@@ -1,0 +1,218 @@
+/* ===================== ESTILO DO BANNER ===================== */
+.banner-section {
+    height: 240px;
+    overflow: hidden;
+}
+
+.banner-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ===================== ESTILO DO CORPO DA PÁGINA HOME ===================== */
+/* A classe para o fundo da página inteira */
+.home-content-wrapper {
+    background-color: #C4D2CD;
+    /* REMOVIDO: padding-top: 48px; */
+    padding-bottom: 48px;
+}
+
+/* Cor do texto descritivo dos cards */
+.card-description {
+    color: #f97316;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+/* Estilo para as imagens redondas, incluindo sombra e hover */
+.card-img {
+    width: 128px;
+    height: 128px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+}
+
+.card-img:hover {
+    transform: scale(1.05) translateY(-10px);
+}
+
+/* Estilo para o espaçamento entre as colunas do grid */
+.row.g-5>* {
+    padding-left: calc(1.5rem * 2);
+    padding-right: calc(1.5rem * 2);
+}
+
+/* ========================================================= */
+/* Estilos para o Modal de Login e Cadastro */
+/* ========================================================= */
+.modal-xl {
+    --bs-modal-width: 900px; /* Largura para telas grandes */
+}
+
+.custom-modal-content {
+    background-color: #f7f3ed; /* Fundo bege claro do seu layout */
+}
+
+.register-section {
+    background-color: #ff5733; /* Cor laranja avermelhada da imagem */
+}
+
+.text-red {
+    color: #ff5733; /* Cor do título de login */
+}
+
+.text-red-dark {
+    color: #d14120; /* Uma variação mais escura para links */
+}
+
+.btn-social {
+    border: 1px solid #ced4da;
+    color: #495057;
+    background-color: #fff;
+    transition: all 0.3s ease;
+}
+
+.btn-social:hover {
+    background-color: #e9ecef;
+}
+
+.btn-google img,
+/*.btn-facebook img {
+    height: 20px;
+    width: 20px;
+}*/
+
+.divider hr {
+    border-color: #ced4da;
+}
+
+/* Estilos de input */
+.custom-input-group .form-control,
+.custom-input-group .input-group-text {
+    border-color: #ced4da;
+}
+
+.custom-input-group .input-group-text {
+    border-right: none;
+}
+
+.custom-input-group .form-control {
+    border-left: none;
+}
+
+.custom-input-group .form-control:focus,
+.custom-input-group .form-control:focus-visible {
+    box-shadow: none;
+    outline: none;
+    border-color: #86b7fe; /* Cor de foco do Bootstrap */
+}
+
+/* Estilos de input da seção de cadastro (branco) */
+.custom-input-group-white .form-control {
+    border-left: none;
+}
+
+.custom-input-group-white .input-group-text {
+    border-right: none;
+}
+
+.custom-input-group-white .form-control {
+    background-color: #fff;
+}
+
+/* Botões de Ação */
+.btn-login {
+    background-color: #ff5733;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-login:hover {
+    background-color: #d14120;
+    color: white;
+}
+
+.btn-register {
+    background-color: #1e3f66; /* Azul escuro, semelhante ao botão "Entrar" na navbar */
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-register:hover {
+    background-color: #1a3250;
+    color: white;
+}
+
+/* Botões Sociais Redondos na seção de cadastro */
+.btn-social-white-circle {
+    background-color: #fff;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    color: #ff5733;
+    font-size: 1.25rem;
+    transition: transform 0.2s ease-in-out;
+}
+
+.btn-social-white-circle:hover {
+    transform: scale(1.1);
+}
+
+/* Ajustes gerais */
+.modal-body {
+    position: relative;
+}
+
+.modal .btn-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+}
+
+/* Alteração para estilização da socialaccount */
+/* Container para centralizar a caixa de login */
+.container-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f2f5;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Estilo para o cartão de login */
+.login-card {
+    background: #ffffff;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+}
+
+/* Título do cartão */
+.card-title {
+    font-size: 1.8rem;
+    color: #333;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+/* Texto de confirmação */
+.card-text {
+    font-size: 1rem;
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+

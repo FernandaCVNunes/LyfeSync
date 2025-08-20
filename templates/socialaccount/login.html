@@ -1,0 +1,26 @@
+<!-- templates/socialaccount/login.html -->
+
+{% extends "app_LyfeSync/layouts/masterpage.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block head_title %}{% trans "Login Social" %}{% endblock %}
+
+{% block content %}
+<div class="container-center">
+    <div class="login-card">
+        <h1 class="card-title">{% trans "Confirmar Login" %}</h1>
+
+        <p class="card-text">
+            {% blocktrans with provider.name as provider_name %}Você está prestes a fazer login usando a sua conta do {{ provider_name }}.{% endblocktrans %}
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <button class="continue-button" type="submit">
+                <span class="button-text">{% trans "Continuar" %}</span>
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

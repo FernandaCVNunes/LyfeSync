@@ -1,0 +1,18 @@
+{% extends "app_LyfeSync/layouts/masterpage.html" %}
+{% load i18n %}
+{% load socialaccount %}
+
+{% block head_title %}{% trans "Login Cancelado" %}{% endblock %}
+
+{% block content %}
+<div class="container-center">
+    <div class="login-card">
+        <h1 class="card-title">{% trans "Login Cancelado" %}</h1>
+
+        <p class="card-text">
+            {% trans "Você decidiu cancelar o login em nosso site. Se isso foi um engano, por favor, prossiga para" %}
+            <a href="{% url 'account_login' %}">{% trans "fazer login" %}</a>.
+        </p>
+    </div>
+</div>
+{% endblock %}

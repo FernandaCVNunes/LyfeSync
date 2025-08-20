@@ -1,0 +1,144 @@
+/* ===================== PALETA DE CORES ATUALIZADA ===================== */
+:root {
+    --primary-color: #f59e0b;
+    --secondary-color: #f7a26c;
+    --bg-color-header: #F7F0DF; /* Fundo para o cabeçalho */
+    --bg-color-footer: #F7F0DF; /* Fundo para o rodapé */
+    --text-color: #29515F;
+    --link-color: #6c757d;
+    --active-link-color: #f59e0b;
+}
+
+body {
+    background-color: #ffffff;
+    font-family: 'Open Sans', sans-serif;
+    color: var(--text-color);
+}
+
+/* ===================== ESTILO DO CABEÇALHO ===================== */
+.navbar {
+    background-color: var(--bg-color-header);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1rem 0;
+}
+
+.navbar-brand .navbar-logo {
+    height: 40px;
+    margin-right: 10px;
+}
+
+.navbar-brand .logo-text {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 1.5rem;
+}
+
+.nav-link {
+    color: var(--link-color) !important;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.nav-link:hover {
+    color: var(--active-link-color) !important;
+}
+
+.nav-link.active {
+    color: var(--active-link-color) !important;
+    font-weight: 700;
+}
+
+.btn-login {
+    background-color: var(--text-color);
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color 0.3s, color 0.3s;
+    /* Linhas adicionadas para alinhar verticalmente o botão */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-login:hover {
+    background-color: #242424;
+}
+
+.btn-nav-login {
+    background-color: #29515F; /* Cor do botão */
+    color: #fff; /* Cor da fonte */
+    border-radius: 50px; /* Borda arredondada */
+    padding: 8px 25px;
+    margin-left: 15px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Regra de estilo para a cor da fonte do link */
+.btn-nav-login.nav-link {
+    color: #fff; /* Cor da fonte */
+}
+
+.btn-nav-login:hover {
+    background-color: #3f6e80; /* Cor um pouco mais clara para o efeito hover */
+    color: #fff;
+}
+
+/* Regra de estilo para a cor da fonte no hover */
+.btn-nav-login.nav-link:hover {
+    color: #fff; /* Garante que a cor da fonte não mude no hover */
+}
+
+/* ===================== ESTILO DO RODAPÉ ===================== */
+.footer {
+    background-color: #F7F0DF;
+    color: var(--text-color);
+    padding-top: 2rem;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.footer-logo-img {
+    height: 80px;
+}
+
+.footer-link {
+    color: var(--link-color);
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.footer-link:hover {
+    color: var(--primary-color);
+}
+
+.social-icon {
+    font-size: 1.5rem;
+    margin: 0 0.5rem;
+    color: #fff;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    transition: transform 0.3s;
+}
+
+.social-icon:hover {
+    transform: translateY(-5px);
+}
+
+.social-icon.facebook { background-color: #3b5998; }
+.social-icon.instagram { 
+    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%,#d6249f 60%,#285AEB 90%);
+}
+.social-icon.whatsapp { background-color: #25d366; }
+
+.footer-bottom {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #6c757d;
+}
