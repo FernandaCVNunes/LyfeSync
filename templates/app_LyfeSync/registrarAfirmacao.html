@@ -1,0 +1,75 @@
+{% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
+{% load static %}
+
+{% block title %}Registrar Afirmação{% endblock %}
+
+{% block content_logado %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+
+<div class="max-w-full mx-auto p-4 sm:p-6 lg:p-8 bg-white min-h-screen">
+    
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="flex justify-between items-start mb-16">
+            <h1 class="text-4xl font-semibold afirmacao-title-color-new">
+                Afirmações Positivas
+            </h1>
+
+            <div class="flex items-center space-x-2">
+                <label class="text-gray-700 text-lg font-medium">Data:</label>
+                <input 
+                    type="date" 
+                    name="{{ form.data.name|default:'data' }}"
+                    value="{{ form.data.value|default:'' }}"
+                    class="date-input-placeholder p-2 text-gray-700 border-none text-center"
+                    style="width: 150px; background-color: #BDBDBD; border-radius: 0.5rem;"
+                    {% if form.data.value %}disabled{% endif %}
+                >
+            </div>
+        </div>
+
+        <div class="text-center max-w-lg mx-auto mb-16">
+            <p class="text-2xl font-medium afirmacao-text-color">
+                Transforme seu dia com uma afirmação positiva.
+            </p>
+            <p class="text-xl font-bold afirmacao-text-color mt-1">
+                Escreva Aqui.
+            </p>
+        </div>
+        
+        <div class="flex justify-center items-center space-x-12 mb-20">
+            
+            <div class="afirmacao-circle circle-blue">
+                </div>
+
+            <div class="afirmacao-circle circle-pink relative p-4">
+                
+                <textarea 
+                    name="{{ form.conteudo.name|default:'conteudo' }}" 
+                    id="{{ form.conteudo.id_for_label|default:'id_conteudo' }}" 
+                    rows="8" 
+                    class="w-full h-full p-4 bg-transparent border-none text-gray-800 text-xl resize-none focus:outline-none placeholder-gray-500 italic" 
+                    placeholder="Sua afirmação deve caber neste espaço..."
+                    required
+                >{{ form.conteudo.value|default:"" }}</textarea>
+                
+                {% if form.conteudo.errors %}
+                    <p class="absolute bottom-0 text-red-500 text-sm bg-white p-1 rounded-md">{{ form.conteudo.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="afirmacao-circle circle-green">
+            </div>
+
+        </div>
+        
+        <div class="flex justify-end pt-4 pr-16">
+            <button type="submit" class="btn-salvar-form-afirmacao-new text-white">
+                SALVAR
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

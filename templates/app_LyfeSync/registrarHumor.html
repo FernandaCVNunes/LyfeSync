@@ -1,0 +1,143 @@
+{% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
+{% load static %}
+
+{% block title %}Registrar Humor{% endblock %}
+
+{% block content_logado %}
+  <script src="https://cdn.tailwindcss.com"></script>
+
+<div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+    <div class="flex flex-wrap lg:flex-nowrap gap-8">
+        
+        <!-- COLUNA ESQUERDA: Registro de Humor (Formulário) -->
+        <div class="w-full lg:w-3/5 bg-white p-6 rounded-xl shadow-lg">
+            
+            <!-- Título -->
+            <h1 class="text-3xl font-bold text-lyfesync-green mb-8">
+                Como você está se sentindo hoje?
+            </h1>
+            
+            <form id="form-registro-humor" method="POST" action="{% url 'registrarHumor' %}">
+                {% csrf_token %}
+
+                <!-- Data -->
+                <div class="mb-6">
+                    <label for="id_data" class="block text-xl font-semibold text-gray-700 mb-2">Data:</label>
+                    <input type="date" id="id_data" name="data" 
+                           class="w-full sm:w-1/2 p-3 border-2 border-green-200 rounded-lg focus:border-lyfesync-green focus:ring focus:ring-green-100 transition duration-150"
+                           value="{{ data_atual|date:'Y-m-d' }}" required>
+                </div>
+                
+                <!-- Seleção de Humor por Emojis -->
+                <div class="mb-10">
+                    <label class="block text-xl font-semibold text-gray-700 mb-4">Selecione seu Humor:</label>
+                    <div class="flex justify-between items-center space-x-2 sm:space-x-4">
+                        <!-- Os 5 emojis coloridos grandes -->
+                        <div class="emoji-option" data-humor="Feliz">😀</div>
+                        <div class="emoji-option" data-humor="Calmo">😌</div>
+                        <div class="emoji-option" data-humor="Ansioso">😟</div>
+                        <div class="emoji-option" data-humor="Triste">😥</div>
+                        <div class="emoji-option" data-humor="Irritado">😡</div>
+                        <input type="hidden" name="estado" id="id_estado" required>
+                    </div>
+                </div>
+
+                <!-- Descrição -->
+                <div class="mb-8">
+                    <label for="id_descricaohumor" class="block text-xl font-semibold text-gray-700 mb-2">Descrição:</label>
+                    <textarea id="id_descricaohumor" name="descricaohumor" rows="8"
+                              placeholder="Descreva brevemente o que motivou seu humor hoje..."
+                              class="w-full p-4 border-2 border-green-200 rounded-xl focus:border-lyfesync-green focus:ring focus:ring-green-100 transition duration-150 custom-textarea"></textarea>
+                </div>
+                
+                <!-- Botão Salvar -->
+                <div class="flex justify-end">
+                    <button type="submit" class="btn-salvar-humor py-3 px-8 text-white font-bold rounded-full shadow-lg transition duration-200">
+                        SALVAR
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- COLUNA DIREITA: Tabela de Explicações (NÃO é a dica da tela principal) -->
+        <div class="w-full lg:w-2/5 space-y-8">
+            
+            <!-- Tabela de Humor (Explicações) -->
+            <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-lyfesync-green">
+                <h2 class="text-2xl font-bold text-lyfesync-green mb-4">Tabela de Humor</h2>
+                
+                <!-- Tabela de emojis pequenos no topo -->
+                <div class="flex justify-start items-center space-x-4 mb-4">
+                    <span class="text-3xl text-green-500">😀</span>
+                    <span class="text-3xl text-lime-500">😌</span>
+                    <span class="text-3xl text-yellow-400">😟</span>
+                    <span class="text-3xl text-blue-500">😥</span>
+                    <span class="text-3xl text-red-500">😡</span>
+                </div>
+                
+                <!-- Descrições -->
+                <div class="text-gray-700 space-y-4 text-sm">
+                    <p>
+                        <span class="font-bold text-green-600">Feliz:</span> Representa momentos de alegria, contentamento ou satisfação com a vida. É um estado positivo de bem-estar emocional.
+                    </p>
+                    <p>
+                        <span class="font-bold text-lime-600">Calmo:</span> Indica tranquilidade, serenidade e uma sensação de paz interior, sem grandes agitações emocionais.
+                    </p>
+                    <p>
+                        <span class="font-bold text-yellow-600">Ansioso:</span> Expressa preocupação, nervosismo ou estresse. Pode ser um estado de alerta em relação a eventos futuros.
+                    </p>
+                    <p>
+                        <span class="font-bold text-blue-600">Triste:</span> Reflete sentimentos de melancolia, tristeza ou desânimo, geralmente associados a situações de perda ou dificuldades.
+                    </p>
+                    <p>
+                        <span class="font-bold text-red-600">Irritado:</span> Representa frustração, raiva ou impaciência, geralmente como resposta a algo que incomoda ou causa desconforto.
+                    </p>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const emojiOptions = document.querySelectorAll('.emoji-option');
+        const estadoInput = document.getElementById('id_estado');
+
+        // Define a data atual como padrão, se o campo estiver vazio
+        const dataInput = document.getElementById('id_data');
+        if (!dataInput.value) {
+            const today = new Date().toISOString().slice(0, 10);
+            dataInput.value = today;
+        }
+
+        emojiOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                // 1. Remove a seleção de todos
+                emojiOptions.forEach(o => o.classList.remove('selected-emoji'));
+                
+                // 2. Adiciona a seleção ao clicado
+                this.classList.add('selected-emoji');
+                
+                // 3. Define o valor do input hidden
+                estadoInput.value = this.getAttribute('data-humor');
+            });
+        });
+        
+        // Adiciona validação simples para o formulário
+        document.getElementById('form-registro-humor').addEventListener('submit', function(e) {
+            if (!estadoInput.value) {
+                // Usa um modal ou mensagem customizada em vez de alert()
+                console.error('Por favor, selecione um estado de humor antes de salvar.');
+                e.preventDefault();
+            }
+        });
+        
+        // Seleciona o primeiro emoji por padrão (Melhora a UX)
+        if (!estadoInput.value && emojiOptions.length > 0) {
+            emojiOptions[0].click();
+        }
+    });
+</script>
+
+{% endblock %}

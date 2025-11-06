@@ -1,0 +1,65 @@
+{% extends 'app_LyfeSync/layouts/masterpage.html' %}
+{% load static %}
+
+{% block title %}Contatos - LyfeSync{% endblock %}
+
+{% block content %}
+<div class="contact-content-wrapper">
+    <section class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h1 class="display-5 fw-bold mb-4 text-center text-red">Fale Conosco</h1>
+                <p class="lead text-center text-muted mb-5">
+                    Tem alguma dúvida, sugestão ou precisa de suporte? Envie-nos uma mensagem!
+                    </br>Nossa equipe responderá o mais breve possível.
+                </p>
+
+                <div class="card shadow-lg border-0 rounded-4 contact-card">
+                    <div class="card-body p-4 p-md-5">
+                        
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <div class="mb-4">
+                                <label for="email" class="form-label fw-bold">Seu E-mail (Identificador)</label>
+                                <input type="email" class="form-control rounded-pill contact-input" id="email" name="email" placeholder="nome@exemplo.com" required>
+                                <small class="form-text text-muted">Usaremos este e-mail para responder ao seu contato.</small>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="assunto" class="form-label fw-bold">Assunto</label>
+                                <input type="text" class="form-control rounded-pill contact-input" id="assunto" name="assunto" placeholder="Ex: Dúvida sobre o LyfeSync" required>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="mensagem" class="form-label fw-bold">Mensagem</label>
+                                <textarea class="form-control rounded-4 contact-input" id="mensagem" name="mensagem" rows="6" placeholder="Descreva sua dúvida ou sugestão aqui..." required></textarea>
+                            </div>
+                            
+                            <div class="mb-5">
+                                <label for="anexo" class="form-label fw-bold">Anexar Arquivo (Opcional)</label>
+                                <input class="form-control contact-input" type="file" id="anexo" name="anexo">
+                                <small class="form-text text-muted">Máximo 5MB.</small>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-lg btn-contact-submit rounded-pill fw-bold">
+                                    <i class="fas fa-paper-plane me-2"></i> Enviar Mensagem
+                                </button>
+                            </div>
+                            
+                            <p class="text-center mt-4 text-muted small">
+                                O e-mail de destino é: lyfesyncpt@gmail.com
+                            </p>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+{% include 'app_LyfeSync/login.html' %} 
+
+{% endblock %}

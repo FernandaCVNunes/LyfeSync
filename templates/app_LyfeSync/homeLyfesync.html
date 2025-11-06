@@ -1,0 +1,17 @@
+{% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
+{% load static %}
+
+{% block title %}Meu LyfeSync{% endblock %}
+
+{% block content_logado %}
+    <div class="dashboard-container">
+        <div class="dashboard-main-image text-center p-4">
+            {# Imagem central conforme o anexo #}
+            <img 
+                src="{% static 'img/imagens/homelyfesync.png' %}" 
+                alt="Ilustração de bem-estar com atividades" 
+                class="img-fluid"
+            />
+        </div>
+    </div>
+{% endblock %}

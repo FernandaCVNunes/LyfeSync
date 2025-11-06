@@ -1,0 +1,77 @@
+{% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
+{% load static %}
+
+{% block title %}Autocuidado e Bem-estar{% endblock %}
+
+{% block content_logado %}
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 mt-10">
+    <!-- Título Principal -->
+    <h1 class="text-4xl font-extrabold text-lyfesync-green mb-8 text-center">
+        Seu Espaço de Autocuidado
+    </h1>
+    
+    <!-- Afirmação Diária (Se houver) -->
+    {% if ultima_afirmacao %}
+    <div class="bg-indigo-50 border-l-4 border-indigo-500 p-4 mb-8 rounded-lg shadow-md">
+        <div class="flex items-center">
+            <svg class="h-6 w-6 text-indigo-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <p class="font-semibold text-indigo-700">Afirmação de Poder:</p>
+        </div>
+        <p class="mt-2 text-indigo-800 italic">
+            "{{ ultima_afirmacao.texto }}"
+        </p>
+    </div>
+    {% endif %}
+
+    <!-- Seção de Ações (Cards) -->
+    <div class="space-y-6">
+
+        <!-- 1. Humor -->
+        <a href="{% url 'humor' %}" class="block autocuidado-card bg-white p-6 border border-gray-200 rounded-xl shadow-lg hover:shadow-xl">
+            <div class="flex items-start space-x-4">
+                <img src="{% static 'img/icon/adchumor.png' %}" alt="Ícone de Humor" class="icon-size object-contain flex-shrink-0">
+                <div>
+                    <h2 class="text-2xl font-bold text-lyfesync-green">Humor</h2>
+                    <p class="text-gray-500 mt-1">Registre seu estado emocional e acompanhe seu bem-estar.</p>
+                </div>
+            </div>
+        </a>
+
+        <!-- 2. Gratidão -->
+        <a href="{% url 'gratidao' %}" class="block autocuidado-card bg-white p-6 border border-gray-200 rounded-xl shadow-lg hover:shadow-xl">
+            <div class="flex items-start space-x-4">
+                <img src="{% static 'img/icon/gratidao.png' %}" alt="Ícone de Gratidão" class="icon-size object-contain flex-shrink-0">
+                <div>
+                    <h2 class="text-2xl font-bold text-lyfesync-green">Gratidão</h2>
+                    <p class="text-gray-500 mt-1">Cultive o positivo. Anote as coisas pelas quais você é grato hoje.</p>
+                </div>
+            </div>
+        </a>
+
+        <!-- 3. Afirmações -->
+        <a href="{% url 'afirmacao' %}" class="block autocuidado-card bg-white p-6 border border-gray-200 rounded-xl shadow-lg hover:shadow-xl">
+            <div class="flex items-start space-x-4">
+                <img src="{% static 'img/icon/afirmacoes.png' %}" alt="Ícone de Afirmações" class="icon-size object-contain flex-shrink-0">
+                <div>
+                    <h2 class="text-2xl font-bold text-lyfesync-green">Afirmações</h2>
+                    <p class="text-gray-500 mt-1">Defina intenções positivas para fortalecer sua mentalidade.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Seção de Dicas (Exemplo de um card passivo) -->
+    <div class="mt-10 p-6 bg-green-50 border-l-4 border-lyfesync-green rounded-lg shadow-inner">
+        <h3 class="text-xl font-bold text-lyfesync-green mb-2">Dica Rápida de Autocuidado</h3>
+        <p class="text-gray-700">
+            Lembre-se de fazer uma pausa de 5 minutos a cada hora. Levante-se, alongue-se e beba um copo d'água. Pequenas pausas aumentam a produtividade e reduzem o estresse.
+        </p>
+    </div>
+</div>
+
+{% endblock %}

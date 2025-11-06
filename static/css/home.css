@@ -47,23 +47,28 @@
 /* Estilos para o Modal de Login e Cadastro */
 /* ========================================================= */
 .modal-xl {
-    --bs-modal-width: 900px; /* Largura para telas grandes */
+    --bs-modal-width: 900px;
+    /* Largura para telas grandes */
 }
 
 .custom-modal-content {
-    background-color: #f7f3ed; /* Fundo bege claro do seu layout */
+    background-color: #f7f3ed;
+    /* Fundo bege claro do seu layout */
 }
 
 .register-section {
-    background-color: #ff5733; /* Cor laranja avermelhada da imagem */
+    background-color: #ff5733;
+    /* Cor laranja avermelhada da imagem */
 }
 
 .text-red {
-    color: #ff5733; /* Cor do título de login */
+    color: #ff5733;
+    /* Cor do título de login */
 }
 
 .text-red-dark {
-    color: #d14120; /* Uma variação mais escura para links */
+    color: #d14120;
+    /* Uma variação mais escura para links */
 }
 
 .btn-social {
@@ -101,11 +106,14 @@
     border-left: none;
 }
 
+/* O ÚNICO AJUSTE FOI AQUI: Mudar a cor do foco do input para a cor primária (#ff5733) */
 .custom-input-group .form-control:focus,
 .custom-input-group .form-control:focus-visible {
-    box-shadow: none;
+    box-shadow: 0 0 0 0.25rem rgba(255, 87, 51, 0.25);
+    /* Usando ff5733 com transparência */
     outline: none;
-    border-color: #86b7fe; /* Cor de foco do Bootstrap */
+    border-color: #ff5733;
+    /* Cor primária */
 }
 
 /* Estilos de input da seção de cadastro (branco) */
@@ -136,7 +144,8 @@
 }
 
 .btn-register {
-    background-color: #1e3f66; /* Azul escuro, semelhante ao botão "Entrar" na navbar */
+    background-color: #1e3f66;
+    /* Azul escuro, semelhante ao botão "Entrar" na navbar */
     color: white;
     border: none;
     padding: 12px 24px;
@@ -216,3 +225,72 @@
     margin-bottom: 1.5rem;
 }
 
+/* ========================================================= */
+/* Estilos para o SobreNos */
+/* ========================================================= */
+
+.text-red {
+    color: #ff5733;
+    /* Exemplo: #D9534F; */
+}
+
+.bg-light-section {
+    background-color: #f7f7f7;
+    border-radius: 10px;
+}
+
+.btn-red-primary {
+    background-color: #ff5733;
+    border-color: #f7f7f7;
+    color: white;
+}
+
+.btn-red-primary:hover {
+    background-color: #1a3250;
+    border-color: #f7f7f7;
+    color: white;
+}
+
+/* ========================================================= */
+/* Estilos para a Página de Contatos */
+/* ========================================================= */
+
+.contact-content-wrapper {
+    background-color: #C4D2CD;
+    /* Cor de fundo semelhante à home */
+    padding-bottom: 48px;
+}
+
+.contact-card {
+    background-color: #fff;
+}
+
+/* Estilo para os inputs do formulário de contato */
+.contact-input {
+    border-color: #ced4da;
+    transition: all 0.3s ease;
+}
+
+.contact-input:focus {
+    border-color: #ff5733;
+    /* Usa sua cor principal (text-red) no foco */
+    box-shadow: 0 0 0 0.25rem rgba(255, 87, 51, 0.25);
+}
+
+/* Estilo para o botão de envio */
+.btn-contact-submit {
+    background-color: #ff5733;
+    /* Cor principal de ação (text-red) */
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-contact-submit:hover {
+    background-color: #d14120;
+    /* Variação escura da cor principal */
+    color: white;
+    transform: translateY(-2px);
+}

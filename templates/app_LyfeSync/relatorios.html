@@ -1,0 +1,22 @@
+{% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
+{% load static %}
+
+{% block title %}Relatórios e Estatísticas{% endblock %}
+
+{% block content_logado %}
+    <div class="container-fluid">
+        <h1 class="mb-4">Relatórios Gerais</h1>
+        <p class="lead">Selecione abaixo o tipo de relatório que você deseja visualizar:</p>
+        
+        <ul class="list-group">
+            <li class="list-group-item"><a href="{% url 'relatorio_habito' %}">Relatório de Hábitos</a></li>
+            <li class="list-group-item"><a href="{% url 'relatorio_humor' %}">Relatório de Humor</a></li>
+            <li class="list-group-item"><a href="{% url 'relatorio_gratidao' %}">Relatório de Gratidão</a></li>
+            <li class="list-group-item"><a href="{% url 'relatorio_afirmacao' %}">Relatório de Afirmações</a></li>
+        </ul>
+        
+        <div class="alert alert-info mt-5" role="alert">
+            Conteúdo da página de Relatórios em desenvolvimento.
+        </div>
+    </div>
+{% endblock %}

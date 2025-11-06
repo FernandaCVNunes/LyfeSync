@@ -1,0 +1,138 @@
+{% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
+{% load static %}
+
+{% block title %}Registrar Dicas (Admin){% endblock %}
+
+{% block content_logado %}
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Adicionando a configuração de cores do Tailwind baseada nas suas variáveis CSS -->
+<div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 bg-white rounded-xl shadow-2xl mt-8">
+    
+    <!-- Título e Botão de Ação -->
+    <div class="mb-8">
+        <div class="btn-adicionar-dica">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            Adicionar Dicas
+        </div>
+        <h1 class="text-3xl font-extrabold text-gray-800 mt-2 border-b pb-2">
+            Cadastro de Dicas de Autocuidado
+        </h1>
+    </div>
+
+    <!-- Mensagens do Django (Success/Error) -->
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="django-message {{ message.tags }}" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Formulário de Cadastro de Dicas -->
+    <form method="post" action="{% url 'registrar_dica' %}" class="space-y-6">
+        {% csrf_token %}
+
+        <!-- 1. SELEÇÃO DE HUMOR (Emojis Customizados) -->
+        <div class="form-group">
+            <label class="dica-label-text block text-xl mb-3">Selecione o Humor:</label>
+            <div class="dica-emoji-selector">
+                
+                <!-- O campo 'estado' do formulário é ocultado e manipulado pelo JS/CSS -->
+                {{ form.estado.as_hidden }}
+
+                <!-- Emojis (Hardcoded para ter o controle visual exato da imagem) -->
+                {% for value, label in form.fields.estado.choices %}
+                <div class="dica-emoji-option" data-humor-value="{{ value }}" id="emoji-{{ value }}">
+                    <span class="dica-emoji-icon emoji-{{ value|lower }}">
+                        {% if value == 'Feliz' %}😀
+                        {% elif value == 'Calmo' %}😌
+                        {% elif value == 'Ansioso' %}😟
+                        {% elif value == 'Triste' %}😥
+                        {% elif value == 'Irritado' %}😡
+                        {% else %}?
+                        {% endif %}
+                    </span>
+                    <span class="dica-emoji-text text-{{ value|lower }}">
+                        {{ label }}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+            {% if form.estado.errors %}<small class="text-red-500 block mt-1">{{ form.estado.errors }}</small>{% endif %}
+        </div>
+        
+        <!-- 2. NOME DA DICA (Input Text) -->
+        <div class="form-group">
+            <label for="{{ form.nome_dica.id_for_label }}" class="dica-label-text block">Nome da Dica:</label>
+            {{ form.nome_dica }}
+            {% if form.nome_dica.errors %}<small class="text-red-500 block mt-1">{{ form.nome_dica.errors }}</small>{% endif %}
+        </div>
+        
+        <!-- 3. DESCRIÇÃO (Textarea Customizado) -->
+        <div class="form-group">
+            <label for="{{ form.descricao.id_for_label }}" class="dica-label-text block">Descrição:</label>
+            {{ form.descricao }}
+            {% if form.descricao.errors %}<small class="text-red-500 block mt-1">{{ form.descricao.errors }}</small>{% endif %}
+        </div>
+
+        <!-- Botão de Salvar -->
+        <div class="flex justify-end pt-4">
+            <button type="submit" class="btn-salvar-dica">
+                Salvar Dica
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const emojiOptions = document.querySelectorAll('.dica-emoji-option');
+        const estadoInput = document.querySelector('input[name="estado"]');
+        const defaultHumor = 'Feliz'; // Define um humor padrão
+        
+        // Função para selecionar um emoji visualmente e no input oculto
+        function selectEmoji(element, value) {
+            // 1. Limpa a seleção anterior
+            emojiOptions.forEach(opt => opt.classList.remove('selected-dica-emoji'));
+            
+            // 2. Aplica a seleção atual (Opcional: você pode adicionar um estilo 'selected-dica-emoji' no CSS)
+            // element.classList.add('selected-dica-emoji');
+
+            // 3. Atualiza o valor do input oculto
+            estadoInput.value = value;
+        }
+
+        // Adiciona listener de click para cada emoji
+        emojiOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const value = this.getAttribute('data-humor-value');
+                selectEmoji(this, value);
+            });
+        });
+
+        // 4. Inicializa com o valor padrão (para garantir que um valor seja enviado)
+        const initialSelected = document.querySelector(`.dica-emoji-option[data-humor-value="${estadoInput.value || defaultHumor}"]`);
+        if (initialSelected) {
+            selectEmoji(initialSelected, estadoInput.value || defaultHumor);
+        } else {
+            // Garante que o input tenha um valor mesmo que não haja seleção visual
+            estadoInput.value = defaultHumor;
+        }
+
+        // Aplica o estilo customizado aos campos de texto (se o formulário foi renderizado pelo Django)
+        const nomeDicaInput = document.getElementById('{{ form.nome_dica.id_for_label }}');
+        const descricaoTextarea = document.getElementById('{{ form.descricao.id_for_label }}');
+
+        if (nomeDicaInput) {
+            nomeDicaInput.classList.add('custom-dica-input');
+        }
+        if (descricaoTextarea) {
+            descricaoTextarea.classList.add('custom-dica-textarea');
+        }
+
+    });
+</script>
+
+{% endblock %}

@@ -8,7 +8,6 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('app_LyfeSync.urls')),
-    path('accounts/', include('allauth.urls')),
 ]
 
 # Este trecho é essencial para servir arquivos estáticos no modo de desenvolvimento

@@ -1,0 +1,583 @@
+/* ========================================================= */
+/* --- ESTILO BASE PARA O CORPO DO SITE --- */
+/* ========================================================= */
+body {
+    /* Define uma cor escura padrão para todo o texto do corpo */
+    color: #333333;
+    /* Cinza escuro, mais suave que o preto puro */
+    font-family: Arial, sans-serif;
+    /* Define uma fonte de fallback segura */
+}
+
+/* ========================================================= */
+/* --- IMPORTAÇÕES DE FONTES --- */
+/* ========================================================= */
+/* Fonte para a frase motivacional (Dancing Script é uma alternativa comum se Karumbi falhar) */
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
+/* Fonte específica Karumbi Regular (menos confiável; a importação do db.onlinewebfonts permanece) */
+@import url(https://db.onlinewebfonts.com/c/8af4f981069f65fe3806caf753e04464?family=Karumbi+Regular);
+
+/* ========================================================= */
+/* --- VARIÁVEIS GLOBAIS DE COR --- */
+/* ========================================================= */
+:root {
+    --lyfesync-green: #10B981;
+    /* Verde Principal (Autocuidado/Gratidão) */
+    --lyfesync-red-salvar: #F0553A;
+    /* Vermelho/Laranja de Ação/Salvar */
+    --lyfesync-blue-modal: #4b80a0;
+    /* Azul de Títulos de Hábito/Modal */
+    --lyfesync-cyan: #00B8D9;
+    /* Ciano para Destaque/Seleção */
+}
+
+/* ========================================================= */
+/* --- LAYOUT GERAL (HABITOS) --- */
+/* ========================================================= */
+
+.content-container {
+    /* Ocupa a altura restante da tela (viewport) */
+    min-height: calc(100vh - 100px);
+    position: relative;
+    padding-top: 20px;
+    padding-bottom: 150px;
+    /* Espaço para a frase no rodapé */
+}
+
+/* ------------------ Botão "Novo Hábito" (Estilo Original) ------------------ */
+/* Manteremos estes estilos, mas o HTML no habito.html usa classes Bootstrap (btn btn-success) */
+.link_addHabito {
+    display: inline-flex;
+    align-items: center;
+    color: #20c997;
+    /* Verde-água/Ciano */
+    font-size: 1.2rem;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.span_addHabito {
+    background-color: #ffc107;
+    /* Amarelo */
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+}
+
+.addHabitos {
+    width: 8px;
+    height: 8px;
+}
+
+/* ------------------ Frase Motivacional ------------------ */
+.motivational-quote {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    /* Prioriza Karumbi e usa Dancing Script como fallback */
+    font-family: 'Karumbi Regular', 'Dancing Script', cursive;
+    font-weight: 700;
+    font-size: 1.7rem;
+    color: #20c997;
+    /* Verde-água */
+    text-align: center;
+    line-height: 1.3;
+    max-width: 90%;
+}
+
+/* ========================================================= */
+/* --- MODAL DE REGISTRO DE HÁBITO (Formulário) --- */
+/* ========================================================= */
+
+.modal-content-custom {
+    background-color: #eef2f7;
+    /* Cinza claro */
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.modal-header-custom {
+    border-bottom: none;
+    justify-content: center;
+    padding: 15px 15px 5px 15px;
+}
+
+.modal-title-custom {
+    color: var(--lyfesync-blue-modal);
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.form-control-custom {
+    background-color: white;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    padding: 10px 15px;
+    box-shadow: none;
+}
+
+.form-control-custom:focus {
+    border-color: var(--lyfesync-blue-modal);
+    box-shadow: 0 0 0 0.25rem rgba(75, 128, 160, 0.25);
+}
+
+.btn-adicionar-habito {
+    background-color: #2e8baf;
+    /* Azul forte/ciano */
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 10px 40px;
+    border-radius: 20px;
+    border: none;
+    transition: background-color 0.3s;
+    width: 100%;
+}
+
+.btn-adicionar-habito:hover {
+    background-color: #246a85;
+}
+
+/* ========================================================= */
+/* --- TABELA DE HÁBITOS (Baseada em Bootstrap) --- */
+/* ========================================================= */
+
+.habit-row {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.habit-row.selected {
+    background-color: #e6f7ff !important;
+    outline: 2px solid var(--lyfesync-cyan);
+    /* Azul ciano de destaque */
+    outline-offset: -2px;
+}
+
+/* Estilo do Checkbox/Indicador de Conclusão */
+.check-box {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #B8860B;
+    /* Borda Marrom Ouro */
+    border-radius: 4px;
+    display: inline-block;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.check-box.checked {
+    background-color: #38A16C;
+    /* Verde-água */
+    border-color: #38A16C;
+}
+
+.table td,
+.table th {
+    padding: 0.75rem;
+    vertical-align: middle;
+}
+
+.habit-row td:first-child h6 {
+    color: var(--lyfesync-blue-modal);
+    font-weight: bold;
+}
+
+/* Se precisar de um estilo para o texto "Hoje" */
+.badge.bg-primary {
+    background-color: #38A16C !important;
+    /* Verde-água para o badge de 'Hoje' */
+}
+
+/* ========================================================= */
+/* --- AUTOCUIDADO (Humor) --- */
+/* ========================================================= */
+
+.autocuidado-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.autocuidado-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.text-lyfesync-green {
+    color: var(--lyfesync-green);
+}
+
+.icon-size {
+    width: 12px;
+    height: 12px;
+}
+
+/* Emojis Grandes (Seleção de Humor) */
+.emoji-option {
+    font-size: 4rem;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s, box-shadow 0.3s;
+    line-height: 1;
+    padding: 0.5rem;
+    border-radius: 50%;
+    background-color: transparent;
+}
+
+/* Usando cores mais consistentes para os filtros */
+.emoji-option:not(.selected-emoji) {
+    filter: grayscale(80%) opacity(0.7);
+}
+
+.emoji-option:nth-child(1) {
+    color: #10B981;
+}
+
+/* Feliz - Verde Escuro */
+.emoji-option:nth-child(2) {
+    color: #84CC16;
+}
+
+/* Calmo - Verde Claro/Lima */
+.emoji-option:nth-child(3) {
+    color: #FACC15;
+}
+
+/* Ansioso - Amarelo */
+.emoji-option:nth-child(4) {
+    color: #3B82F6;
+}
+
+/* Triste - Azul */
+.emoji-option:nth-child(5) {
+    color: #EF4444;
+}
+
+/* Irritado - Vermelho */
+
+.emoji-option.selected-emoji {
+    filter: none;
+    opacity: 1;
+    transform: scale(1.1);
+    box-shadow: 0 0 0 4px var(--lyfesync-green), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Campo de Descrição (Textarea) */
+.custom-textarea {
+    background-color: #E0F2F7;
+    /* Azul/verde muito claro */
+    border-radius: 1rem;
+    resize: none;
+    min-height: 200px;
+}
+
+.btn-salvar-humor {
+    background-color: var(--lyfesync-red-salvar);
+}
+
+.btn-salvar-humor:hover {
+    background-color: #E24F34;
+    /* Um tom ligeiramente mais escuro do var(--lyfesync-red-salvar) */
+    box-shadow: 0 4px 10px rgba(240, 85, 58, 0.4);
+}
+
+.btn-adicionar-humor {
+    /* Cor do fundo do botão (do link <a>) - Removido pois vamos usar o estilo do ícone */
+    /* background-color: transparent !important; */
+
+    /* Cor do texto do botão */
+    color: var(--lyfesync-green) !important;
+
+    /* Estilos de fonte/espaçamento */
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 0.5rem 0.75rem;
+    /* Ajuste o padding para parecer um link/botão discreto */
+    border-radius: 0.5rem;
+    transition: background-color 0.2s;
+}
+
+.btn-adicionar-humor:hover {
+    background-color: #f0fdf4;
+    /* Um verde muito claro no hover */
+}
+
+/* Estilo para o ícone/círculo (Baseado no seu ícone de Adicionar Hábito) */
+.btn-adicionar-humor svg {
+    /* O SVG é o ícone do sinal de + */
+    /* Cor do ícone */
+    color: white;
+    /* Cor de fundo para simular o círculo amarelo */
+    background-color: #ffc107;
+    /* Amarelo (Como na imagem) */
+    border-radius: 50%;
+    padding: 2px;
+    width: 24px;
+    height: 24px;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+/* ========================================================= */
+/* --- GRATIDÃO --- */
+/* ========================================================= */
+
+.gratidao-title-color {
+    color: var(--lyfesync-red-salvar);
+}
+
+.gratidao-question-color {
+    color: var(--lyfesync-green);
+}
+
+.gratidao-field-bg {
+    background-color: #C6F6D5;
+    /* Verde Menta (muito claro) */
+    border: none !important;
+    box-shadow: none !important;
+    min-height: 120px;
+}
+
+.btn-salvar-gratidao {
+    background-color: var(--lyfesync-red-salvar);
+    width: 250px;
+    padding: 1rem 2rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 1.125rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-salvar-gratidao:hover {
+    background-color: #E24F34;
+}
+
+.date-input-placeholder {
+    background-color: #BDBDBD;
+    border-radius: 0.5rem;
+    height: 40px;
+    width: 150px;
+}
+
+.btn-salvar-form {
+    /* Usado em formulários genéricos de salvar */
+    background-color: var(--lyfesync-red-salvar);
+}
+
+/* ========================================================= */
+/* --- AFIRMAÇÃO --- */
+/* ========================================================= */
+
+.btn-adicionar-afirmacao {
+    background-color: #3B82F6;
+    /* Azul */
+    color: white;
+}
+
+.btn-adicionar-afirmacao:hover {
+    background-color: #2563EB;
+}
+
+.afirmacao-card {
+    background-color: #EFF6FF;
+    /* Azul muito claro */
+    border-color: #3B82F6;
+    min-height: 80px;
+}
+
+/* Estilos de Formulário registrarAfirmacao.html (Fidelidade à NOVA Imagem) */
+
+.afirmacao-title-color-new {
+    color: var(--lyfesync-red-salvar);
+}
+
+.afirmacao-text-color {
+    color: #374151;
+}
+
+/* Cores dos Círculos */
+.circle-blue {
+    background-color: #BEE3F8;
+    /* Azul Claro */
+}
+
+.circle-pink {
+    background-color: #FEEBC8;
+    /* Rosa Claro/Pêssego */
+}
+
+.circle-green {
+    background-color: #C6F6D5;
+    /* Verde Menta Claro */
+}
+
+/* Estilos do Círculo Comum */
+.afirmacao-circle {
+    width: 250px;
+    height: 250px;
+    border-radius: 9999px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+}
+
+/* Botão Salvar */
+.btn-salvar-form-afirmacao-new {
+    background-color: var(--lyfesync-red-salvar);
+    width: 250px;
+    padding: 1rem 2rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 1.125rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.btn-salvar-form-afirmacao-new:hover {
+    background-color: #E24F34;
+}
+
+/* ========================================================= */
+/* --- ESTILOS ESPECÍFICOS DE DICAS (Dicas.html) --- */
+/* ========================================================= */
+
+/* Botão principal de Adicionar Dicas (Círculo amarelo + Texto verde) */
+.btn-adicionar-dica {
+    display: inline-flex;
+    align-items: center;
+    color: var(--lyfesync-green) !important;
+    font-size: 1.3rem;
+    /* Um pouco maior */
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.btn-adicionar-dica svg {
+    /* O SVG é o ícone do sinal de + */
+    color: white;
+    background-color: #ffc107;
+    /* Amarelo (Como na imagem) */
+    border-radius: 50%;
+    padding: 2px;
+    width: 28px;
+    height: 28px;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+/* Estilo para o label "Nome da Dica" e "Descrição" */
+.dica-label-text {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #333333;
+    /* Cor padrão */
+    margin-bottom: 0.5rem;
+}
+
+
+/* Estilo para a barra de seleção de Humor - Reutiliza estilos de Humor */
+.dica-emoji-selector {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1rem 0;
+}
+
+/* Estilo para cada opção de humor (Emoji + Texto) */
+.dica-emoji-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    text-align: center;
+    /* Ajuste de tamanho e transição */
+    transition: transform 0.2s;
+}
+
+.dica-emoji-option:hover {
+    transform: translateY(-2px);
+}
+
+.dica-emoji-icon {
+    font-size: 2.5rem;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.dica-emoji-text {
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+/* Fundo do campo de texto (Descrição), como na imagem em anexo */
+.custom-dica-textarea {
+    background-color: #FEEEEE;
+    /* Rosa/Pêssego muito claro, semelhante à imagem */
+    border: 1px solid #F0553A;
+    /* Borda da cor do salvar (lyfesync-red-salvar) */
+    border-radius: 0.75rem;
+    padding: 1rem;
+    resize: vertical;
+    min-height: 250px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Fundo do campo de texto (Nome da Dica) */
+.custom-dica-input {
+    background-color: #FDF9F6;
+    /* Cor bem clara para o input de nome */
+    border: 1px solid #fbd38d;
+    /* Amarelo bem suave */
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    width: 100%;
+    font-weight: 600;
+    color: #4A5568;
+}
+
+/* Botão de Salvar */
+.btn-salvar-dica {
+    background-color: var(--lyfesync-red-salvar);
+    color: white;
+    font-weight: bold;
+    padding: 0.75rem 2rem;
+    border-radius: 9999px;
+    /* Botão arredondado */
+    transition: background-color 0.3s;
+}
+
+.btn-salvar-dica:hover {
+    background-color: #E24F34;
+}
+
+/* Emojis cores (Reutilizando ou redefinindo com os mesmos valores) */
+.emoji-feliz {
+    /* Verde Escuro */
+    color: #10B981;
+}
+
+.emoji-calmo {
+    /* Verde Claro/Lima */
+    color: #84CC16;
+}
+
+.emoji-ansioso {
+    /* Amarelo */
+    color: #FACC15;
+}
+
+.emoji-triste {
+    color: #3B82F6;
+    /* Azul */
+}
+
+.emoji-irritado {
+    /* Vermelho */
+    color: #EF4444;
+}

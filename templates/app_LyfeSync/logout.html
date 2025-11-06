@@ -1,0 +1,23 @@
+{% load i18n %}
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Saindo...</title>
+    </head>
+<body>
+    <form method="post" action="{% url 'account_logout' %}">
+        {% csrf_token %}
+        <p>Saindo da sua conta...</p>
+        <button type="submit" style="display:none;">Sair</button>
+    </form>
+
+    <script>
+        // Envia o formulário automaticamente.
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('form').submit();
+        });
+    </script>
+</body>
+</html>

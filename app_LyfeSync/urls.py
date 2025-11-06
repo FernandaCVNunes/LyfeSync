@@ -1,28 +1,59 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
+    # Páginas Públicas
     path('', views.home, name='home'),
     path('sobre-nos/', views.sobre_nos, name='sobre_nos'),
     path('contatos/', views.contatos, name='contatos'),
-    path('login/', views.login, name='login'),
-    path('home-lyfesync/', views.home_lyfesync, name='home_lyfesync'),
+    path('cadastro/', views.cadastro, name='cadastro'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    
+    # Dashboard (Página Inicial Logada)
+    # A URL que deu erro foi /home-lyfesync/, mas a view se chama home_lyfesync.
+    # O nome interno usado no template deve ser 'homeLyfesync'.
+    path('home-lyfesync/', views.home_lyfesync, name='homeLyfesync'),
+    
+    # HÁBITOS
     path('habito/', views.habito, name='habito'),
-    path('registrar-habito/', views.registrar_habito, name='registrar_habito'),
-    path('alterar-habito/', views.alterar_habito, name='alterar_habito'),
+    path('habitos/registrar/', views.registrar_habito, name='registrar_habito'),
+    path('habitos/alterar/<int:habito_id>/', views.alterar_habito, name='alterar_habito'), # Adicionado <int:habito_id>
+    path('habitos/toggle_day/<int:habit_id>/<str:day>/', views.toggle_habito_day, name='toggle_habit_day'),
+    path('habitos/delete/<int:habit_id>/', views.delete_habit, name='delete_habit'),
+
+    # AUTOCUIDADO (Página principal de Afirmação, Gratidão e Humor)
     path('autocuidado/', views.autocuidado, name='autocuidado'),
+    
+    # HUMOR
     path('humor/', views.humor, name='humor'),
+    # Esta é a URL principal referenciada no sidebar.
+    path('humor/registrar/', views.registrar_humor, name='registrar_humor'),
+    path('humor/alterar/', views.alterar_humor, name='alterar_humor'), # Adapte esta URL se precisar de um ID
+    
+    # GRATIDÃO
     path('gratidao/', views.gratidao, name='gratidao'),
+    path('gratidao/registrar/', views.registrar_gratidao, name='registrar_gratidao'),
+    path('gratidao/alterar/', views.alterar_gratidao, name='alterar_gratidao'), # Adapte esta URL se precisar de um ID
+    
+    # AFIRMAÇÃO
     path('afirmacao/', views.afirmacao, name='afirmacao'),
-    path('registrar-humor/', views.registrar_humor, name='registrar_humor'),
-    path('alterar-humor/', views.alterar_humor, name='alterar_humor'),
-    path('registrar-gratidao/', views.registrar_gratidao, name='registrar_gratidao'),
-    path('alterar-gratidao/', views.alterar_gratidao, name='alterar_gratidao'),
-    path('registrar-afirmacao/', views.registrar_afirmacao, name='registrar_afirmacao'),
-    path('alterar-afirmacao/', views.alterar_afirmacao, name='alterar_afirmacao'),
+    path('afirmacao/registrar/', views.registrar_afirmacao, name='registrar_afirmacao'),
+    path('afirmacao/alterar/', views.alterar_afirmacao, name='alterar_afirmacao'), # Adapte esta URL se precisar de um ID
+
+    # RELATÓRIOS
     path('relatorios/', views.relatorios, name='relatorios'),
-    path('relatorio-habito/', views.relatorio_habito, name='relatorio_habito'),
-    path('relatorio-humor/', views.relatorio_humor, name='relatorio_humor'),
-    path('relatorio-gratidao/', views.relatorio_gratidao, name='relatorio_gratidao'),
-    path('relatorio-afirmacao/', views.relatorio_afirmacao, name='relatorio_afirmacao'),
+    path('relatorios/habito/', views.relatorio_habito, name='relatorio_habito'),
+    path('relatorios/humor/', views.relatorio_humor, name='relatorio_humor'),
+    path('relatorios/gratidao/', views.relatorio_gratidao, name='relatorio_gratidao'),
+    path('relatorios/afirmacao/', views.relatorio_afirmacao, name='relatorio_afirmacao'),
+    
+    # CONTA E ADMIN
+    path('conta/', views.conta, name='conta'),
+    path('configuracoes/', views.configuracoes_conta, name='configuracoes_conta'),
+    path('dicas/registrar/', views.registrar_dica, name='registrar_dica'),
+    
+    # URLs do Allauth
+    path('accounts/', include('allauth.urls')),
 ]

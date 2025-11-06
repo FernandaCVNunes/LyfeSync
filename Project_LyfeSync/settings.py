@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     #'allauth.socialaccount.providers.facebook', não utilizarei por enquanto
+    'django_filters',
 ]
 
 SITE_ID = 1
@@ -124,7 +125,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    BASE_DIR / 'static',
+    os.path.join(BASE_DIR, 'static'),
 ]
 
 # Default primary key field type
@@ -132,3 +133,12 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Opcional: URL para onde o usuário é redirecionado após o logout (Allauth)
+ACCOUNT_LOGOUT_REDIRECT_URL = '/' 
+
+# URL para onde o usuário é redirecionado após o login (Allauth)
+LOGIN_REDIRECT_URL = '/home-lyfesync/'
+
+ACCOUNT_FORMS = {
+    'signup': 'sua_app.forms.CustomSignupForm', # <-- TROQUE 'sua_app' pelo nome real da sua aplicação
+}
