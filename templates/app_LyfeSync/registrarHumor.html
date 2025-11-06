@@ -1,143 +1,239 @@
+{# registrarHumor.html #}
 {% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
 {% load static %}
+{% load custom_filters %}
+{% load app_LyfeSync_extras %} 
 
 {% block title %}Registrar Humor{% endblock %}
 
 {% block content_logado %}
-  <script src="https://cdn.tailwindcss.com"></script>
+
+{# Adicione estilos customizados que não são facilmente implementados com Tailwind, como o hover/seleção da imagem #}
+<style>
+    /* Estilos Customizados Adicionais (Se o Tailwind não for suficiente) */
+    .humor-image {
+        width: 30px; /* Tamanho da imagem, conforme solicitado */
+        height: 30px;
+        transition: transform 0.1s;
+    }
+
+    /* Estilo para o container de humor selecionado */
+    .selected-humor {
+        background-color: #ecfdf5; /* Tailwind: bg-green-50, um verde claro */
+        border: 2px solid #34d399; /* Tailwind: border-green-400 */
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transform: scale(1.05);
+    }
+    
+    /* Estilo para a textarea, baseado na sua imagem de referência */
+    .custom-textarea {
+        background-color: #e6f7ff; /* Cor azul claro da imagem de anexo */
+        border-radius: 20px; /* Borda arredondada */
+        border-color: #b3e0ff; /* Cor da borda */
+    }
+
+    /* Estilo do botão SALVAR */
+    .btn-salvar-humor {
+        background-color: #f44336; /* Cor Laranja/Vermelho da imagem de anexo */
+    }
+    .btn-salvar-humor:hover {
+        background-color: #d32f2f;
+    }
+
+    /* Estilo para as imagens pequenas na tabela de humor */
+    .humor-image-small {
+        width: 20px;
+        height: 20px;
+    }
+</style>
 
 <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-    <div class="flex flex-wrap lg:flex-nowrap gap-8">
-        
-        <!-- COLUNA ESQUERDA: Registro de Humor (Formulário) -->
-        <div class="w-full lg:w-3/5 bg-white p-6 rounded-xl shadow-lg">
-            
-            <!-- Título -->
-            <h1 class="text-3xl font-bold text-lyfesync-green mb-8">
-                Como você está se sentindo hoje?
-            </h1>
-            
-            <form id="form-registro-humor" method="POST" action="{% url 'registrarHumor' %}">
-                {% csrf_token %}
+    <div class="flex flex-wrap lg:flex-nowrap gap-8">
+        
+        <div class="w-full lg:w-3/5 bg-white p-6 rounded-xl shadow-lg">
+            
+            <h1 class="text-3xl font-bold text-lyfesync-green mb-8">
+                Como você está se sentindo hoje?
+            </h1>
+            
+            <form id="form-registro-humor" method="POST" action="{% url 'registrarHumor' %}">
+                {% csrf_token %}
 
-                <!-- Data -->
-                <div class="mb-6">
-                    <label for="id_data" class="block text-xl font-semibold text-gray-700 mb-2">Data:</label>
-                    <input type="date" id="id_data" name="data" 
-                           class="w-full sm:w-1/2 p-3 border-2 border-green-200 rounded-lg focus:border-lyfesync-green focus:ring focus:ring-green-100 transition duration-150"
-                           value="{{ data_atual|date:'Y-m-d' }}" required>
-                </div>
-                
-                <!-- Seleção de Humor por Emojis -->
-                <div class="mb-10">
-                    <label class="block text-xl font-semibold text-gray-700 mb-4">Selecione seu Humor:</label>
-                    <div class="flex justify-between items-center space-x-2 sm:space-x-4">
-                        <!-- Os 5 emojis coloridos grandes -->
-                        <div class="emoji-option" data-humor="Feliz">😀</div>
-                        <div class="emoji-option" data-humor="Calmo">😌</div>
-                        <div class="emoji-option" data-humor="Ansioso">😟</div>
-                        <div class="emoji-option" data-humor="Triste">😥</div>
-                        <div class="emoji-option" data-humor="Irritado">😡</div>
-                        <input type="hidden" name="estado" id="id_estado" required>
-                    </div>
-                </div>
+                <div class="mb-6">
+                    <label for="id_data" class="block text-xl font-semibold text-gray-700 mb-2">Data:</label>
+                    <input type="date" id="id_data" name="data"
+                            class="w-full sm:w-1/2 p-3 border-2 border-green-200 rounded-lg focus:border-lyfesync-green focus:ring focus:ring-green-100 transition duration-150"
+                            value="{{ form.data.value|default_if_none:'' }}" required>
+                    {% if form.data.errors %}<div class="text-red-500 text-sm mt-1">{{ form.data.errors }}</div>{% endif %}
+                </div>
+                
+                <div class="mb-10">
+                    <label class="block text-xl font-semibold text-gray-700 mb-4">Selecione seu Humor:</label>
+                    
+                    {# Oculta o widget completo do Django, mas ele deve existir para a validação #}
+                    <div id="hidden-radio-widget" style="display: none; visibility: hidden;">
+                        {{ form.estado }}
+                    </div>
 
-                <!-- Descrição -->
-                <div class="mb-8">
-                    <label for="id_descricaohumor" class="block text-xl font-semibold text-gray-700 mb-2">Descrição:</label>
-                    <textarea id="id_descricaohumor" name="descricaohumor" rows="8"
-                              placeholder="Descreva brevemente o que motivou seu humor hoje..."
-                              class="w-full p-4 border-2 border-green-200 rounded-xl focus:border-lyfesync-green focus:ring focus:ring-green-100 transition duration-150 custom-textarea"></textarea>
-                </div>
-                
-                <!-- Botão Salvar -->
-                <div class="flex justify-end">
-                    <button type="submit" class="btn-salvar-humor py-3 px-8 text-white font-bold rounded-full shadow-lg transition duration-200">
-                        SALVAR
-                    </button>
-                </div>
-            </form>
-        </div>
+                    <div class="flex flex-wrap gap-4">
+                        
+                        {% for value, label in form.estado.field.choices %}
+                            
+                            {% with image_path=humor_icon_class_map|get_item:value|default:"img/icon/default.png" %}
+                            
+                                <div class="cursor-pointer p-2 rounded-full border-2 border-transparent hover:bg-gray-100 transition duration-150 flex items-center gap-2"
+                                        data-humor-container
+                                        data-humor-value="{{ value }}"
+                                        onclick="selectHumor('{{ value }}', this)">
+                                    
+                                    {# ÍCONE DE IMAGEM (Reduzido no CSS customizado) #}
+                                    <img src="{% static image_path %}" alt="{{ label }}" class="humor-image">
+                                    
+                                    {# Texto do humor #}
+                                    <span class="text-base font-semibold text-gray-700 pr-2">{{ label|split_by_space|first }}</span>
+                                </div>
+                            {% endwith %} 
+                        {% endfor %} 
+                        
+                    </div>
+                    
+                    {% if form.estado.errors %}<div class="text-red-500 text-sm mt-1">{{ form.estado.errors }}</div>{% endif %}
+                </div>
 
-        <!-- COLUNA DIREITA: Tabela de Explicações (NÃO é a dica da tela principal) -->
-        <div class="w-full lg:w-2/5 space-y-8">
-            
-            <!-- Tabela de Humor (Explicações) -->
-            <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-lyfesync-green">
-                <h2 class="text-2xl font-bold text-lyfesync-green mb-4">Tabela de Humor</h2>
-                
-                <!-- Tabela de emojis pequenos no topo -->
-                <div class="flex justify-start items-center space-x-4 mb-4">
-                    <span class="text-3xl text-green-500">😀</span>
-                    <span class="text-3xl text-lime-500">😌</span>
-                    <span class="text-3xl text-yellow-400">😟</span>
-                    <span class="text-3xl text-blue-500">😥</span>
-                    <span class="text-3xl text-red-500">😡</span>
-                </div>
-                
-                <!-- Descrições -->
-                <div class="text-gray-700 space-y-4 text-sm">
-                    <p>
-                        <span class="font-bold text-green-600">Feliz:</span> Representa momentos de alegria, contentamento ou satisfação com a vida. É um estado positivo de bem-estar emocional.
-                    </p>
-                    <p>
-                        <span class="font-bold text-lime-600">Calmo:</span> Indica tranquilidade, serenidade e uma sensação de paz interior, sem grandes agitações emocionais.
-                    </p>
-                    <p>
-                        <span class="font-bold text-yellow-600">Ansioso:</span> Expressa preocupação, nervosismo ou estresse. Pode ser um estado de alerta em relação a eventos futuros.
-                    </p>
-                    <p>
-                        <span class="font-bold text-blue-600">Triste:</span> Reflete sentimentos de melancolia, tristeza ou desânimo, geralmente associados a situações de perda ou dificuldades.
-                    </p>
-                    <p>
-                        <span class="font-bold text-red-600">Irritado:</span> Representa frustração, raiva ou impaciência, geralmente como resposta a algo que incomoda ou causa desconforto.
-                    </p>
-                </div>
-            </div>
-            
-        </div>
-    </div>
+                <div class="mb-8">
+                    <label for="id_descricaohumor" class="block text-xl font-semibold text-gray-700 mb-2">Descrição:</label>
+                    <textarea id="id_descricaohumor" name="descricaohumor" rows="8"
+                                placeholder="Descreva brevemente o que motivou seu humor hoje..."
+                                class="w-full p-4 border-2 border-green-200 rounded-xl focus:border-lyfesync-green focus:ring focus:ring-green-100 transition duration-150 custom-textarea">{{ form.descricaohumor.value|default_if_none:'' }}</textarea>
+                    {% if form.descricaohumor.errors %}<div class="text-red-500 text-sm mt-1">{{ form.descricaohumor.errors }}</div>{% endif %}
+                </div>
+                
+                <div class="flex justify-end">
+                    <button type="submit" class="btn-salvar-humor py-3 px-8 text-white font-bold rounded-xl shadow-lg transition duration-200">
+                        SALVAR
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="w-full lg:w-2/5 space-y-8">
+            
+            <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-lyfesync-green">
+                <h2 class="text-2xl font-bold text-lyfesync-green mb-4">Tabela de Humor</h2>
+                
+                <div class="text-gray-700 space-y-4 text-sm">
+                    
+                    {# Ícones de referência no topo (Ajustado para 5 ícones em linha) #}
+                    <div class="flex justify-around items-center mb-6 border-b pb-4">
+                        {% for value, image_path in humor_icon_class_map.items %}
+                            <img src="{% static image_path %}" alt="{{ value }}" class="humor-image-small">
+                        {% endfor %}
+                    </div>
+
+                    {% for value, image_path in humor_icon_class_map.items %}
+                        <div class="flex items-start gap-3">
+                            
+                            <span class="font-bold text-gray-700">{{ value }}:</span>
+                            
+                            <div>
+                                {% if value == 'Feliz' %}
+                                    Representa momentos de alegria, contentamento ou satisfação com a vida. É um estado positivo de bem-estar emocional.
+                                {% elif value == 'Calmo' %}
+                                    Indica tranquilidade, serenidade e uma sensação de paz interior, sem grandes agitações emocionais.
+                                {% elif value == 'Ansioso' %}
+                                    Expressa preocupação, nervosismo ou estresse. Pode ser um estado de alerta em relação a eventos futuros.
+                                {% elif value == 'Triste' %}
+                                    Reflete sentimentos de melancolia, tristeza ou desânimo, geralmente associados a situações de perda ou dificuldades.
+                                {% elif value == 'Irritado' %}
+                                    Representa frustração, raiva ou impaciência, geralmente como resposta a algo que incomoda ou causa desconforto.
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const emojiOptions = document.querySelectorAll('.emoji-option');
-        const estadoInput = document.getElementById('id_estado');
+    // Função JavaScript para gerenciar a seleção de humor
+    function selectHumor(humorValue, element) {
+        // 1. Remove a classe de seleção de todos os containers
+        document.querySelectorAll('[data-humor-container]').forEach(function(el) {
+            el.classList.remove('selected-humor');
+        });
 
-        // Define a data atual como padrão, se o campo estiver vazio
-        const dataInput = document.getElementById('id_data');
-        if (!dataInput.value) {
-            const today = new Date().toISOString().slice(0, 10);
-            dataInput.value = today;
-        }
+        // 2. Adiciona a classe de seleção ao elemento clicado (o container div)
+        element.classList.add('selected-humor');
+        
+        // 3. ENCONTRA O INPUT DE RÁDIO CORRESPONDENTE E O MARCA COMO CHECADO
+        
+        // Localiza todos os inputs de rádio ocultos para o campo 'estado'
+        const radioInputs = document.querySelectorAll('input[name="estado"][type="radio"]');
 
-        emojiOptions.forEach(option => {
-            option.addEventListener('click', function() {
-                // 1. Remove a seleção de todos
-                emojiOptions.forEach(o => o.classList.remove('selected-emoji'));
-                
-                // 2. Adiciona a seleção ao clicado
-                this.classList.add('selected-emoji');
-                
-                // 3. Define o valor do input hidden
-                estadoInput.value = this.getAttribute('data-humor');
-            });
-        });
-        
-        // Adiciona validação simples para o formulário
-        document.getElementById('form-registro-humor').addEventListener('submit', function(e) {
-            if (!estadoInput.value) {
-                // Usa um modal ou mensagem customizada em vez de alert()
-                console.error('Por favor, selecione um estado de humor antes de salvar.');
-                e.preventDefault();
-            }
-        });
-        
-        // Seleciona o primeiro emoji por padrão (Melhora a UX)
-        if (!estadoInput.value && emojiOptions.length > 0) {
-            emojiOptions[0].click();
-        }
-    });
+        let found = false;
+        radioInputs.forEach(function(input) {
+            // O valor do input de rádio deve ser igual ao valor do data-humor
+            if (input.value === humorValue) {
+                input.checked = true; 
+                found = true;
+            } else {
+                input.checked = false;
+            }
+        });
+
+        if (!found) {
+            console.warn(`Aviso: O input de rádio para o valor "${humorValue}" não foi encontrado. O form pode falhar.`);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Define a data atual se o campo estiver vazio (mantido)
+        const dateInput = document.getElementById('id_data');
+        if (dateInput && !dateInput.value) {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            let mm = today.getMonth() + 1;
+            let dd = today.getDate();
+
+            if (mm < 10) mm = '0' + mm;
+            if (dd < 10) dd = '0' + dd;
+
+            dateInput.value = yyyy + '-' + mm + '-' + dd;
+        }
+
+        // ------------------------------------------------------------------
+        // Lógica de Pré-Seleção e Marcação Inicial
+        // ------------------------------------------------------------------
+        const checkedRadio = document.querySelector('input[name="estado"][type="radio"]:checked');
+        const firstHumorElement = document.querySelector('[data-humor-container]');
+        
+        let preSelectedValue = null;
+
+        if (checkedRadio) {
+            preSelectedValue = checkedRadio.value;
+        } 
+        
+        // Se nenhum valor foi pré-selecionado (ou seja, é um novo registro)
+        if (!preSelectedValue && firstHumorElement) {
+            preSelectedValue = firstHumorElement.getAttribute('data-humor-value');
+             // Opcional: Marcar o primeiro rádio se nenhum estiver marcado
+             const firstRadioInput = document.querySelector(`input[name="estado"][value="${preSelectedValue}"]`);
+             if(firstRadioInput) {
+                 firstRadioInput.checked = true;
+             }
+        }
+
+        // Inicializa o estilo do container selecionado
+        if (preSelectedValue) {
+            const initialElement = document.querySelector(`[data-humor-value="${preSelectedValue}"]`);
+            if (initialElement) {
+                // Chama a função de seleção para aplicar as classes CSS
+                selectHumor(preSelectedValue, initialElement);
+            }
+        } 
+    });
 </script>
 
 {% endblock %}

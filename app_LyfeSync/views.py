@@ -29,6 +29,7 @@ def _get_checked_days_for_current_month(habito_obj):
     year = date.today().year
     
     # Consulta todas as conclusões para o hábito no mês e ano atuais
+    # ASSUMIDO: O campo de data em StatusDiario é 'data_conclusao'
     completions = StatusDiario.objects.filter(
         habito=habito_obj, 
         data_conclusao__year=year, 
@@ -119,8 +120,9 @@ def cadastro(request):
             return redirect('home_lyfesync') 
         else:
             # Se o formulário for inválido, redireciona para login.html 
-            # onde as mensagens de erro (via Django messages) serão exibidas.
-            messages.error(request, 'Erro no cadastro. Por favor, verifique os dados e tente novamente.')
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"Erro em {field}: {error}")
             return redirect('login') 
             
     # Se for GET, apenas redireciona para a página de login/cadastro
@@ -139,10 +141,10 @@ def logout_view(request):
 @login_required
 def home_lyfesync(request):
     """Dashboard principal da aplicação para usuários logados."""
-    # CORREÇÃO: Usando 'usuario=request.user' para Habito
+    # CORREÇÃO/IMPORTANTE: Usando 'usuario=request.user' para Habito (Consistente com a view habito)
     total_habitos = Habito.objects.filter(usuario=request.user).count()
     
-    # Manter a correção 'idusuario' para Afirmacao (baseado em erros anteriores)
+    # CORREÇÃO/IMPORTANTE: Usando 'idusuario=request.user' para Afirmacao 
     ultima_afirmacao = Afirmacao.objects.filter(
         idusuario=request.user
     ).order_by('-data').first()
@@ -160,7 +162,7 @@ def habito(request):
     
     # 1. Obter lista de hábitos reais
     try:
-        # CORREÇÃO: Usando 'usuario=request.user' para Habito
+        # CORREÇÃO: Usando 'usuario=request.user' para Habito (Assumindo que Habito tem FK 'usuario')
         habitos_reais = Habito.objects.filter(usuario=request.user).order_by('-data_inicio')
     except Exception as e:
         print(f"Erro ao buscar hábitos no DB: {e}")
@@ -169,28 +171,27 @@ def habito(request):
     # 2. Transformação de dados (adiciona o mapa de conclusão)
     habitos_para_template = []
     for habito_obj in habitos_reais:
+        # Busca o status de conclusão para o mês atual
         checked_days_map = _get_checked_days_for_current_month(habito_obj) 
 
         habitos_para_template.append({
             'id': habito_obj.id,
             'nome': habito_obj.nome,
-            # Adicione os campos ausentes
-            'descricao': habito_obj.descricao, # Estava faltando
-            'frequencia': habito_obj.frequencia, # Estava faltando
-
-            # CORREÇÃO: Mude a chave de 'checked_days' para 'completion_status' 
-            # pois é o que o template habito.html espera
+            'descricao': habito_obj.descricao, 
+            'frequencia': habito_obj.frequencia, 
+            # CHAVE ESPERADA PELO TEMPLATE
             'completion_status': checked_days_map 
         })
         
     # 3. Contexto de datas
     try:
+        # Tenta configurar o locale para Português (Brasil ou padrão)
         locale.setlocale(locale.LC_ALL, 'pt_BR.utf8') 
     except locale.Error:
         try:
             locale.setlocale(locale.LC_ALL, 'pt_BR')
         except locale.Error:
-            pass
+            pass # Continua sem locale se não for possível configurar
             
     month_names = [calendar.month_abbr[i].upper() for i in range(1, 13)]
     dias_do_mes = list(range(1, 32)) 
@@ -217,7 +218,7 @@ def marcar_habito_concluido(request, habito_id):
             # Lógica de marcação StatusDiario
             status_diario, criado = StatusDiario.objects.update_or_create(
                 habito=habito,
-                data=data_hoje,
+                data_conclusao=data_hoje, # Assumindo 'data_conclusao' é o campo de data
                 defaults={'concluido': True}
             )
             
@@ -276,14 +277,33 @@ def alterar_habito(request, habito_id):
 @require_POST
 def toggle_habito_day(request, habit_id, day):
     # Lógica da API para marcar/desmarcar StatusDiario
-    # O código aqui é crucial, mas para o erro, basta a definição da função.
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         try:
             data = json.loads(request.body)
             action = data.get('action') # 'check' ou 'uncheck'
             
-            # ... (Lógica para encontrar e salvar o StatusDiario) ...
+            # 1. Encontra o Hábito e verifica se pertence ao usuário
+            habito = get_object_or_404(Habito, pk=habit_id, usuario=request.user)
+            
+            # 2. Constrói a data
+            year = date.today().year
+            month = date.today().month
+            date_to_toggle = date(year, month, int(day))
 
+            # 3. Lógica de toggle/Marcação
+            if action == 'check':
+                StatusDiario.objects.update_or_create(
+                    habito=habito,
+                    data_conclusao=date_to_toggle,
+                    defaults={'concluido': True}
+                )
+            elif action == 'uncheck':
+                # Remove o StatusDiario (desmarca)
+                StatusDiario.objects.filter(
+                    habito=habito,
+                    data_conclusao=date_to_toggle
+                ).delete()
+            
             return JsonResponse({'status': 'success', 'habit_id': habit_id, 'day': day, 'action': action})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
@@ -303,20 +323,33 @@ def delete_habit(request, habit_id):
 @login_required
 def autocuidado(request):
     """Página de Autocuidado, que pode listar Afirmações, Gratidão e Humor. Requer login."""
-    # Usando 'idusuario' para Afirmacao (conforme erros anteriores)
+    # CORREÇÃO/IMPORTANTE: Usando 'idusuario' para Afirmacao
     afirmacoes = Afirmacao.objects.filter(idusuario=request.user).order_by('?')[:5]
     
     context = {'afirmacoes': afirmacoes}
     return render(request, 'app_LyfeSync/autocuidado.html', context)
 
+# app_LyfeSync/views.py
+
+# ... (imports e outras views) ...
+
 @login_required
 def humor(request):
     """Página de Humor. Requer login."""
-
+    
     data_hoje = timezone.localdate()
 
+    # 1. Defina o mapa de ícones e cores AQUI (FORA do 'if')
+    # Mapa de ícones Font Awesome (para listagem/dashboard)
+    humor_icon_class_map = {
+        'Feliz': {'icon': 'fa-solid fa-face-laugh', 'color_class': 'text-feliz'},
+        'Calmo': {'icon': 'fa-solid fa-face-meh', 'color_class': 'text-calmo'},
+        'Ansioso': {'icon': 'fa-solid fa-face-frown-open', 'color_class': 'text-ansioso'},
+        'Triste': {'icon': 'fa-solid fa-face-sad-cry', 'color_class': 'text-triste'},
+        'Irritado': {'icon': 'fa-solid fa-face-angry', 'color_class': 'text-irritado'},
+    }
+
     try:
-        # CORREÇÃO MANTIDA: Usando 'idusuario' para Humor
         humor_do_dia = Humor.objects.get(
             idusuario=request.user, 
             data=data_hoje
@@ -325,14 +358,16 @@ def humor(request):
         humor_do_dia = None
 
     if humor_do_dia:
-        emoji_map = {
-            'Feliz': '😀', 'Calmo': '😌', 'Ansioso': '😟',
-            'Triste': '😥', 'Irritado': '😡'
-        }
-        humor_do_dia.emoji_char = emoji_map.get(humor_do_dia.estado, '🤷‍♀️')
+        # 2. Apenas a lógica de atribuição é mantida dentro do 'if'
+        humor_info = humor_icon_class_map.get(humor_do_dia.estado, {'icon': 'fa-solid fa-face-question', 'color_class': ''})
+        humor_do_dia.icon_class = humor_info['icon']
+        humor_do_dia.color_class = humor_info['color_class']
 
+    # 3. O dicionário 'context' é criado no final
     context = {
         'humor_do_dia': humor_do_dia,
+        # O mapa agora é sempre passado para o template 'humor.html'
+        'humor_icon_class_map': humor_icon_class_map 
     }
     return render(request, 'app_LyfeSync/humor.html', context)
 
@@ -343,13 +378,13 @@ def gratidao(request):
     data_hoje = timezone.localdate()
     primeiro_dia_mes = data_hoje.replace(day=1)
     
-    # CORREÇÃO MANTIDA: Usando 'idusuario' para Gratidao
+    # CORREÇÃO/IMPORTANTE: Usando 'idusuario' para Gratidao
     gratidoes_do_mes = Gratidao.objects.filter(
         idusuario=request.user, 
         data__gte=primeiro_dia_mes
     ).order_by('-data') 
     
-    # Lógica de Locale
+    # Lógica de Locale (mantida como estava)
     try:
         locale.setlocale(locale.LC_ALL, 'pt_BR.utf8')
     except locale.Error:
@@ -372,7 +407,7 @@ def gratidao(request):
 def afirmacao(request):
     """Página de Afirmações. Lista as últimas 15 afirmações. Requer login."""
     
-    # CORREÇÃO MANTIDA: Usando 'idusuario' para Afirmacao
+    # CORREÇÃO/IMPORTANTE: Usando 'idusuario' para Afirmacao
     ultimas_afirmacoes = Afirmacao.objects.filter(
         idusuario=request.user
     ).order_by('-data')[:15]
@@ -389,44 +424,58 @@ def afirmacao(request):
 @login_required
 def registrar_humor(request):
     """Permite registrar um novo Humor. Requer login."""
+    # MAPA DE CAMINHOS DE IMAGEM (para o formulário de seleção)
+    humor_icon_class_map = {
+        'Feliz': 'img/icon/feliz.png',
+        'Calmo': 'img/icon/calmo.png',
+        'Ansioso': 'img/icon/ansioso.png',
+        'Triste': 'img/icon/triste.png',
+        'Irritado': 'img/icon/raiva.png',
+    }
+    
     if request.method == 'POST':
         form = HumorForm(request.POST)
         if form.is_valid():
             humor_obj = form.save(commit=False)
-            # Associa ao usuário logado
             humor_obj.idusuario = request.user 
             
-            # Adiciona a data de hoje, se não for preenchida no formulário
             if not humor_obj.data:
                 humor_obj.data = timezone.localdate()
                 
             try:
+                # O save pode falhar se houver uma restrição de unicidade (data + idusuario)
                 humor_obj.save()
                 messages.success(request, 'Seu humor foi registrado com sucesso! 😊')
-                return redirect('humor') # Redireciona para a listagem/página principal de humor
+                return redirect('humor')
             except Exception as e:
-                # Caso ocorra a violação da restrição unique_together (idusuario, data)
-                messages.error(request, f'Erro ao salvar: Você já registrou um humor para esta data.')
+                # Trata a exceção de registro duplicado
+                messages.error(request, f'Erro ao salvar: Você já registrou um humor para esta data. Detalhe: {e}')
         else:
             messages.error(request, 'Houve um erro ao registrar o humor. Verifique os campos.')
     else:
         form = HumorForm()
         
-    context = {'form': form}
+    context = {
+        'form': form,
+        'humor_icon_class_map': humor_icon_class_map # Passa o mapa para o template
+    }
     return render(request, 'app_LyfeSync/registrarHumor.html', context)
 
 @login_required
 def alterar_humor(request):
+    # A view de alteração precisa da lógica de formulário (GET e POST)
+    # Recomendo implementar a busca do Humor do Dia para alteração
+    messages.info(request, "Lógica completa de Alterar Humor pendente de implementação.")
     return render(request, 'app_LyfeSync/alterarHumor.html')
 
-@login_required # Adicionado @login_required que estava faltando
+@login_required 
 def registrar_gratidao(request):
     """Permite registrar uma nova Gratidão. Requer login."""
     if request.method == 'POST':
         form = GratidaoForm(request.POST)
         if form.is_valid():
             gratidao_obj = form.save(commit=False)
-            # CORREÇÃO: Usando 'idusuario' ao salvar para Gratidao
+            # CORREÇÃO/IMPORTANTE: Usando 'idusuario' ao salvar para Gratidao
             gratidao_obj.idusuario = request.user 
             
             if not gratidao_obj.data:
@@ -445,6 +494,8 @@ def registrar_gratidao(request):
 
 @login_required
 def alterar_gratidao(request):
+    # A view de alteração precisa de lógica de formulário (GET e POST)
+    messages.info(request, "Lógica completa de Alterar Gratidão pendente de implementação.")
     return render(request, 'app_LyfeSync/alterarGratidao.html')
 
 @login_required
@@ -454,7 +505,7 @@ def registrar_afirmacao(request):
         form = AfirmacaoForm(request.POST)
         if form.is_valid():
             afirmacao_obj = form.save(commit=False)
-            # CORREÇÃO: Usando 'idusuario' ao salvar para Afirmacao
+            # CORREÇÃO/IMPORTANTE: Usando 'idusuario' ao salvar para Afirmacao
             afirmacao_obj.idusuario = request.user
             
             if not afirmacao_obj.data:
@@ -473,6 +524,8 @@ def registrar_afirmacao(request):
 
 @login_required
 def alterar_afirmacao(request):
+    # A view de alteração precisa de lógica de formulário (GET e POST)
+    messages.info(request, "Lógica completa de Alterar Afirmação pendente de implementação.")
     return render(request, 'app_LyfeSync/alterarAfirmacao.html')
 
 # --- Views de Relatórios e Conta ---
@@ -499,7 +552,8 @@ def relatorio_afirmacao(request):
 
 @login_required
 def conta(request): 
-    return render(request, 'app_LyfeSync/conta.html')
+    # Esta view é renderizada por 'configuracoes_conta' agora, mas mantemos a URL caso seja um atalho simples
+    return redirect('configuracoes_conta')
 
 # Função de teste para verificar se o usuário é superusuário (Admin)
 def is_superuser(user):
@@ -508,23 +562,18 @@ def is_superuser(user):
 @login_required(login_url='login') # Redireciona para login se não estiver logado
 @user_passes_test(is_superuser, login_url='home') # Redireciona para home se não for admin
 def registrar_dica(request):
-    """
-    Permite ao superusuário registrar novas Dicas.
-    CORREÇÃO: Atualizado de DicaHumorForm para DicasForm.
-    """
+
     if request.method == 'POST':
-        # CORRIGIDO: Usa o nome do Form atualizado
         form = DicasForm(request.POST)
         if form.is_valid():
             dica = form.save(commit=False)
             dica.criado_por = request.user
             dica.save()
             messages.success(request, 'Dica cadastrada com sucesso!')
-            return redirect('registrar_dica') # Redireciona para a mesma página ou outra de sua escolha
+            return redirect('registrar_dica') 
         else:
             messages.error(request, 'Erro ao cadastrar a dica. Verifique os campos.')
     else:
-        # CORRIGIDO: Usa o nome do Form atualizado
         form = DicasForm()
         
     context = {
@@ -534,51 +583,55 @@ def registrar_dica(request):
 
 @login_required(login_url='login')
 def configuracoes_conta(request):
-    # Instanciamos os formulários com os dados atuais do usuário e seu perfil
-    user_form = UserUpdateForm(instance=request.user)
-    
-    # Tenta obter a instância do perfil, ou cria uma se não existir (necessário para UserUpdateForm)
+    # Tenta obter ou criar o perfil do usuário de forma segura
+    # Assumimos que o modelo 'Usuario' é o modelo de Perfil de Usuário
     try:
-        perfil_instance = request.user.perfil
+        # Tenta obter o objeto 'Usuario' associado ao User.
+        perfil_instance = request.user.usuario 
     except Usuario.DoesNotExist:
-        # Se o perfil não existir, instancie um novo objeto Usuario, associando o user
+        # Se não existir, cria uma instância não salva para preencher o formulário GET
         perfil_instance = Usuario(user=request.user)
-        # Observação: Não chame perfil_instance.save() aqui, pois pode causar um rollback se user_form falhar. 
-        # A lógica de salvar será feita na transação.
-
+    
+    user_form = UserUpdateForm(instance=request.user)
     perfil_form = PerfilUsuarioForm(instance=perfil_instance)
-    is_admin = request.user.is_superuser # Verifica se o usuário é superusuário
+    is_admin = request.user.is_superuser
 
     if request.method == 'POST':
         # Instanciamos com os dados do POST
         user_form = UserUpdateForm(request.POST, instance=request.user)
         
         # O formulário de perfil é instanciado com POST
+        # Se for um novo perfil, ele ainda usa a 'perfil_instance' não salva como base
         perfil_form = PerfilUsuarioForm(request.POST, instance=perfil_instance)
         
         # Inicia a transação para garantir que ambos salvem ou nenhum salve
         with transaction.atomic():
             forms_valid = True
 
-            # Processa o formulário do usuário (sempre permitido)
+            # Processa o formulário do usuário
             if user_form.is_valid():
                 user_form.save()
             else:
                 forms_valid = False
                 
-            # Processa o formulário de perfil (apenas se for administrador)
+            # Processa o formulário de perfil
             if perfil_form.is_valid():
-                # Se for admin, o perfil é salvo normalmente
-                perfil_form.save()
-            elif not perfil_form.is_valid():
-                forms_valid = False # Marca como inválido se houver problema no perfil
+                perfil_obj = perfil_form.save(commit=False)
+                # Garante que o FK para o User está setado corretamente
+                perfil_obj.user = request.user 
+                perfil_obj.save() # Salva o perfil (novo ou atualizado)
+            else:
+                # O perfil não é válido
+                forms_valid = False 
 
             if forms_valid:
                 messages.success(request, 'Suas configurações foram atualizadas com sucesso!')
-                return redirect('configuracoes_conta') # Redireciona para evitar reenvio do POST
+                # Recarrega a página com o novo objeto salvo (redirect)
+                return redirect('configuracoes_conta') 
             else:
-                # Se forms_valid for False, as mensagens de erro do formulário serão exibidas no template
+                # Mensagens de erro detalhadas do formulário são exibidas no template
                 messages.error(request, 'Ocorreu um erro ao salvar as alterações. Verifique os campos.')
+                # Continua para o render para exibir os formulários com erros
 
     context = {
         'user_form': user_form,

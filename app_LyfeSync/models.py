@@ -374,11 +374,11 @@ class Humor(models.Model):
     )
     
     ESTADOS_HUMOR = [
-        ('Feliz', '😀 Feliz'),
-        ('Calmo', '😌 Calmo'),
-        ('Ansioso', '😟 Ansioso'),
-        ('Triste', '😥 Triste'),
-        ('Irritado', '😡 Irritado'),
+        ('Feliz', 'Feliz'),
+        ('Calmo', 'Calmo'),
+        ('Ansioso', 'Ansioso'),
+        ('Triste', 'Triste'),
+        ('Irritado', 'Irritado'),
     ]
     
     data = models.DateField(

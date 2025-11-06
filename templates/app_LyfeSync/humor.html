@@ -9,49 +9,40 @@
 <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
     <div class="flex flex-wrap lg:flex-nowrap gap-8">
         
-        <!-- COLUNA ESQUERDA: Meu Humor do Dia e Botão de Ação -->
         <div class="w-full lg:w-3/5 bg-white p-6 rounded-xl shadow-lg border-t-4 border-lyfesync-green">
             
-            <!-- Título Principal -->
             <h1 class="text-3xl font-bold text-gray-700 mb-8">
                 Meu Humor
             </h1>
 
-            <!-- Botão de Adicionar Humor -->
             <div class="mb-8">
-                <a href="{% url 'registrarHumor' %}" class="btn-adicionar-humor inline-flex items-center py-3 px-6 text-white font-bold rounded-full shadow-lg transition duration-200">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                    Adicionar seu Humor de hoje.
+                <a href="{% url 'registrarHumor' %}" class="btn-adicionar-humor inline-flex items-center font-bold text-xl text-lyfesync-green">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Adicionar Humor de Hoje
                 </a>
             </div>
             
-            <!-- Conteúdo do Humor Registrado -->
             {% if humor_do_dia %}
             <div>
-                <!-- Data -->
                 <p class="text-xl font-semibold text-gray-700 mb-4">Data: <span class="text-lyfesync-green">{{ humor_do_dia.data|date:"d/m/Y" }}</span></p>
 
                 <div class="flex items-start space-x-6 mb-8 p-4 border-2 border-green-100 rounded-xl bg-green-50">
-                    <!-- Emoji Grande -->
                     <div class="emoji-visualizer text-6xl flex-shrink-0">
-                         {{ humor_do_dia.emoji_char }}
+                            {{ humor_do_dia.emoji_char }}
                     </div>
                     
-                    <!-- Estado e Descrição -->
                     <div>
                         <h2 class="text-2xl font-bold text-gray-800">{{ humor_do_dia.estado }}:</h2>
                         <p class="text-lg text-gray-600 mt-1">{{ humor_do_dia.descricao }}</p>
                     </div>
                 </div>
 
-                <!-- Campo Descrição (Área de texto estilizada) -->
                 <h3 class="text-xl font-semibold text-gray-700 mb-2">Descrição:</h3>
                 <div class="p-4 custom-textarea-visualizar rounded-xl text-gray-800 border-2 border-green-200">
                     {{ humor_do_dia.descricaohumor|linebreaksbr }}
                 </div>
             </div>
             {% else %}
-            <!-- Mensagem se não houver registro -->
             <div class="text-center p-10 bg-gray-50 rounded-xl border border-dashed border-gray-300">
                 <p class="text-lg text-gray-500">Você ainda não registrou seu humor para hoje.</p>
                 <p class="text-sm text-gray-400 mt-2">Clique em "Adicionar Humor" para começar!</p>
@@ -60,10 +51,8 @@
             
         </div>
 
-        <!-- COLUNA DIREITA: DICA -->
         <div class="w-full lg:w-2/5 space-y-8">
             
-            <!-- Dica de Autocuidado (Hardcoded temporariamente, ou use uma variável do contexto) -->
             <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-red-400">
                 <h2 class="text-2xl font-bold text-red-500 mb-4">DICA</h2>
                 
@@ -87,6 +76,14 @@
 
     </div>
 </div>
+
+<div class="w-full mt-10">
+    <p class="frase-motivacional-humor">
+        “O humor é a arte de transformar o peso da vida em leveza 
+        — quem ri, ressignifica o que dói.”
+    </p>
+</div>
+
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {

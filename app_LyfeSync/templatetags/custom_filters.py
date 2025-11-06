@@ -11,3 +11,23 @@ def split(value, arg):
     Uso: {{ value|split:"," }}
     """
     return value.split(arg)
+
+@register.filter(name='split_by_space')
+def split_by_space(value):
+    """
+    Divide uma string por espaços e retorna a lista de strings.
+    Geralmente usado para pegar a primeira palavra.
+    Exemplo: "Muito Feliz" | split_by_space -> ['Muito', 'Feliz']
+    """
+    if not isinstance(value, str):
+        return value
+    return value.split(' ')
+
+@register.filter(name='first_word')
+def first_word(value):
+    """
+    Retorna apenas a primeira palavra de uma string.
+    """
+    if not isinstance(value, str):
+        return value
+    return value.split(' ')[0]
