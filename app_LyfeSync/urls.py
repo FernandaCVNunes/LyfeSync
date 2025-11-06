@@ -29,7 +29,7 @@ urlpatterns = [
     # HUMOR
     path('humor/', views.humor, name='humor'),
     # Esta é a URL principal referenciada no sidebar.
-    path('humor/registrar/', views.registrar_humor, name='registrar_humor'),
+    path('humor/registrar/', views.registrar_humor, name='registrarHumor'),
     path('humor/alterar/', views.alterar_humor, name='alterar_humor'), # Adapte esta URL se precisar de um ID
     
     # GRATIDÃO

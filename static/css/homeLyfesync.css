@@ -212,9 +212,10 @@ body {
     color: var(--lyfesync-green);
 }
 
-.icon-size {
-    width: 12px;
-    height: 12px;
+.icon-autocuidado {
+    width: 40px;
+    height: 40px;
+    max-width: 8%;
 }
 
 /* Emojis Grandes (Seleção de Humor) */

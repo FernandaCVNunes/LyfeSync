@@ -91,6 +91,17 @@
                             <span>Autocuidado</span>
                         </a>
                     </li>
+
+                    {# ITEM: DICAS (Apenas para Administrador) #}
+                    {% if user.is_authenticated and user.is_superuser %}
+                    <li class="mb-1 border-top pt-2 mt-2">
+                        <a href="{% url 'registrar_dica' %}" class="sidebar-link text-success">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>Dicas (Admin)</span>
+                        </a>
+                    </li>
+                    {% endif %}
+
                     
                     {# Item: Relatórios #}
                     <li>

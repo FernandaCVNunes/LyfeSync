@@ -140,5 +140,5 @@ ACCOUNT_LOGOUT_REDIRECT_URL = '/'
 LOGIN_REDIRECT_URL = '/home-lyfesync/'
 
 ACCOUNT_FORMS = {
-    'signup': 'sua_app.forms.CustomSignupForm', # <-- TROQUE 'sua_app' pelo nome real da sua aplicação
+    'signup': 'app_LyfeSync.forms.CustomSignupForm',
 }

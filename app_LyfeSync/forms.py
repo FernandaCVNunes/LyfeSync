@@ -5,6 +5,8 @@ from django.utils import timezone
 from django.forms import ModelForm, TextInput, DateInput, NumberInput, Select, Textarea
 from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.models import User
+from allauth.account.forms import SignupForm
+from django.db import transaction
 
 # -------------------------------------------------------------------
 # 1. FORMULÁRIO DE HÁBITO
@@ -191,3 +193,34 @@ class PerfilUsuarioForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         pass
+
+class CustomSignupForm(SignupForm):
+    # 1. Adiciona os campos de Nome e Sobrenome e os torna obrigatórios (required=True é o padrão)
+    first_name = forms.CharField(max_length=150, label='Nome')
+    last_name = forms.CharField(max_length=150, label='Sobrenome')
+
+    @transaction.atomic
+    def save(self, request):
+        # O método super().save(request) cria o objeto User, mas não salva first_name e last_name 
+        # a menos que estejam na lista ACCOUNT_SIGNUP_FIELDS.
+        # Mesmo que estejam, vamos garantir que o salvamento é feito aqui.
+        
+        # 2. Chama o método save da classe pai (SignupForm)
+        # Isso cria o objeto User (auth_user)
+        user = super(CustomSignupForm, self).save(request)
+        
+        # 3. Adiciona os dados extras do formulário ao objeto User
+        user.first_name = self.cleaned_data['first_name']
+        user.last_name = self.cleaned_data['last_name']
+        
+        # 4. Salva o User atualizado com Nome e Sobrenome
+        user.save()
+        
+        # 5. Lógica para garantir que o PerfilUsuario está configurado
+        # O seu signal já cuida da criação e definição de 'Cliente', mas repetimos
+        # a lógica de segurança (verificando se o perfil existe)
+        if hasattr(user, 'perfil'):
+            user.perfil.tipoUsuario = 'Cliente'
+            user.perfil.save()
+        
+        return user
