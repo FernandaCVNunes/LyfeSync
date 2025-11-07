@@ -1,39 +1,127 @@
-# app_LyfeSync/views.py
+{% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
+{% load static %}
 
-from django.shortcuts import render, redirect, get_object_or_404 # ... (outros imports) from django.utils import timezone from django.db import transaction from datetime import date, timedelta # <-- ADICIONE timedelta import json # ... (outros imports)
+{% block title %}
+  Meu Humor
+{% endblock %}
 
-# ------------------------------------------------------------------- # LÓGICA AUXILIAR PARA HUMOR # -------------------------------------------------------------------
+{% block content_logado %}
+  <script src="https://cdn.tailwindcss.com"></script>
 
-# FUNÇÃO AUXILIAR PARA MAPEAR ESTADO -> EMOJI (Baseado no script do seu HTML) def get_humor_emoji(estado): """Mapeia o estado de humor para o caractere emoji.""" return { 'Feliz': '😀', 'Calmo': '😌', 'Ansioso': '😟', 'Triste': '😥', 'Irritado': '😡', }.get(estado, '🤷‍♀️')
+  <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+    <div class="flex flex-wrap lg:flex-nowrap gap-8">
+      <div class="w-full lg:w-3/5 bg-white p-6 rounded-xl shadow-lg border-t-4 border-lyfesync-green">
+        <h1 class="text-3xl font-bold text-gray-700 mb-8">Meu Humor</h1>
 
-# ... (restante do código até a view 'humor')
+        <div class="mb-8">
+          <a href="{% url 'registrarHumor' %}" class="btn-adicionar-humor inline-flex items-center font-bold text-xl text-lyfesync-green">
+            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>Adicionar Humor de Hoje
+          </a>
+        </div>
 
-# 2. VIEW PARA PÁGINA DE HUMOR (Atualizada) @login_required def humor(request): """Página de Humor. Requer login. Agora inclui humores das últimas duas semanas."""
+        {% if humor_do_dia %}
+          <div>
+            <p class="text-xl font-semibold text-gray-700 mb-4">
+              Data: <span class="text-lyfesync-green">{{ humor_do_dia.data|date:'d/m/Y' }}</span>
+            </p>
 
-data_hoje = timezone.localdate() humor_map = get_humor_map() # Para o image_path
+            <div class="flex items-start space-x-6 mb-8 p-4 border-2 border-green-100 rounded-xl bg-green-50">
+              <div class="emoji-visualizer text-6xl flex-shrink-0">{{ humor_do_dia.emoji_char }}</div>
 
-# --- 1. Lógica para Humor do Dia --- try: humor_do_dia = Humor.objects.get( idusuario=request.user, data=data_hoje ) except Humor.DoesNotExist: humor_do_dia = None
+              <div>
+                <h2 class="text-2xl font-bold text-gray-800">{{ humor_do_dia.estado }}:</h2>
+                <p class="text-lg text-gray-600 mt-1">{{ humor_do_dia.descricao }}</p>
+              </div>
+            </div>
 
-if humor_do_dia: humor_do_dia.image_path = humor_map.get(humor_do_dia.estado, 'img/icon/default.png') # Adiciona o caractere emoji para ser usado na template (como o seu HTML já faz) humor_do_dia.emoji_char = get_humor_emoji(humor_do_dia.estado)
+            <h3 class="text-xl font-semibold text-gray-700 mb-2">Descrição:</h3>
+            <div class="p-4 custom-textarea-visualizar rounded-xl text-gray-800 border-2 border-green-200">{{ humor_do_dia.descricaohumor|linebreaksbr }}</div>
+          </div>
+        {% else %}
+          <div class="text-center p-10 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+            <p class="text-lg text-gray-500">Você ainda não registrou seu humor para hoje.</p>
+            <p class="text-sm text-gray-400 mt-2">Clique em "Adicionar Humor" para começar!</p>
+          </div>
+        {% endif %}
+      </div>
 
-# --- 2. Lógica para Humores Recentes (Semana Atual e Anterior) ---
+      <div class="w-full lg:w-2/5 space-y-8">
+        <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-red-400">
+          <h2 class="text-2xl font-bold text-red-500 mb-4">DICA</h2>
 
-# Encontra o dia da semana atual (0=Segunda, 6=Domingo) hoje_weekday = data_hoje.weekday()
+          <div class="text-gray-700 space-y-4 text-sm">
+            <p class="font-bold text-gray-800">Aqui estão algumas dicas práticas para ajudar a acalmar a ansiedade:</p>
+            <ol class="list-decimal list-inside space-y-2">
+              <li>
+                <span class="font-semibold">Respiração Profunda:</span> Pratique a respiração controlada, inspirando pelo nariz durante 4 segundos, segurando o ar por 4 segundos e expirando lentamente pela boca em 6 segundos. Isso reduz a tensão e acalma o sistema nervoso.
+              </li>
+              <li>
+                <span class="font-semibold">Movimente-se:</span> Caminhar, alongar ou realizar exercícios leves pode ajudar a liberar endorfina, promovendo uma sensação de bem-estar.
+              </li>
+              <li>
+                <span class="font-semibold">Pratique a Atenção Plena (Mindfulness):</span> Concentre-se no momento presente, observando os detalhes ao seu redor (cores, cheiros, sons) para diminuir a sobrecarga mental.
+              </li>
+              <li>
+                <span class="font-semibold">Utilize Técnicas de Ancoragem:</span> Escolha algo tangível, como segurar um objeto ou sentir o chão sob seus pés, para trazer foco ao aqui e agora.
+              </li>
+              <li>
+                <span class="font-semibold">Ouça Música Relaxante:</span> Sons calmantes ou músicas instrumentais podem ajudar a reduzir o ritmo acelerado dos pensamentos.
+              </li>
+              <li>
+                <span class="font-semibold">Escreva:</span> Expresse suas preocupações em um diário ou caderno, organizando os pensamentos e liberando o que está incomodando.
+              </li>
+              <li>
+                <span class="font-semibold">Beba Água ou Chá Calmante:</span> Um chá como camomila ou erva-doce pode servir para reconfortar e ajudar a relaxar.
+              </li>
+              <li>
+                <span class="font-semibold">Evite Cargas Negativas:</span> Se puder, limite o uso de redes sociais ou notícias que podem intensificar sentimentos ansiosos.
+              </li>
+              <li>
+                <span class="font-semibold">Reconheça os Sentimentos:</span> Ao invés de lutar contra a ansiedade, tente acolher a emoção e compreendê-la; isso pode reduzir a pressão.
+              </li>
+            </ol>
+            <p class="text-xs italic mt-4">Essas técnicas variam de pessoa para pessoa, então vale a pena experimentar e descobrir o que funciona melhor para você! 😊</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-# Calcula a data de início do período (Segunda-feira da semana anterior) # Primeiro calcula a segunda-feira da semana atual: data_hoje - N dias para voltar para segunda data_inicio_semana_atual = data_hoje - timedelta(days=hoje_weekday) # Depois volta 7 dias para a segunda-feira da semana anterior data_inicio_periodo = data_inicio_semana_atual - timedelta(weeks=1)
+  <div class="w-full mt-10">
+    <p class="frase-motivacional-humor">“O humor é a arte de transformar o peso da vida em leveza — quem ri, ressignifica o que dói.”</p>
+  </div>
 
-# Busca os registros no intervalo: [Segunda da Semana Anterior, Hoje] humores_recentes = Humor.objects.filter( idusuario=request.user, data__range=[data_inicio_periodo, data_hoje] ).order_by('-data') # Ordena pelo mais recente
-
-# Adicionar o caractere emoji a cada registro para ser usado no loop da template for humor_registro in humores_recentes: humor_registro.emoji_char = get_humor_emoji(humor_registro.estado)
-
-context = { 'humor_do_dia': humor_do_dia, 'humores_recentes': humores_recentes, # <-- Novo contexto } return render(request, 'app_LyfeSync/humor.html', context)
-
-# 4. VIEW PARA ALTERAR HUMOR (Corrigida para aceitar ID via URL) @login_required def alterar_humor(request, humor_id): # <-- MUDANÇA: Aceita ID como argumento """Permite alterar um Humor existente. Requer login e ID do Humor."""
-
-# Garante que o registro existe e pertence ao usuário instance = get_object_or_404(Humor, id=humor_id, idusuario=request.user)
-
-if request.method == 'POST': form = HumorForm(request.POST, instance=instance) if form.is_valid(): form.save() messages.success(request, 'Humor alterado com sucesso! 🎉') return redirect('humor') # Redireciona para a página principal de humor else: messages.error(request, 'Erro na validação do formulário. Verifique os campos.') else: # Se for GET, inicializa o formulário com a instância form = HumorForm(instance=instance)
-
-humor_map = get_humor_map() # Mapeamento de emojis (ou imagens)
-
-context = { 'form': form, 'humor_icon_class_map': humor_map, 'humor_instance': instance, # Passa a instância para o template (útil para título, etc.) } return render(request, 'app_LyfeSync/alterarHumor.html', context)
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const visualizer = document.querySelector('.emoji-visualizer')
+      if (visualizer) {
+        const humor = visualizer.getAttribute('data-humor')
+        let emoji = ''
+        // Mapeamento de humor para emoji (Pode ser melhorado passando o emoji direto pelo contexto do Django)
+        switch (humor) {
+          case 'Feliz':
+            emoji = '😀'
+            break
+          case 'Calmo':
+            emoji = '😌'
+            break
+          case 'Ansioso':
+            emoji = '😟'
+            break
+          case 'Triste':
+            emoji = '😥'
+            break
+          case 'Irritado':
+            emoji = '😡'
+            break
+          default:
+            emoji = '🤷‍♀️'
+            break
+        }
+        visualizer.textContent = emoji
+      }
+    })
+  </script>
+{% endblock %}
