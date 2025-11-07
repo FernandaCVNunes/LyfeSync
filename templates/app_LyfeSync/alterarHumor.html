@@ -1,4 +1,3 @@
-{# alterarHumor.html #}
 {% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
 {% load static %}
 {% load custom_filters %}
@@ -9,15 +8,56 @@
 {% endblock %}
 
 {% block content_logado %}
-  {# Inclusão do CSS: Assumindo que homeLifesync.css está em static/css/ #}
+  <style>
+    /* Estilos Customizados Adicionais (Baseado em registrarHumor.html) */
+    .humor-image {
+      width: 30px;
+      height: 30px;
+      transition: transform 0.1s;
+    }
+    
+    /* Estilo para o container de humor selecionado */
+    .selected-humor {
+      background-color: #ecfdf5; /* Tailwind: bg-green-50, um verde claro */
+      border: 2px solid #34d399; /* Tailwind: border-green-400 */
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      transform: scale(1.05);
+    }
+    
+    /* Estilo para a textarea, baseado na sua imagem de referência */
+    .custom-textarea {
+      background-color: #e6f7ff; /* Cor azul claro */
+      border-radius: 20px;
+      border-color: #b3e0ff;
+    }
+    
+    /* Estilo do botão SALVAR (Cor Laranja/Vermelho da imagem de anexo) */
+    .btn-salvar-humor {
+      background-color: #f44336;
+    }
+    
+    .btn-salvar-humor:hover {
+      background-color: #d32f2f;
+    }
+    
+    /* Ajuste de layout */
+    .humor-option-item {
+      padding: 8px;
+      border-radius: 12px;
+      border: 2px solid transparent;
+      transition: all 0.15s ease-in-out;
+    }
+  </style>
+
+  {# Se este arquivo CSS não existir em static/css/ o botão continuará branco. #}
   <link rel="stylesheet" href="{% static 'css/homeLifesync.css' %}" />
 
   <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-    <div class="flex flex-wrap lg:flex-nowrap gap-8">
-      <div class="w-full lg:w-3/5 bg-white p-6 rounded-xl shadow-lg">
-        <h1 class="text-3xl font-bold text-lyfesync-green mb-8">Alterar Humor Registrado</h1>
+    <div class="flex flex-wrap gap-4">
+      <div class="w-full bg-white p-6 rounded-xl shadow-lg">
+        <h1 class="text-3xl font-bold text-lyfesync-green mb-6">Alterar Humor Registrado</h1>
 
-        <form id="form-alteracao-humor" method="POST" action="{% url 'alterarHumor' %}">
+        <form id="form-alteracao-humor" method="POST" action="{% url 'alterarHumor' humor_id=humor_id|default:0 %}">
           {% csrf_token %}
 
           {# Mensagens de feedback (sucesso/erro) #}
@@ -26,22 +66,31 @@
           {# 1. SELEÇÃO DE DATA #}
           <div class="mb-6">
             <label for="id_data" class="block text-xl font-semibold text-gray-700 mb-2">Selecione a Data para Edição:</label>
-            <input type="date" id="id_data" name="data" class="w-full sm:w-1/2 p-3 border-2 border-green-200 rounded-lg focus:border-lyfesync-green focus:ring focus:ring-green-100 transition duration-150" value="{{ form.data.value|default_if_none:'' }}" required onchange="loadHumorData(this.value)" /> {# 🚨 CHAMA FUNÇÃO AO MUDAR A DATA 🚨 #}
-            <input type="hidden" name="humor_id" id="humor_id" />
+            <input type="date" id="id_data" name="data" class="w-full sm:w-1/2 p-3 border-2 border-green-200 rounded-lg focus:border-lyfesync-green focus:ring focus:ring-green-100 transition duration-150" value="{{ form.data.value|default_if_none:'' }}" required onchange="loadHumorData(this.value)" />
+            <input type="hidden" name="humor_id" id="humor_id" value="{{ humor_id|default_if_none:'' }}" />
           </div>
 
-          {# 2. SELEÇÃO DE HUMOR (OCULTA ATÉ O CARREGAMENTO) #}
-          <div id="humor-selection-container" class="mb-10" style="display: none;">
+          {# 2. SELEÇÃO DE HUMOR (RENDERIZADO PELO DJANGO) #}
+          <div id="humor-selection-container" class="mb-8" style="display: none;">
             <label class="block text-xl font-semibold text-gray-700 mb-4">Novo Humor:</label>
 
-            {# Aqui re-utilizamos o HTML do registrarHumor, mas sem o loop for. 
-                       O JS irá popular os inputs de rádio e os containers DIVs. #}
-
-            <div id="humor-options-placeholder" class="flex flex-wrap gap-4">
-              {# 🚨 O JavaScript irá renderizar os ícones de humor aqui 🚨 #}
+            <div class="flex flex-wrap gap-3">
+              {# Renderização direta dos ícones #}
+              {% for value, label in form.estado.field.choices %}
+                {% with image_path=humor_icon_class_map|get_item:value|default:'img/icon/adchumor.png' %}
+                  <div class="humor-option-item cursor-pointer hover:shadow-md transition duration-150 flex flex-col items-center justify-center text-center" data-humor-container data-humor-value="{{ value }}" onclick="selectHumor('{{ value }}', this)">
+                    {% if value %}
+                      <img src="{% static image_path %}" alt="{{ label }}" class="humor-image" />
+                    {% else %}
+                      <img src="{% static 'img/icon/adchumor.png' %}" alt="{{ label }}" class="humor-image" />
+                    {% endif %}
+                    <span class="text-xs font-semibold text-gray-700 mt-1">{{ label|split_by_space|first }}</span>
+                  </div>
+                {% endwith %}
+              {% endfor %}
             </div>
 
-            {# O campo real do formulário (estado) deve ser passado pelo Django na view #}
+            {# Mantém o campo real do formulário 'estado' oculto para submissão #}
             <div id="hidden-radio-widget" style="display: none;">{{ form.estado }}</div>
 
             {% if form.estado.errors %}
@@ -53,6 +102,7 @@
           <div id="description-container" class="mb-8" style="display: none;">
             <label for="id_descricaohumor" class="block text-xl font-semibold text-gray-700 mb-2">Nova Descrição:</label>
             <textarea id="id_descricaohumor" name="descricaohumor" rows="8" placeholder="Descreva brevemente o que motivou seu humor hoje..." class="w-full p-4 border-2 border-green-200 rounded-xl focus:border-lyfesync-green focus:ring focus:ring-green-100 transition duration-150 custom-textarea"></textarea>
+
             {% if form.descricaohumor.errors %}
               <div class="text-red-500 text-sm mt-1">{{ form.descricaohumor.errors }}</div>
             {% endif %}
@@ -64,161 +114,137 @@
           </div>
         </form>
       </div>
-
-      {# 5. TABELA DE HUMOR (Reutilizada) #}
-      <div class="w-full lg:w-2/5 space-y-8">
-        <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-lyfesync-green">
-          <h2 class="text-2xl font-bold text-lyfesync-green mb-4">Tabela de Humor</h2>
-          <div class="text-gray-700 space-y-4 text-sm">
-            <div class="flex justify-around items-center mb-6 border-b pb-4">
-              {% for value, image_path in humor_icon_class_map.items %}
-                <img src="{% static image_path %}" alt="{{ value }}" class="humor-image-small" />
-              {% endfor %}
-            </div>
-
-            {% for value, image_path in humor_icon_class_map.items %}
-              <div class="flex items-start gap-3">
-                <span class="font-bold text-gray-700">{{ value|split_by_space|first }}:</span>
-                <div>
-                  {# Descrições omitidas por brevidade, mas devem ser mantidas aqui #}
-                </div>
-              </div>
-            {% endfor %}
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
   <script>
-    // URL para buscar os dados de humor por data (DEVE ser configurada no seu urls.py)
+    // Funções de Utilidade e Constantes
     const AJAX_LOAD_URL = "{% url 'load_humor_by_date' %}"
+    const ALTERAR_URL_TEMPLATE = "{% url 'alterarHumor' humor_id=999999999 %}"
+    const REGISTRAR_URL = "{% url 'registrarHumor' %}"
     
-    // Mapeamento dos ícones (para re-renderizar no JS)
-    const HUMOR_ICON_MAP = JSON.parse('{{ humor_icon_class_map|jsonify|safe }}')
-    const HUMOR_CHOICES = JSON.parse('{{ form.estado.field.choices|jsonify|safe }}')
+    // Elementos DOM
+    const formElement = document.getElementById('form-alteracao-humor')
+    const humorIdInput = document.getElementById('humor_id')
+    const descriptionInput = document.getElementById('id_descricaohumor')
+    const feedbackMessage = document.getElementById('feedback-message')
+    const btnSalvar = document.getElementById('btn-salvar')
+    const humorSelectionContainer = document.getElementById('humor-selection-container')
+    const descriptionContainer = document.getElementById('description-container')
+    const dateInput = document.getElementById('id_data')
     
-    // Função utilitária do registrarHumor para marcar o rádio
+    /**
+     * Marca o humor selecionado no DOM e no campo de rádio oculto.
+     */
     function selectHumor(humorValue, element) {
+      // 1. Remove a classe de seleção de todos os containers
       document.querySelectorAll('[data-humor-container]').forEach(function (el) {
         el.classList.remove('selected-humor')
       })
-      element.classList.add('selected-humor')
     
-      // Marca o input de rádio correspondente
+      // 2. Adiciona a classe de seleção ao elemento clicado
+      if (element) {
+        element.classList.add('selected-humor')
+      }
+    
+      // 3. Marca o input de rádio correspondente
       const radioInputs = document.querySelectorAll('input[name="estado"][type="radio"]')
       radioInputs.forEach(function (input) {
         input.checked = input.value === humorValue
       })
     }
     
-    // Função para renderizar e carregar os dados de humor
-    function renderHumorOptions(selectedValue) {
-      const placeholder = document.getElementById('humor-options-placeholder')
-      placeholder.innerHTML = '' // Limpa antes de renderizar
+    /**
+     * Limpa e prepara os campos para novo registro/edição.
+     * Seleciona o humor se os dados forem encontrados.
+     */
+    function handleDataDisplay(data, dateString) {
+      // Limpa seleções antigas
+      document.querySelectorAll('[data-humor-container]').forEach((el) => el.classList.remove('selected-humor'))
+      document.querySelectorAll('input[name="estado"][type="radio"]').forEach((el) => (el.checked = false))
     
-      HUMOR_CHOICES.forEach(([value, label]) => {
-        if (!value) return // Ignora o placeholder 'Selecione'
+      // Mostra containers (Humor e Descrição)
+      humorSelectionContainer.style.display = 'block'
+      descriptionContainer.style.display = 'block'
+      btnSalvar.style.display = 'inline-block'
+      descriptionInput.value = data.descricaohumor || '' // Preenche a descrição se existir
     
-        const imagePath = HUMOR_ICON_MAP[value] || 'img/icon/default.png'
-        const isSelected = value === selectedValue
-        const displayLabel = label.split(' ')[0]
+      if (data.exists) {
+        // MODO EDIÇÃO
+        humorIdInput.value = data.id
+        formElement.action = ALTERAR_URL_TEMPLATE.replace('999999999', data.id)
+        btnSalvar.textContent = 'SALVAR ALTERAÇÕES'
+        feedbackMessage.className = 'alert alert-success mt-4 p-3 bg-green-100 text-green-700 rounded'
+        feedbackMessage.textContent = `Registro encontrado para ${dateString}. Você pode alterá-lo.`
     
-        const div = document.createElement('div')
-        div.className = `cursor-pointer p-2 rounded-full border-2 border-transparent hover:bg-gray-100 transition duration-150 flex items-center gap-2 ${isSelected ? 'selected-humor' : ''}`
-        div.setAttribute('data-humor-container', '')
-        div.setAttribute('data-humor-value', value)
-        div.setAttribute('onclick', `selectHumor('${value}', this)`)
-    
-        // Adiciona a imagem
-        const img = document.createElement('img')
-        img.src = `{% static '' %}${imagePath}`
-        img.alt = displayLabel
-        img.className = 'humor-image'
-        div.appendChild(img)
-    
-        // Adiciona o label
-        const span = document.createElement('span')
-        span.className = 'text-base font-semibold text-gray-700 pr-2'
-        span.textContent = displayLabel
-        div.appendChild(span)
-    
-        placeholder.appendChild(div)
-    
-        // Marca o input de rádio oculto se for o valor selecionado
-        if (isSelected) {
-          const radioInput = document.querySelector(`input[name="estado"][value="${value}"]`)
-          if (radioInput) radioInput.checked = true
+        // 🚨 Seleciona o ícone de humor existente
+        const selectedElement = document.querySelector(`[data-humor-value="${data.estado}"]`)
+        if (selectedElement) {
+          selectHumor(data.estado, selectedElement)
+        } else {
+          // Caso onde o humor salvo não tem um ícone correspondente no template
+          selectHumor(data.estado, null)
+          console.warn(`Aviso: O humor salvo '${data.estado}' foi marcado no rádio, mas o ícone visual correspondente não foi encontrado.`)
         }
-      })
-    
-      document.getElementById('humor-selection-container').style.display = 'block'
-      document.getElementById('description-container').style.display = 'block'
-      document.getElementById('btn-salvar').style.display = 'inline-block'
+      } else {
+        // MODO NOVO REGISTRO
+        humorIdInput.value = ''
+        formElement.action = REGISTRAR_URL
+        btnSalvar.textContent = 'REGISTRAR NOVO HUMOR'
+        feedbackMessage.className = 'alert alert-info mt-4 p-3 bg-blue-100 text-blue-700 rounded'
+        feedbackMessage.textContent = `Nenhum registro encontrado para ${dateString}. Você pode criar um novo.`
+      }
+      feedbackMessage.style.display = 'block'
     }
     
-    // Função principal de carregamento via AJAX
+    /**
+     * Busca dados de humor via AJAX com base na data.
+     */
     function loadHumorData(dateString) {
-      const feedback = document.getElementById('feedback-message')
-      feedback.className = 'mb-4 hidden'
-    
-      // Oculta os campos e botões enquanto carrega
-      document.getElementById('humor-options-placeholder').innerHTML = ''
-      document.getElementById('id_descricaohumor').value = ''
-      document.getElementById('humor_id').value = ''
-      document.getElementById('btn-salvar').style.display = 'none'
-      document.getElementById('humor-selection-container').style.display = 'none'
-      document.getElementById('description-container').style.display = 'none'
+      // Limpa feedback e oculta elementos antes de carregar
+      feedbackMessage.style.display = 'none'
+      humorSelectionContainer.style.display = 'none'
+      descriptionContainer.style.display = 'none'
+      btnSalvar.style.display = 'none'
     
       if (!dateString) return
     
+      console.log(`[AJAX] Buscando humor para a data: ${dateString}`)
+    
       fetch(`${AJAX_LOAD_URL}?date=${dateString}`)
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.exists) {
-            // Humor encontrado: Popula o formulário
-            document.getElementById('humor_id').value = data.id
-            document.getElementById('id_descricaohumor').value = data.descricaohumor || ''
-    
-            // Renderiza os botões e pré-seleciona o valor
-            renderHumorOptions(data.estado)
-    
-            feedback.className = 'alert alert-success mt-4'
-            feedback.textContent = `Registro encontrado para ${dateString}. Você pode alterá-lo.`
-            feedback.style.display = 'block'
-          } else {
-            // Humor não encontrado: Limpa e exibe mensagem
-            renderHumorOptions('') // Renderiza para permitir novo registro (opcionalmente)
-            document.getElementById('form-alteracao-humor').action = "{% url 'registrarHumor' %}" // Se for um novo, muda a action
-    
-            feedback.className = 'alert alert-info mt-4'
-            feedback.textContent = `Nenhum registro encontrado para ${dateString}. Você pode criar um novo.`
-            feedback.style.display = 'block'
+        .then((response) => {
+          if (!response.ok) {
+            console.error(`[AJAX ERROR] Falha na resposta do servidor. Status: ${response.status}`)
+            throw new Error('Falha na resposta do servidor. (Status: ' + response.status + ')')
           }
+          return response.json()
+        })
+        .then((data) => {
+          console.log('[AJAX SUCCESS] Dados de humor recebidos:', data)
+          handleDataDisplay(data, dateString)
         })
         .catch((error) => {
-          console.error('Erro ao buscar humor:', error)
-          feedback.className = 'alert alert-danger mt-4'
-          feedback.textContent = 'Ocorreu um erro ao tentar carregar o humor. Tente novamente.'
-          feedback.style.display = 'block'
+          console.error('Erro final na função loadHumorData:', error)
+          feedbackMessage.className = 'alert alert-danger mt-4 p-3 bg-red-100 text-red-700 rounded'
+          feedbackMessage.textContent = 'Ocorreu um erro ao tentar carregar o humor. Tente novamente e verifique o Console (F12) para detalhes.'
+          feedbackMessage.style.display = 'block'
         })
     }
     
+    // Inicialização no carregamento da página
     document.addEventListener('DOMContentLoaded', function () {
-      // Inicializa a data com a data atual (mantendo a lógica)
-      const dateInput = document.getElementById('id_data')
-      if (dateInput && !dateInput.value) {
-        const today = new Date()
-        const yyyy = today.getFullYear()
-        let mm = today.getMonth() + 1
-        let dd = today.getDate()
-        if (mm < 10) mm = '0' + mm
-        if (dd < 10) dd = '0' + dd
-        dateInput.value = yyyy + '-' + mm + '-' + dd
-      }
+      const initialDate = dateInput.value
     
-      // Carrega os dados para a data inicial
-      loadHumorData(dateInput.value)
+      if (!initialDate) {
+        // Define a data de hoje se o campo estiver vazio
+        const today = new Date()
+        const todayString = today.toISOString().split('T')[0]
+        dateInput.value = todayString
+        loadHumorData(todayString)
+      } else {
+        // Carrega os dados para a data inicial (útil para POST com erro)
+        loadHumorData(initialDate)
+      }
     })
   </script>
 {% endblock %}

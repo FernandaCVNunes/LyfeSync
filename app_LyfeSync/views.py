@@ -400,7 +400,7 @@ def humor(request):
     }
     return render(request, 'app_LyfeSync/humor.html', context)
 
- 
+    
 # 3. VIEW PARA REGISTRAR HUMOR
 @login_required
 def registrar_humor(request):
@@ -439,41 +439,38 @@ def registrar_humor(request):
     }
     return render(request, 'app_LyfeSync/registrarHumor.html', context)
 
-# 4. VIEW PARA ALTERAR HUMOR (Corrigida para usar get_humor_map)
+# 4. VIEW PARA ALTERAR HUMOR (CORRIGIDA)
 @login_required
-def alterar_humor(request):
+def alterar_humor(request, humor_id): 
     """Permite alterar um Humor existente. Requer login."""
     
     humor_map = get_humor_map()
-    form = HumorForm(initial={'data': timezone.localdate().strftime('%Y-%m-%d')})
     
-    # Lógica para salvar a alteração (POST)
+    # 1. Tenta obter a instância do Humor
+    instance = get_object_or_404(Humor, idhumor=humor_id, idusuario=request.user)
+    
+    # 2. Lógica de formulário
     if request.method == 'POST':
-        humor_id = request.POST.get('humor_id')
+        # Instancia o formulário com os dados POST e a instância existente (para alteração)
+        form = HumorForm(request.POST, instance=instance)
         
-        # O fluxo de alteração exige um ID
-        if humor_id:
-            # 🚨 IMPORTANTE: Validação de que o usuário só pode alterar o próprio registro
-            instance = get_object_or_404(Humor, id=humor_id, idusuario=request.user)
-            form = HumorForm(request.POST, instance=instance)
-            
-            if form.is_valid():
-                form.save()
-                messages.success(request, 'Humor alterado com sucesso! 🎉')
-                return redirect('alterarHumor')
-            else:
-                messages.error(request, 'Erro na validação do formulário. Verifique os campos.')
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Humor alterado com sucesso! 🎉')
+            return redirect('humor') 
         else:
-            # Se não houver ID, o usuário está tentando usar o formulário de alteração para registrar um novo
-            messages.warning(request, 'Nenhum registro selecionado para alteração. Use a página de Registro.')
-            # Redireciona para o registrar para evitar confusão.
-            return redirect('registrarHumor')
-
+            messages.error(request, 'Erro na validação do formulário. Verifique os campos.')
+    else:
+        # GET: Inicializa o formulário com os dados da instância
+        form = HumorForm(instance=instance)
+        
     context = {
         'form': form,
         'humor_icon_class_map': humor_map,
+        'humor_id': humor_id, 
     }
-    return render(request, 'alterarHumor.html', context)
+    
+    return render(request, 'app_LyfeSync/alterarHumor.html', context)
 
 # 5. API AJAX PARA BUSCAR DADOS DE HUMOR POR DATA
 @login_required
@@ -485,16 +482,26 @@ def load_humor_by_date(request):
     if not date_str:
         return JsonResponse({'exists': False, 'error': 'Data ausente'}, status=400) # Bad Request
         
+    selected_date = None
+    
+    # 🚨 CORREÇÃO DE DATA: Tenta analisar a data em diferentes formatos 🚨
+    # 1. Tenta o formato padrão ISO (YYYY-MM-DD), que é o ideal para HTML type="date"
     try:
-        # Converte a string de data para objeto date
         selected_date = timezone.datetime.strptime(date_str, '%Y-%m-%d').date()
-        
+    except ValueError:
+        # 2. Tenta o formato comum brasileiro (DD/MM/YYYY) caso o front-end envie assim
+        try:
+            selected_date = timezone.datetime.strptime(date_str, '%d/%m/%Y').date()
+        except ValueError:
+            return JsonResponse({'exists': False, 'error': f'Formato de data inválido: {date_str}'}, status=400) 
+            
+    try:
         # Tenta encontrar o registro de humor para o usuário e a data selecionada
         humor_registro = Humor.objects.get(idusuario=request.user, data=selected_date)
         
         data = {
             'exists': True,
-            'id': humor_registro.id,
+            'id': humor_registro.idhumor, # 🚨 CORREÇÃO: Usando 'idhumor' que é a PK no model Humor 🚨
             'estado': humor_registro.estado,
             'descricaohumor': humor_registro.descricaohumor,
         }
@@ -503,8 +510,10 @@ def load_humor_by_date(request):
     except Humor.DoesNotExist:
         return JsonResponse({'exists': False, 'message': 'Nenhum registro encontrado'})
         
-    except ValueError:
-        return JsonResponse({'exists': False, 'error': 'Formato de data inválido'}, status=400) 
+    except Exception as e:
+        # Captura erros inesperados do ORM ou BD
+        print(f"Erro ao carregar humor no servidor: {e}")
+        return JsonResponse({'exists': False, 'error': 'Erro interno do servidor ao buscar humor.'}, status=500)
 
 @login_required
 def gratidao(request):
@@ -671,9 +680,9 @@ def configuracoes_conta(request):
     # MUDANÇA CRUCIAL: Mude a referência do modelo para PerfilUsuario
 
     from .models import PerfilUsuario # Garantindo que PerfilUsuario está importado
-     
+      
     try:
-         perfil_instance = request.user.perfil 
+        perfil_instance = request.user.perfil 
 
     except PerfilUsuario.DoesNotExist: 
         # Cria uma instância do PerfilUsuario com o User, caso o sinal tenha falhado
