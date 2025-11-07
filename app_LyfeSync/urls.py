@@ -31,7 +31,7 @@ urlpatterns = [
     # Esta é a URL principal referenciada no sidebar.
     path('humor/registrar/', views.registrar_humor, name='registrarHumor'),
     path('api/humor/load/', views.load_humor_by_date, name='load_humor_by_date'),
-    path('humor/alterar/', views.alterar_humor, name='alterar_humor'), # Adapte esta URL se precisar de um ID
+    path('humor/alterar/<int:humor_id>/', views.alterar_humor, name='alterarHumor'),
     
     # GRATIDÃO
     path('gratidao/', views.gratidao, name='gratidao'),

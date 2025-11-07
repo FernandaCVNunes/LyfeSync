@@ -10,7 +10,7 @@ from django.contrib.auth import logout, login # Adicionado 'login'
 from django.contrib.auth.forms import UserCreationForm as CadastroForm # Importação para formulário de cadastro
 from django.utils import timezone
 from django.db import transaction
-from datetime import date
+from datetime import date, timedelta # <-- CORREÇÃO 1: Adição de timedelta
 import json 
 import locale 
 import calendar 
@@ -348,33 +348,54 @@ def autocuidado(request):
     return render(request, 'app_LyfeSync/autocuidado.html', context)
 
 
-# 2. VIEW PARA PÁGINA DE HUMOR (Usa Imagens em vez de Ícones)
+# VIEW PARA PÁGINA DE HUMOR
 @login_required
 def humor(request):
     """Página de Humor. Requer login."""
     
     data_hoje = timezone.localdate()
     humor_map = get_humor_map()
+    
+    #user_id_logado = request.user.pk
+    #data_duas_semanas_atras = data_hoje - timedelta(days=14)
+    #print(f"DEBUG: ID Usuário: {user_id_logado}")
+    #print(f"DEBUG: Data de Hoje: {data_hoje}")
+    #print(f"DEBUG: Data Limite (14 dias atrás): {data_duas_semanas_atras}")
 
+    # 1. Busca o Humor de Hoje
     try:
-        # Busca o humor do dia
         humor_do_dia = Humor.objects.get(
             idusuario=request.user, 
             data=data_hoje
         )
+        # Adiciona o caminho da imagem ao objeto
+        humor_do_dia.image_path = humor_map.get(humor_do_dia.estado, 'img/icon/default.png')
     except Humor.DoesNotExist:
         humor_do_dia = None
 
-    if humor_do_dia:
-        # 🚨 ATUALIZAÇÃO: Adiciona o caminho da imagem ao objeto humor_do_dia 🚨
-        humor_do_dia.image_path = humor_map.get(humor_do_dia.estado, 'img/icon/default.png')
-        # Limpamos as classes de cor e ícone antigas que usavam Font Awesome
-        humor_do_dia.icon_class = None
-        humor_do_dia.color_class = None
-
+    # 2. Lógica do Histórico (Últimas 2 Semanas)
+    data_duas_semanas_atras = data_hoje - timedelta(days=14)
+    
+    humores_recentes_qs = Humor.objects.filter(
+        idusuario=request.user, 
+        data__gte=data_duas_semanas_atras
+    ).exclude(
+        data=data_hoje # Garante que o humor do dia não apareça no histórico
+    ).order_by('-data')
+    
+    #count = humores_recentes_qs.count()
+    #print(f"DEBUG: Contagem de Histórico encontrada: {count}")
+    
+    # 3. Adicionar o caminho da imagem aos registros do histórico
+    humores_recentes_list = []
+    for registro in humores_recentes_qs:
+        registro.image_path = humor_map.get(registro.estado, 'img/icon/default.png')
+        humores_recentes_list.append(registro)
+        
+    # 4. Contexto
     context = {
         'humor_do_dia': humor_do_dia,
-        # O mapa de ícones é passado para o template 'humor.html' (útil para listagens)
+        'humores_recentes': humores_recentes_list, # VARIÁVEL CORRETA PASSADA
         'humor_icon_class_map': humor_map 
     }
     return render(request, 'app_LyfeSync/humor.html', context)

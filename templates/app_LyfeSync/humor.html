@@ -1,5 +1,8 @@
+{# humor.html - Versão Final e Limpa #}
 {% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
 {% load static %}
+{% load custom_filters %}
+{% load app_LyfeSync_extras %}
 
 {% block title %}
   Meu Humor
@@ -21,107 +24,102 @@
           </a>
         </div>
 
-        {% if humor_do_dia %}
-          <div>
-            <p class="text-xl font-semibold text-gray-700 mb-4">
-              Data: <span class="text-lyfesync-green">{{ humor_do_dia.data|date:'d/m/Y' }}</span>
-            </p>
+        {# Humor de Hoje #}
+        {# CORREÇÃO CRÍTICA: Usando .idhumor em vez de .id #}
+        {% if humor_do_dia and humor_do_dia.idhumor %}
+          <div class="mb-10">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Humor de Hoje: <span class="text-lyfesync-green">{{ humor_do_dia.data|date:'d/m/Y' }}</span></h2>
 
             <div class="flex items-start space-x-6 mb-8 p-4 border-2 border-green-100 rounded-xl bg-green-50">
-              <div class="emoji-visualizer text-6xl flex-shrink-0">{{ humor_do_dia.emoji_char }}</div>
+              <div class="flex-shrink-0 w-12 h-12">
+                <img src="{% static humor_do_dia.image_path %}" alt="{{ humor_do_dia.estado }}" class="w-full h-full object-contain" />
+              </div>
 
               <div>
                 <h2 class="text-2xl font-bold text-gray-800">{{ humor_do_dia.estado }}:</h2>
-                <p class="text-lg text-gray-600 mt-1">{{ humor_do_dia.descricao }}</p>
+                <p class="text-lg text-gray-600 mt-1">{{ humor_do_dia.descricaohumor|default:'Nenhuma descrição.' }}</p>
               </div>
             </div>
 
             <h3 class="text-xl font-semibold text-gray-700 mb-2">Descrição:</h3>
-            <div class="p-4 custom-textarea-visualizar rounded-xl text-gray-800 border-2 border-green-200">{{ humor_do_dia.descricaohumor|linebreaksbr }}</div>
+
+            <div class="p-4 custom-textarea-visualizar rounded-xl text-gray-800 border-2 border-green-200">{{ humor_do_dia.descricaohumor|default:'Nenhuma descrição.'|linebreaksbr }}</div>
+
+            <div class="mt-4 text-right">
+              <a href="{% url 'alterarHumor' humor_do_dia.idhumor %}" class="bg-lyfesync-green hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition duration-150 ease-in-out inline-flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.536L16.232 5.232z"></path>
+                </svg>Alterar Humor de Hoje
+              </a>
+            </div>
           </div>
         {% else %}
           <div class="text-center p-10 bg-gray-50 rounded-xl border border-dashed border-gray-300">
             <p class="text-lg text-gray-500">Você ainda não registrou seu humor para hoje.</p>
-            <p class="text-sm text-gray-400 mt-2">Clique em "Adicionar Humor" para começar!</p>
+
+            <p class="text-sm text-gray-400 mt-2">Clique em "Adicionar Humor de Hoje" para começar!</p>
           </div>
         {% endif %}
       </div>
 
       <div class="w-full lg:w-2/5 space-y-8">
         <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-red-400">
-          <h2 class="text-2xl font-bold text-red-500 mb-4">DICA</h2>
+          <h2 class="text-xl font-bold text-gray-700 mb-4">Dicas de Autocuidado</h2>
 
-          <div class="text-gray-700 space-y-4 text-sm">
-            <p class="font-bold text-gray-800">Aqui estão algumas dicas práticas para ajudar a acalmar a ansiedade:</p>
-            <ol class="list-decimal list-inside space-y-2">
-              <li>
-                <span class="font-semibold">Respiração Profunda:</span> Pratique a respiração controlada, inspirando pelo nariz durante 4 segundos, segurando o ar por 4 segundos e expirando lentamente pela boca em 6 segundos. Isso reduz a tensão e acalma o sistema nervoso.
-              </li>
-              <li>
-                <span class="font-semibold">Movimente-se:</span> Caminhar, alongar ou realizar exercícios leves pode ajudar a liberar endorfina, promovendo uma sensação de bem-estar.
-              </li>
-              <li>
-                <span class="font-semibold">Pratique a Atenção Plena (Mindfulness):</span> Concentre-se no momento presente, observando os detalhes ao seu redor (cores, cheiros, sons) para diminuir a sobrecarga mental.
-              </li>
-              <li>
-                <span class="font-semibold">Utilize Técnicas de Ancoragem:</span> Escolha algo tangível, como segurar um objeto ou sentir o chão sob seus pés, para trazer foco ao aqui e agora.
-              </li>
-              <li>
-                <span class="font-semibold">Ouça Música Relaxante:</span> Sons calmantes ou músicas instrumentais podem ajudar a reduzir o ritmo acelerado dos pensamentos.
-              </li>
-              <li>
-                <span class="font-semibold">Escreva:</span> Expresse suas preocupações em um diário ou caderno, organizando os pensamentos e liberando o que está incomodando.
-              </li>
-              <li>
-                <span class="font-semibold">Beba Água ou Chá Calmante:</span> Um chá como camomila ou erva-doce pode servir para reconfortar e ajudar a relaxar.
-              </li>
-              <li>
-                <span class="font-semibold">Evite Cargas Negativas:</span> Se puder, limite o uso de redes sociais ou notícias que podem intensificar sentimentos ansiosos.
-              </li>
-              <li>
-                <span class="font-semibold">Reconheça os Sentimentos:</span> Ao invés de lutar contra a ansiedade, tente acolher a emoção e compreendê-la; isso pode reduzir a pressão.
-              </li>
-            </ol>
-            <p class="text-xs italic mt-4">Essas técnicas variam de pessoa para pessoa, então vale a pena experimentar e descobrir o que funciona melhor para você! 😊</p>
-          </div>
+          <p class="text-gray-500">Espaço reservado para dicas.</p>
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="w-full mt-10">
-    <p class="frase-motivacional-humor">“O humor é a arte de transformar o peso da vida em leveza — quem ri, ressignifica o que dói.”</p>
+    <div class="w-full mt-10 bg-white p-6 rounded-xl shadow-lg border-t-4 border-lyfesync-green">
+      <h2 class="text-2xl font-bold text-gray-700 mb-6 border-b pb-2">Histórico de Humor (Últimas 2 Semanas)</h2>
+
+      {% if humores_recentes %}
+        <div class="space-y-4">
+          {% for humor_registro in humores_recentes %}
+            <div class="flex justify-between items-center p-4 border rounded-xl bg-gray-50 border-gray-200 hover:shadow-md transition duration-150 ease-in-out">
+              <div class="flex items-center space-x-4 flex-grow">
+                <div class="flex-shrink-0 w-8 h-8">
+                  <img src="{% static humor_registro.image_path %}" alt="{{ humor_registro.estado }}" class="w-full h-full object-contain" />
+                </div>
+
+                <div>
+                  <p class="text-sm font-medium text-gray-500">{{ humor_registro.data|date:'d/m/Y (l)' }}</p>
+
+                  <h3 class="text-lg font-semibold text-gray-800">{{ humor_registro.estado }}</h3>
+
+                  {% if humor_registro.descricaohumor %}
+                    <p class="text-sm text-gray-600 truncate max-w-lg">{{ humor_registro.descricaohumor|default:'Nenhuma descrição.' }}</p>
+                  {% endif %}
+                </div>
+              </div>
+
+              {# CORREÇÃO CRÍTICA: Usando .idhumor em vez de .id #}
+              {% if humor_registro.idhumor %}
+                <a href="{% url 'alterarHumor' humor_registro.idhumor %}" class="ml-4 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg transition duration-150 ease-in-out flex-shrink-0 inline-flex items-center text-sm">
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.536L16.232 5.232z"></path>
+                  </svg>Alterar
+                </a>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-center p-6 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+          <p class="text-md text-gray-500">Nenhum registro de humor encontrado no período das últimas duas semanas.</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="w-full mt-10">
+      <p class="frase-motivacional-humor">“O humor é a arte de transformar o peso da vida em leveza — quem ri, ressignifica o que dói.”</p>
+    </div>
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const visualizer = document.querySelector('.emoji-visualizer')
-      if (visualizer) {
-        const humor = visualizer.getAttribute('data-humor')
-        let emoji = ''
-        // Mapeamento de humor para emoji (Pode ser melhorado passando o emoji direto pelo contexto do Django)
-        switch (humor) {
-          case 'Feliz':
-            emoji = '😀'
-            break
-          case 'Calmo':
-            emoji = '😌'
-            break
-          case 'Ansioso':
-            emoji = '😟'
-            break
-          case 'Triste':
-            emoji = '😥'
-            break
-          case 'Irritado':
-            emoji = '😡'
-            break
-          default:
-            emoji = '🤷‍♀️'
-            break
-        }
-        visualizer.textContent = emoji
-      }
+      // Script mantido vazio, mas pronto para futuras funcionalidades de JS/AJAX
     })
   </script>
 {% endblock %}
