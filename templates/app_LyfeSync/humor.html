@@ -1,0 +1,39 @@
+# app_LyfeSync/views.py
+
+from django.shortcuts import render, redirect, get_object_or_404 # ... (outros imports) from django.utils import timezone from django.db import transaction from datetime import date, timedelta # <-- ADICIONE timedelta import json # ... (outros imports)
+
+# ------------------------------------------------------------------- # LÓGICA AUXILIAR PARA HUMOR # -------------------------------------------------------------------
+
+# FUNÇÃO AUXILIAR PARA MAPEAR ESTADO -> EMOJI (Baseado no script do seu HTML) def get_humor_emoji(estado): """Mapeia o estado de humor para o caractere emoji.""" return { 'Feliz': '😀', 'Calmo': '😌', 'Ansioso': '😟', 'Triste': '😥', 'Irritado': '😡', }.get(estado, '🤷‍♀️')
+
+# ... (restante do código até a view 'humor')
+
+# 2. VIEW PARA PÁGINA DE HUMOR (Atualizada) @login_required def humor(request): """Página de Humor. Requer login. Agora inclui humores das últimas duas semanas."""
+
+data_hoje = timezone.localdate() humor_map = get_humor_map() # Para o image_path
+
+# --- 1. Lógica para Humor do Dia --- try: humor_do_dia = Humor.objects.get( idusuario=request.user, data=data_hoje ) except Humor.DoesNotExist: humor_do_dia = None
+
+if humor_do_dia: humor_do_dia.image_path = humor_map.get(humor_do_dia.estado, 'img/icon/default.png') # Adiciona o caractere emoji para ser usado na template (como o seu HTML já faz) humor_do_dia.emoji_char = get_humor_emoji(humor_do_dia.estado)
+
+# --- 2. Lógica para Humores Recentes (Semana Atual e Anterior) ---
+
+# Encontra o dia da semana atual (0=Segunda, 6=Domingo) hoje_weekday = data_hoje.weekday()
+
+# Calcula a data de início do período (Segunda-feira da semana anterior) # Primeiro calcula a segunda-feira da semana atual: data_hoje - N dias para voltar para segunda data_inicio_semana_atual = data_hoje - timedelta(days=hoje_weekday) # Depois volta 7 dias para a segunda-feira da semana anterior data_inicio_periodo = data_inicio_semana_atual - timedelta(weeks=1)
+
+# Busca os registros no intervalo: [Segunda da Semana Anterior, Hoje] humores_recentes = Humor.objects.filter( idusuario=request.user, data__range=[data_inicio_periodo, data_hoje] ).order_by('-data') # Ordena pelo mais recente
+
+# Adicionar o caractere emoji a cada registro para ser usado no loop da template for humor_registro in humores_recentes: humor_registro.emoji_char = get_humor_emoji(humor_registro.estado)
+
+context = { 'humor_do_dia': humor_do_dia, 'humores_recentes': humores_recentes, # <-- Novo contexto } return render(request, 'app_LyfeSync/humor.html', context)
+
+# 4. VIEW PARA ALTERAR HUMOR (Corrigida para aceitar ID via URL) @login_required def alterar_humor(request, humor_id): # <-- MUDANÇA: Aceita ID como argumento """Permite alterar um Humor existente. Requer login e ID do Humor."""
+
+# Garante que o registro existe e pertence ao usuário instance = get_object_or_404(Humor, id=humor_id, idusuario=request.user)
+
+if request.method == 'POST': form = HumorForm(request.POST, instance=instance) if form.is_valid(): form.save() messages.success(request, 'Humor alterado com sucesso! 🎉') return redirect('humor') # Redireciona para a página principal de humor else: messages.error(request, 'Erro na validação do formulário. Verifique os campos.') else: # Se for GET, inicializa o formulário com a instância form = HumorForm(instance=instance)
+
+humor_map = get_humor_map() # Mapeamento de emojis (ou imagens)
+
+context = { 'form': form, 'humor_icon_class_map': humor_map, 'humor_instance': instance, # Passa a instância para o template (útil para título, etc.) } return render(request, 'app_LyfeSync/alterarHumor.html', context)
