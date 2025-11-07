@@ -1,182 +1,180 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LyfeSync - {% block title %}{% endblock %}</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      LyfeSync -{% block title %}
+      {% endblock %}
+    </title>
 
     {# Dependências do Bootstrap e Font Awesome #}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
 
     {# Arquivos de Estilo Personalizados #}
-    <link rel="stylesheet" href="{% static 'css/masterpage.css' %}">
-    <link rel="stylesheet" href="{% static 'css/masterpage_logado.css' %}">
-</head>
-<body class="d-flex flex-column min-vh-100">
-
+    <link rel="stylesheet" href="{% static 'css/masterpage.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/masterpage_logado.css' %}" />
+  </head>
+  <body class="d-flex flex-column min-vh-100">
     <nav class="navbar navbar-expand-lg fixed-top">
-        <div class="container-fluid">
-            {# Logo e Título: APONTANDO PARA O DASHBOARD/ÁREA LOGADA #}
-            <a class="navbar-brand" href="{% url 'homeLyfesync' %}">
-                <img src="{% static 'img/logo/logo2.png' %}" alt="Logo LyfeSync" class="navbar-logo">
-                <span class="logo-text">LyfeSync</span>
-            </a>
-            
-            {# Botão Toggler para Mobile #}
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    
-                    {# Item: HOME/DASHBOARD (REINCLUÍDO E APONTANDO PARA A ÁREA LOGADA) #}
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="{% url 'homeLyfesync' %}">Home</a>
-                    </li>
-                    
-                    {# Item: SOBRE NÓS (REINCLUÍDO) #}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'sobre_nos' %}">Sobre Nós</a>
-                    </li>
-                    
-                    {# Item: CONTATOS (REINCLUÍDO) #}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'contatos' %}">Contatos</a>
-                    </li>
+      <div class="container-fluid">
+        {# Logo e Título: APONTANDO PARA O DASHBOARD/ÁREA LOGADA #}
+        <a class="navbar-brand" href="{% url 'homeLyfesync' %}">
+          <img src="{% static 'img/logo/logo2.png' %}" alt="Logo LyfeSync" class="navbar-logo" />
+          <span class="logo-text">LyfeSync</span>
+        </a>
 
-                    {# Item: MINHA CONTA #}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'conta' %}">
-                            <i class="fas fa-user-circle"></i> Minha Conta
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        {# Botão SAIR #}
-                        <a class="btn-nav-login nav-link btn-logout" href="{% url 'account_logout' %}">Sair</a>
-                    </li>
-                </ul>
-            </div>
+        {# Botão Toggler para Mobile #}
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            {# Item: HOME/DASHBOARD (REINCLUÍDO E APONTANDO PARA A ÁREA LOGADA) #}
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="{% url 'homeLyfesync' %}">Home</a>
+            </li>
+
+            {# Item: SOBRE NÓS (REINCLUÍDO) #}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'sobre_nos' %}">Sobre Nós</a>
+            </li>
+
+            {# Item: CONTATOS (REINCLUÍDO) #}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'contatos' %}">Contatos</a>
+            </li>
+
+            {# Item: MINHA CONTA #}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'conta' %}"><i class="fas fa-user-circle"></i> Minha Conta</a>
+            </li>
+            <li class="nav-item">
+              {# Botão SAIR #}
+              <a class="btn-nav-login nav-link btn-logout" href="{% url 'account_logout' %}">Sair</a>
+            </li>
+          </ul>
         </div>
+      </div>
     </nav>
 
-
     {% block body_content %}
-    <div class="main-wrapper-logado">
+      <div class="main-wrapper-logado">
         {# ---------------- Menu Lateral (Sidebar) ---------------- #}
         <aside class="sidebar-logado">
-            <nav class="nav-sidebar">
-                <ul class="list-unstyled">
-                    {# Item: HOME/DASHBOARD - CORRIGIDO NO SIDEBAR #}
-                    <li>
-                        <a href="{% url 'homeLyfesync' %}" class="sidebar-link active">
-                            <i class="fas fa-home sidebar-icon"></i>
-                            <span>Início</span>
-                        </a>
-                    </li>
-                    {# Item: Hábitos #}
-                    <li>
-                        <a href="{% url 'habito' %}" class="sidebar-link">
-                            <img src="{% static 'img/icon/planner.png' %}" alt="Ícone Hábitos" class="sidebar-icon">
-                            <span>Hábitos</span>
-                        </a>
-                    </li>
-                    
-                    {# Item: Autocuidado #}
-                    <li>
-                        <a href="{% url 'autocuidado' %}" class="sidebar-link">
-                            <img src="{% static 'img/icon/autocuidado.png' %}" alt="Ícone Autocuidado" class="sidebar-icon">
-                            <span>Autocuidado</span>
-                        </a>
-                    </li>
-
-                    {# ITEM: DICAS (Apenas para Administrador) #}
-                    {% if user.is_authenticated and user.is_superuser %}
-                    <li class="mb-1 border-top pt-2 mt-2">
-                        <a href="{% url 'registrar_dica' %}" class="sidebar-link text-success">
-                            <i class="fas fa-lightbulb"></i>
-                            <span>Dicas (Admin)</span>
-                        </a>
-                    </li>
-                    {% endif %}
-
-                    
-                    {# Item: Relatórios #}
-                    <li>
-                        <a href="{% url 'relatorios' %}" class="sidebar-link">
-                            <img src="{% static 'img/icon/relatorio.png' %}" alt="Ícone Relatórios" class="sidebar-icon">
-                            <span>Relatórios</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-            
-            {# Ícone de Conta (Alinhado ao Rodapé do Sidebar) #}
-            <div class="sidebar-bottom">
-                <a href="{% url 'conta' %}" class="sidebar-link-conta">
-                    <img src="{% static 'img/icon/conf.png' %}" alt="Ícone Conta" class="sidebar-icon">
-                    <span>Conta</span>
+          <nav class="nav-sidebar">
+            <ul class="list-unstyled">
+              {# Item: HOME/DASHBOARD - CORRIGIDO NO SIDEBAR #}
+              <li>
+                <a href="{% url 'homeLyfesync' %}" class="sidebar-link active">
+                  <i class="fas fa-home sidebar-icon"></i>
+                  <span>Início</span>
                 </a>
-                <a href="{% url 'account_logout' %}" class="sidebar-link-conta mt-2">
-                    <i class="fas fa-sign-out-alt sidebar-icon"></i>
-                    <span>Sair</span>
+              </li>
+              {# Item: Hábitos #}
+              <li>
+                <a href="{% url 'habito' %}" class="sidebar-link">
+                  <img src="{% static 'img/icon/planner.png' %}" alt="Ícone Hábitos" class="sidebar-icon" />
+                  <span>Hábitos</span>
                 </a>
-            </div>
-            
+              </li>
+
+              {# Item: Autocuidado #}
+              <li>
+                <a href="{% url 'autocuidado' %}" class="sidebar-link">
+                  <img src="{% static 'img/icon/autocuidado.png' %}" alt="Ícone Autocuidado" class="sidebar-icon" />
+                  <span>Autocuidado</span>
+                </a>
+              </li>
+
+              {# ITEM: DICAS (Apenas para Administrador) #}
+              {% if user.is_authenticated and user.is_superuser %}
+                <li class="mb-1 border-top pt-2 mt-2">
+                  <a href="{% url 'registrar_dica' %}" class="sidebar-link text-success">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>Dicas (Admin)</span>
+                  </a>
+                </li>
+              {% endif %}
+
+              {# Item: Relatórios #}
+              <li>
+                <a href="{% url 'relatorios' %}" class="sidebar-link">
+                  <img src="{% static 'img/icon/relatorio.png' %}" alt="Ícone Relatórios" class="sidebar-icon" />
+                  <span>Relatórios</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+
+          {# Ícone de Conta (Alinhado ao Rodapé do Sidebar) #}
+          <div class="sidebar-bottom">
+            <a href="{% url 'conta' %}" class="sidebar-link-conta">
+              <img src="{% static 'img/icon/conf.png' %}" alt="Ícone Conta" class="sidebar-icon" />
+              <span>Conta</span>
+            </a>
+            <a href="{% url 'account_logout' %}" class="sidebar-link-conta mt-2">
+              <i class="fas fa-sign-out-alt sidebar-icon"></i>
+              <span>Sair</span>
+            </a>
+          </div>
         </aside>
 
         {# ---------------- Conteúdo Principal ---------------- #}
         <main class="content-logado">
-            {% block content_logado %}
-            
-            {% endblock %}
-        </main>
-    </div>
-    {% endblock %}
+          {% block content_logado %}
 
+          {% endblock %}
+        </main>
+      </div>
+    {% endblock %}
 
     {# Rodapé: MANTIDO COM LINKS PÚBLICOS COMO NO CÓDIGO FORNECIDO #}
     <footer class="footer">
-        <div class="container-fluid py-4">
-            <div class="row text-center align-items-center">
-                
-                {# Bloco 1: Logo no Rodapé #}
-                <div class="col-lg-4 col-md-12 mb-3 mb-md-0 d-flex justify-content-center align-items-center">
-                    <img src="{% static 'img/logo/logo2.png' %}" alt="Logo LyfeSync" class="footer-logo-img">
-                    <span class="logo-text">LyfeSync</span>
-                </div>
+      <div class="container-fluid py-4">
+        <div class="row text-center align-items-center">
+          {# Bloco 1: Logo no Rodapé #}
+          <div class="col-lg-4 col-md-12 mb-3 mb-md-0 d-flex justify-content-center align-items-center">
+            <img src="{% static 'img/logo/logo2.png' %}" alt="Logo LyfeSync" class="footer-logo-img" />
+            <span class="logo-text">LyfeSync</span>
+          </div>
 
-                {# Bloco 2: Links de Navegação #}
-                <div class="col-lg-4 col-md-12 mb-3 mb-md-0 d-flex justify-content-center align-items-center">
-                    <ul class="list-unstyled d-flex gap-4">
-                        <li><a href="{% url 'home' %}" class="footer-link">Início Público</a></li>
-                        <li><a href="{% url 'sobre_nos' %}" class="footer-link">Sobre Nós</a></li>
-                        <li><a href="{% url 'contatos' %}" class="footer-link">Contatos</a></li>
-                    </ul>
-                </div>
+          {# Bloco 2: Links de Navegação #}
+          <div class="col-lg-4 col-md-12 mb-3 mb-md-0 d-flex justify-content-center align-items-center">
+            <ul class="list-unstyled d-flex gap-4">
+              <li>
+                <a href="{% url 'home' %}" class="footer-link">Início Público</a>
+              </li>
+              <li>
+                <a href="{% url 'sobre_nos' %}" class="footer-link">Sobre Nós</a>
+              </li>
+              <li>
+                <a href="{% url 'contatos' %}" class="footer-link">Contatos</a>
+              </li>
+            </ul>
+          </div>
 
-                {# Bloco 3: Ícones Sociais #}
-                <div class="col-lg-4 col-md-12 d-flex justify-content-center align-items-center gap-2">
-                    <a href="#" class="social-icon facebook"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="social-icon instagram"><i class="fab fa-instagram"></i></a>
-                    <a href="#" class="social-icon whatsapp"><i class="fab fa-whatsapp"></i></a>
-                </div>
-            </div>
+          {# Bloco 3: Ícones Sociais #}
+          <div class="col-lg-4 col-md-12 d-flex justify-content-center align-items-center gap-2">
+            <a href="#" class="social-icon facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="social-icon instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="social-icon whatsapp"><i class="fab fa-whatsapp"></i></a>
+          </div>
         </div>
-        
-        {# Rodapé Inferior (Copyright) #}
-        <div class="footer-bottom">
-            <div class="container-fluid text-center py-2">
-                <p class="mb-0">2025 Copyright LyfeSync</p>
-            </div>
+      </div>
+
+      {# Rodapé Inferior (Copyright) #}
+      <div class="footer-bottom">
+        <div class="container-fluid text-center py-2">
+          <p class="mb-0">2025 Copyright LyfeSync</p>
         </div>
+      </div>
     </footer>
-
 
     {# SCRIPTS OBRIGATÓRIOS DO BOOTSTRAP #}
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </body>
 </html>

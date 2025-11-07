@@ -374,6 +374,7 @@ class Humor(models.Model):
     )
     
     ESTADOS_HUMOR = [
+        ('', 'Selecione🔽'),# O valor vazio ('') é o default
         ('Feliz', 'Feliz'),
         ('Calmo', 'Calmo'),
         ('Ansioso', 'Ansioso'),

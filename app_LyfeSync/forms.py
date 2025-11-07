@@ -1,8 +1,9 @@
+# forms.py #
 from django import forms
 # A importação do modelo Dicas já está correta
 from .models import Habito, Gratidao, Afirmacao, Humor, Dicas, PerfilUsuario
 from django.utils import timezone
-from django.forms import ModelForm, TextInput, DateInput, NumberInput, Select, Textarea
+from django.forms import ModelForm, TextInput, DateInput, NumberInput, Select, Textarea, RadioSelect
 from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.models import User
 from allauth.account.forms import SignupForm
@@ -107,7 +108,7 @@ class HumorForm(forms.ModelForm):
         
         widgets = {
             # O campo 'estado' se beneficia de um Select com as choices definidas no Model
-            'estado': Select(attrs={'class': 'form-control'}), 
+            'estado': RadioSelect(attrs={'class': 'form-control'}), 
             'descricaohumor': Textarea(attrs={'placeholder': 'Opcional: Descreva o que motivou este humor.', 'rows': 4, 'class': 'form-control'}),
             'data': DateInput(
                 attrs={'type': 'date', 'class': 'form-control', 'value': timezone.localdate().strftime('%Y-%m-%d')},
@@ -118,6 +119,16 @@ class HumorForm(forms.ModelForm):
             'estado': 'Qual o seu humor?',
             'descricaohumor': 'Detalhes/Motivação',
             'data': 'Data do Registro',
+        }
+
+        error_messages = {
+            'estado': {
+                'required': 'Por favor, selecione seu humor para prosseguir.',
+            },
+            # Se você quiser alterar a mensagem de data:
+            'data': {
+                 'required': 'A data do registro é obrigatória.',
+            }
         }
 
 class DicasForm(forms.ModelForm): # NOME SUGERIDO CORRIGIDO PARA 'DicasForm'

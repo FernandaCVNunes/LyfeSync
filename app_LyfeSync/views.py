@@ -1,3 +1,4 @@
+# app_LyfeSync/views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.mail import EmailMessage
 from django.conf import settings
@@ -5,7 +6,6 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required, user_passes_test
-# IMPORTAÇÕES DE AUTENTICAÇÃO ATUALIZADAS:
 from django.contrib.auth import logout, login # Adicionado 'login'
 from django.contrib.auth.forms import UserCreationForm as CadastroForm # Importação para formulário de cadastro
 from django.utils import timezone
@@ -15,9 +15,27 @@ import json
 import locale 
 import calendar 
 from .forms import HabitoForm, GratidaoForm, AfirmacaoForm, HumorForm, DicasForm, UserUpdateForm, PerfilUsuarioForm
-from .models import Dicas, Habito, Gratidao, Afirmacao, Humor, Relatorio, Usuario, StatusDiario
+from .models import Dicas, Habito, Gratidao, Afirmacao, Humor, Relatorio, Usuario, StatusDiario, PerfilUsuario
 from django.db.models import Q 
 from django.views.decorators.http import require_POST
+
+# -------------------------------------------------------------------
+# LÓGICA AUXILIAR PARA HUMOR
+# -------------------------------------------------------------------
+
+# 1. FUNÇÃO DE MAPA UNIFICADA (Imagens Estáticas)
+# Define o mapeamento dos códigos de humor (salvos no BD) para os caminhos das imagens estáticas.
+
+def get_humor_map():
+    # Caminhos relativos à sua pasta static (ex: static/img/icon/)
+    return {
+        'Feliz': 'img/icon/feliz.png',
+        'Calmo': 'img/icon/calmo.png',
+        'Ansioso': 'img/icon/ansioso.png',
+        'Triste': 'img/icon/triste.png',
+        'Irritado': 'img/icon/raiva.png',
+    }
+
 
 # -------------------------------------------------------------------
 # LÓGICA AUXILIAR PARA HÁBITOS
@@ -329,27 +347,17 @@ def autocuidado(request):
     context = {'afirmacoes': afirmacoes}
     return render(request, 'app_LyfeSync/autocuidado.html', context)
 
-# app_LyfeSync/views.py
 
-# ... (imports e outras views) ...
-
+# 2. VIEW PARA PÁGINA DE HUMOR (Usa Imagens em vez de Ícones)
 @login_required
 def humor(request):
     """Página de Humor. Requer login."""
     
     data_hoje = timezone.localdate()
-
-    # 1. Defina o mapa de ícones e cores AQUI (FORA do 'if')
-    # Mapa de ícones Font Awesome (para listagem/dashboard)
-    humor_icon_class_map = {
-        'Feliz': {'icon': 'fa-solid fa-face-laugh', 'color_class': 'text-feliz'},
-        'Calmo': {'icon': 'fa-solid fa-face-meh', 'color_class': 'text-calmo'},
-        'Ansioso': {'icon': 'fa-solid fa-face-frown-open', 'color_class': 'text-ansioso'},
-        'Triste': {'icon': 'fa-solid fa-face-sad-cry', 'color_class': 'text-triste'},
-        'Irritado': {'icon': 'fa-solid fa-face-angry', 'color_class': 'text-irritado'},
-    }
+    humor_map = get_humor_map()
 
     try:
+        # Busca o humor do dia
         humor_do_dia = Humor.objects.get(
             idusuario=request.user, 
             data=data_hoje
@@ -358,18 +366,124 @@ def humor(request):
         humor_do_dia = None
 
     if humor_do_dia:
-        # 2. Apenas a lógica de atribuição é mantida dentro do 'if'
-        humor_info = humor_icon_class_map.get(humor_do_dia.estado, {'icon': 'fa-solid fa-face-question', 'color_class': ''})
-        humor_do_dia.icon_class = humor_info['icon']
-        humor_do_dia.color_class = humor_info['color_class']
+        # 🚨 ATUALIZAÇÃO: Adiciona o caminho da imagem ao objeto humor_do_dia 🚨
+        humor_do_dia.image_path = humor_map.get(humor_do_dia.estado, 'img/icon/default.png')
+        # Limpamos as classes de cor e ícone antigas que usavam Font Awesome
+        humor_do_dia.icon_class = None
+        humor_do_dia.color_class = None
 
-    # 3. O dicionário 'context' é criado no final
     context = {
         'humor_do_dia': humor_do_dia,
-        # O mapa agora é sempre passado para o template 'humor.html'
-        'humor_icon_class_map': humor_icon_class_map 
+        # O mapa de ícones é passado para o template 'humor.html' (útil para listagens)
+        'humor_icon_class_map': humor_map 
     }
     return render(request, 'app_LyfeSync/humor.html', context)
+
+ 
+# 3. VIEW PARA REGISTRAR HUMOR
+@login_required
+def registrar_humor(request):
+    """Permite registrar um novo Humor. Requer login."""
+    
+    # Usa a função unificada de mapeamento
+    humor_icon_class_map = get_humor_map()
+    
+    if request.method == 'POST':
+        # Tenta verificar se já existe um registro para a data POSTada
+        form = HumorForm(request.POST)
+        if form.is_valid():
+            humor_obj = form.save(commit=False)
+            humor_obj.idusuario = request.user 
+            
+            if not humor_obj.data:
+                humor_obj.data = timezone.localdate()
+            
+            try:
+                # Tenta salvar (o Django/BD tratará a unicidade)
+                humor_obj.save()
+                messages.success(request, 'Seu humor foi registrado com sucesso! 😊')
+                return redirect('humor')
+            except Exception as e:
+                # Trata a exceção de registro duplicado
+                messages.error(request, f'Erro ao salvar: Você já registrou um humor para esta data.')
+        else:
+            messages.error(request, 'Houve um erro ao registrar o humor. Verifique os campos.')
+    else:
+        # Inicializa o form vazio para GET
+        form = HumorForm()
+        
+    context = {
+        'form': form,
+        'humor_icon_class_map': humor_icon_class_map # Passa o mapa para o template
+    }
+    return render(request, 'app_LyfeSync/registrarHumor.html', context)
+
+# 4. VIEW PARA ALTERAR HUMOR (Corrigida para usar get_humor_map)
+@login_required
+def alterar_humor(request):
+    """Permite alterar um Humor existente. Requer login."""
+    
+    humor_map = get_humor_map()
+    form = HumorForm(initial={'data': timezone.localdate().strftime('%Y-%m-%d')})
+    
+    # Lógica para salvar a alteração (POST)
+    if request.method == 'POST':
+        humor_id = request.POST.get('humor_id')
+        
+        # O fluxo de alteração exige um ID
+        if humor_id:
+            # 🚨 IMPORTANTE: Validação de que o usuário só pode alterar o próprio registro
+            instance = get_object_or_404(Humor, id=humor_id, idusuario=request.user)
+            form = HumorForm(request.POST, instance=instance)
+            
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Humor alterado com sucesso! 🎉')
+                return redirect('alterarHumor')
+            else:
+                messages.error(request, 'Erro na validação do formulário. Verifique os campos.')
+        else:
+            # Se não houver ID, o usuário está tentando usar o formulário de alteração para registrar um novo
+            messages.warning(request, 'Nenhum registro selecionado para alteração. Use a página de Registro.')
+            # Redireciona para o registrar para evitar confusão.
+            return redirect('registrarHumor')
+
+    context = {
+        'form': form,
+        'humor_icon_class_map': humor_map,
+    }
+    return render(request, 'alterarHumor.html', context)
+
+# 5. API AJAX PARA BUSCAR DADOS DE HUMOR POR DATA
+@login_required
+def load_humor_by_date(request):
+    """API para buscar dados de humor para uma data específica (via AJAX)."""
+    
+    date_str = request.GET.get('date')
+    
+    if not date_str:
+        return JsonResponse({'exists': False, 'error': 'Data ausente'}, status=400) # Bad Request
+        
+    try:
+        # Converte a string de data para objeto date
+        selected_date = timezone.datetime.strptime(date_str, '%Y-%m-%d').date()
+        
+        # Tenta encontrar o registro de humor para o usuário e a data selecionada
+        humor_registro = Humor.objects.get(idusuario=request.user, data=selected_date)
+        
+        data = {
+            'exists': True,
+            'id': humor_registro.id,
+            'estado': humor_registro.estado,
+            'descricaohumor': humor_registro.descricaohumor,
+        }
+        return JsonResponse(data)
+        
+    except Humor.DoesNotExist:
+        return JsonResponse({'exists': False, 'message': 'Nenhum registro encontrado'})
+        
+    except ValueError:
+        return JsonResponse({'exists': False, 'error': 'Formato de data inválido'}, status=400) 
 
 @login_required
 def gratidao(request):
@@ -417,56 +531,6 @@ def afirmacao(request):
     }
 
     return render(request, 'app_LyfeSync/afirmacao.html', context)
-
-
-# --- Views de Registro/Alteração (POST/SAVE) ---
-
-@login_required
-def registrar_humor(request):
-    """Permite registrar um novo Humor. Requer login."""
-    # MAPA DE CAMINHOS DE IMAGEM (para o formulário de seleção)
-    humor_icon_class_map = {
-        'Feliz': 'img/icon/feliz.png',
-        'Calmo': 'img/icon/calmo.png',
-        'Ansioso': 'img/icon/ansioso.png',
-        'Triste': 'img/icon/triste.png',
-        'Irritado': 'img/icon/raiva.png',
-    }
-    
-    if request.method == 'POST':
-        form = HumorForm(request.POST)
-        if form.is_valid():
-            humor_obj = form.save(commit=False)
-            humor_obj.idusuario = request.user 
-            
-            if not humor_obj.data:
-                humor_obj.data = timezone.localdate()
-                
-            try:
-                # O save pode falhar se houver uma restrição de unicidade (data + idusuario)
-                humor_obj.save()
-                messages.success(request, 'Seu humor foi registrado com sucesso! 😊')
-                return redirect('humor')
-            except Exception as e:
-                # Trata a exceção de registro duplicado
-                messages.error(request, f'Erro ao salvar: Você já registrou um humor para esta data. Detalhe: {e}')
-        else:
-            messages.error(request, 'Houve um erro ao registrar o humor. Verifique os campos.')
-    else:
-        form = HumorForm()
-        
-    context = {
-        'form': form,
-        'humor_icon_class_map': humor_icon_class_map # Passa o mapa para o template
-    }
-    return render(request, 'app_LyfeSync/registrarHumor.html', context)
-
-@login_required
-def alterar_humor(request):
-    # A view de alteração precisa da lógica de formulário (GET e POST)
-    # Recomendo implementar a busca do Humor do Dia para alteração
-    messages.info(request, "Lógica completa de Alterar Humor pendente de implementação.")
-    return render(request, 'app_LyfeSync/alterarHumor.html')
 
 @login_required 
 def registrar_gratidao(request):
@@ -583,14 +647,16 @@ def registrar_dica(request):
 
 @login_required(login_url='login')
 def configuracoes_conta(request):
-    # Tenta obter ou criar o perfil do usuário de forma segura
-    # Assumimos que o modelo 'Usuario' é o modelo de Perfil de Usuário
+    # MUDANÇA CRUCIAL: Mude a referência do modelo para PerfilUsuario
+
+    from .models import PerfilUsuario # Garantindo que PerfilUsuario está importado
+     
     try:
-        # Tenta obter o objeto 'Usuario' associado ao User.
-        perfil_instance = request.user.usuario 
-    except Usuario.DoesNotExist:
-        # Se não existir, cria uma instância não salva para preencher o formulário GET
-        perfil_instance = Usuario(user=request.user)
+         perfil_instance = request.user.perfil 
+
+    except PerfilUsuario.DoesNotExist: 
+        # Cria uma instância do PerfilUsuario com o User, caso o sinal tenha falhado
+        perfil_instance = PerfilUsuario(user=request.user)
     
     user_form = UserUpdateForm(instance=request.user)
     perfil_form = PerfilUsuarioForm(instance=perfil_instance)
