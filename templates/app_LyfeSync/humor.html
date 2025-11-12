@@ -1,4 +1,4 @@
-{# humor.html - Versão Final e Limpa #}
+{# humor.html - Versão Corrigida para Bootstrap #}
 {% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
 {% load static %}
 {% load custom_filters %}
@@ -9,117 +9,118 @@
 {% endblock %}
 
 {% block content_logado %}
-  <script src="https://cdn.tailwindcss.com"></script>
+  {# Container principal Bootstrap, centralizado e com padding vertical #}
+  <div class="container py-4">
+    {# Row para a estrutura de 2 colunas: 7/12 (aprox. 3/5) e 5/12 (aprox. 2/5) #}
+    <div class="row g-4">
+      {# Coluna Principal: Humor de Hoje (Largo) - col-lg-7 é aproximadamente 3/5 (58%) #}
+      <div class="col-lg-7">
+        <div class="card shadow-lg mb-4 border-top border-5 border-success">
+          <div class="card-body">
+            <h1 class="h3 font-weight-bold text-dark mb-4">Meu Humor</h1>
 
-  <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-    <div class="flex flex-wrap lg:flex-nowrap gap-8">
-      <div class="w-full lg:w-3/5 bg-white p-6 rounded-xl shadow-lg border-t-4 border-lyfesync-green">
-        <h1 class="text-3xl font-bold text-gray-700 mb-8">Meu Humor</h1>
+            <div class="mb-4">
+              {# 🚀 CORREÇÃO 1: Removendo o ícone <i class="material-icons">add</i> e mantendo o texto. Se quiser usar a imagem original, mude para: <img src="{% static 'img/icon/adicionar.png' %}" alt="Adicionar" class="me-2" style="width: 24px;"> #}
+              <a href="{% url 'registrarHumor' %}" class="btn btn-success btn-lg">Adicionar Humor de Hoje</a>
+            </div>
 
-        <div class="mb-8">
-          <a href="{% url 'registrarHumor' %}" class="btn-adicionar-humor inline-flex items-center font-bold text-xl text-lyfesync-green">
-            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>Adicionar Humor de Hoje
-          </a>
+            {# Humor de Hoje #}
+            {% if humor_do_dia and humor_do_dia.idhumor %}
+              <div class="mb-4">
+                <h2 class="h5 text-secondary border-bottom pb-2">Humor de Hoje: <span class="text-success">{{ humor_do_dia.data|date:'d/m/Y' }}</span></h2>
+
+                {# Card de Detalhes do Humor #}
+                <div class="d-flex align-items-start p-3 border rounded bg-light humor-today-card">
+                  <div class="flex-shrink-0 me-3 humor-image-lg">
+                    <img src="{% static humor_do_dia.image_path %}" alt="{{ humor_do_dia.estado }}" class="img-fluid" />
+                  </div>
+
+                  <div>
+                    <h2 class="h4 text-dark">{{ humor_do_dia.estado }}:</h2>
+                    <p class="text-secondary mt-1">{{ humor_do_dia.descricaohumor|default:'Nenhuma descrição.' }}</p>
+                  </div>
+                </div>
+
+                <h3 class="h6 font-weight-bold text-secondary mt-4 mb-2">Descrição:</h3>
+
+                {# Área de Descrição #}
+                <div class="p-3 border rounded text-dark bg-light">{{ humor_do_dia.descricaohumor|default:'Nenhuma descrição.'|linebreaksbr }}</div>
+
+                <div class="mt-3 text-end">
+                  {# 🚀 CORREÇÃO 2: Removendo o texto "edit" duplicado. Mantendo a classe 'btn-warning' para destaque. #}
+                  <a href="{% url 'alterarHumor' humor_do_dia.idhumor %}" class="btn btn-warning btn-sm">Alterar Humor de Hoje</a>
+                </div>
+              </div>
+            {% else %}
+              <div class="text-center p-5 bg-light border border-dashed rounded">
+                <p class="text-muted lead">Você ainda não registrou seu humor para hoje.</p>
+                <p class="text-sm text-secondary mt-2">Clique em "Adicionar Humor de Hoje" para começar!</p>
+              </div>
+            {% endif %}
+          </div>
         </div>
-
-        {# Humor de Hoje #}
-        {# CORREÇÃO CRÍTICA: Usando .idhumor em vez de .id #}
-        {% if humor_do_dia and humor_do_dia.idhumor %}
-          <div class="mb-10">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Humor de Hoje: <span class="text-lyfesync-green">{{ humor_do_dia.data|date:'d/m/Y' }}</span></h2>
-
-            <div class="flex items-start space-x-6 mb-8 p-4 border-2 border-green-100 rounded-xl bg-green-50">
-              <div class="flex-shrink-0 w-12 h-12">
-                <img src="{% static humor_do_dia.image_path %}" alt="{{ humor_do_dia.estado }}" class="w-full h-full object-contain" />
-              </div>
-
-              <div>
-                <h2 class="text-2xl font-bold text-gray-800">{{ humor_do_dia.estado }}:</h2>
-                <p class="text-lg text-gray-600 mt-1">{{ humor_do_dia.descricaohumor|default:'Nenhuma descrição.' }}</p>
-              </div>
-            </div>
-
-            <h3 class="text-xl font-semibold text-gray-700 mb-2">Descrição:</h3>
-
-            <div class="p-4 custom-textarea-visualizar rounded-xl text-gray-800 border-2 border-green-200">{{ humor_do_dia.descricaohumor|default:'Nenhuma descrição.'|linebreaksbr }}</div>
-
-            <div class="mt-4 text-right">
-              <a href="{% url 'alterarHumor' humor_do_dia.idhumor %}" class="bg-lyfesync-green hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition duration-150 ease-in-out inline-flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.536L16.232 5.232z"></path>
-                </svg>Alterar Humor de Hoje
-              </a>
-            </div>
-          </div>
-        {% else %}
-          <div class="text-center p-10 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-            <p class="text-lg text-gray-500">Você ainda não registrou seu humor para hoje.</p>
-
-            <p class="text-sm text-gray-400 mt-2">Clique em "Adicionar Humor de Hoje" para começar!</p>
-          </div>
-        {% endif %}
       </div>
 
-      <div class="w-full lg:w-2/5 space-y-8">
-        <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-red-400">
-          <h2 class="text-xl font-bold text-gray-700 mb-4">Dicas de Autocuidado</h2>
-
-          <p class="text-gray-500">Espaço reservado para dicas.</p>
+      {# Coluna Lateral: Dicas de Autocuidado (Estreito) - col-lg-5 é aproximadamente 2/5 (42%) #}
+      <div class="col-lg-5">
+        <div class="card shadow-lg mb-4 border-top border-5 border-danger">
+          <div class="card-body">
+            <h2 class="h4 font-weight-bold text-dark mb-4">Dicas de Autocuidado</h2>
+            <p class="text-muted">Espaço reservado para dicas.</p>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="w-full mt-10 bg-white p-6 rounded-xl shadow-lg border-t-4 border-lyfesync-green">
-      <h2 class="text-2xl font-bold text-gray-700 mb-6 border-b pb-2">Histórico de Humor (Últimas 2 Semanas)</h2>
+    {# Histórico de Humor (Ocupa a largura total abaixo das colunas) #}
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="card shadow-lg mb-4 border-top border-5 border-success">
+          <div class="card-body">
+            <h2 class="h4 font-weight-bold text-dark mb-4 border-bottom pb-2">Histórico de Humor (Últimas 2 Semanas)</h2>
 
-      {% if humores_recentes %}
-        <div class="space-y-4">
-          {% for humor_registro in humores_recentes %}
-            <div class="flex justify-between items-center p-4 border rounded-xl bg-gray-50 border-gray-200 hover:shadow-md transition duration-150 ease-in-out">
-              <div class="flex items-center space-x-4 flex-grow">
-                <div class="flex-shrink-0 w-8 h-8">
-                  <img src="{% static humor_registro.image_path %}" alt="{{ humor_registro.estado }}" class="w-full h-full object-contain" />
-                </div>
+            {% if humores_recentes %}
+              <div class="list-group">
+                {% for humor_registro in humores_recentes %}
+                  {# Item da Lista Bootstrap #}
+                  <div class="list-group-item d-flex justify-content-between align-items-center bg-light border-secondary mb-2 rounded hover-shadow humor-list-item-hover">
+                    <div class="d-flex align-items-center flex-grow-1">
+                      <div class="flex-shrink-0 me-3 humor-image-sm">
+                        <img src="{% static humor_registro.image_path %}" alt="{{ humor_registro.estado }}" class="img-fluid" />
+                      </div>
 
-                <div>
-                  <p class="text-sm font-medium text-gray-500">{{ humor_registro.data|date:'d/m/Y (l)' }}</p>
+                      <div>
+                        <p class="text-sm text-muted mb-0">{{ humor_registro.data|date:'d/m/Y (l)' }}</p>
+                        <h3 class="h6 font-weight-bold text-dark mb-0">{{ humor_registro.estado }}</h3>
 
-                  <h3 class="text-lg font-semibold text-gray-800">{{ humor_registro.estado }}</h3>
+                        {% if humor_registro.descricaohumor %}
+                          <p class="text-sm text-secondary mb-0 text-truncate humor-truncate-max-width">{{ humor_registro.descricaohumor|default:'Nenhuma descrição.' }}</p>
+                        {% endif %}
+                      </div>
+                    </div>
 
-                  {% if humor_registro.descricaohumor %}
-                    <p class="text-sm text-gray-600 truncate max-w-lg">{{ humor_registro.descricaohumor|default:'Nenhuma descrição.' }}</p>
-                  {% endif %}
-                </div>
+                    {# Botão Alterar - Sem o texto "edit" duplicado #}
+                    {% if humor_registro.idhumor %}
+                      <a href="{% url 'alterarHumor' humor_registro.idhumor %}" class="btn btn-sm btn-warning ms-3">Alterar</a>
+                    {% endif %}
+                  </div>
+                {% endfor %}
               </div>
-
-              {# CORREÇÃO CRÍTICA: Usando .idhumor em vez de .id #}
-              {% if humor_registro.idhumor %}
-                <a href="{% url 'alterarHumor' humor_registro.idhumor %}" class="ml-4 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg transition duration-150 ease-in-out flex-shrink-0 inline-flex items-center text-sm">
-                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.536L16.232 5.232z"></path>
-                  </svg>Alterar
-                </a>
-              {% endif %}
-            </div>
-          {% endfor %}
+            {% else %}
+              <div class="text-center p-4 bg-light border border-dashed rounded">
+                <p class="text-muted">Nenhum registro de humor encontrado no período das últimas duas semanas.</p>
+              </div>
+            {% endif %}
+          </div>
         </div>
-      {% else %}
-        <div class="text-center p-6 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-          <p class="text-md text-gray-500">Nenhum registro de humor encontrado no período das últimas duas semanas.</p>
-        </div>
-      {% endif %}
+      </div>
     </div>
 
-    <div class="w-full mt-10">
-      <p class="frase-motivacional-humor">“O humor é a arte de transformar o peso da vida em leveza — quem ri, ressignifica o que dói.”</p>
+    {# Frase Motivacional #}
+    <div class="row mt-4">
+      <div class="col-12">
+        <p class="text-center text-secondary fst-italic">“O humor é a arte de transformar o peso da vida em leveza — quem ri, ressignifica o que dói.”</p>
+      </div>
     </div>
   </div>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      // Script mantido vazio, mas pronto para futuras funcionalidades de JS/AJAX
-    })
-  </script>
 {% endblock %}

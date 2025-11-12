@@ -1,105 +1,159 @@
+{# conta.html - Configurações da Conta #}
 {% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
 {% load static %}
 
-{% block title %}Configurações da Conta{% endblock %}
+{% block title %}
+  Configurações da Conta
+{% endblock %}
 
 {% block content_logado %}
-    <div class="lyfesync-content-area">
+  <div class="lyfesync-content-area">
+    <div class="d-flex w-100 flex-grow-1 p-4">
+      <main class="main-content flex-grow-1">
+        <h2 class="mb-4 text-primary">Configurações da Conta</h2>
 
-        <div class="d-flex w-100 flex-grow-1 p-4">
+        {# Bloco para exibir mensagens (Django Messages Framework) #}
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
 
-            <main class="main-content flex-grow-1">
-                <h2 class="mb-4 text-primary">Configurações da Conta</h2>
-                
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
+        <div class="row">
+          {# Seção de Navegação (Menu Lateral na página de Conta) #}
+          <div class="col-md-3">
+            <div class="list-group sidebar-menu-conta">
+              <a href="#perfil" class="list-group-item list-group-item-action active"><i class="fas fa-user me-2"></i> Perfil</a>
+              <a href="#seguranca" class="list-group-item list-group-item-action"><i class="fas fa-shield-alt me-2"></i> Segurança</a>
+              <a href="#dados" class="list-group-item list-group-item-action"><i class="fas fa-database me-2"></i> Dados e Privacidade</a>
+              <a href="{% url 'logout' %}" class="list-group-item list-group-item-action text-danger"><i class="fas fa-sign-out-alt me-2"></i> Sair</a>
+            </div>
+          </div>
 
-                <div class="row">
-                    
-                    {# Seção de Navegação (Menu Lateral na página de Conta) #}
-                    <div class="col-md-3">
-                        <div class="list-group sidebar-menu-conta">
-                            <a href="#perfil" class="list-group-item list-group-item-action active">
-                                <i class="fas fa-user me-2"></i> Perfil
-                            </a>
-                            <a href="#seguranca" class="list-group-item list-group-item-action">
-                                <i class="fas fa-shield-alt me-2"></i> Segurança
-                            </a>
-                            <a href="#dados" class="list-group-item list-group-item-action">
-                                <i class="fas fa-database me-2"></i> Dados e Privacidade
-                            </a>
-                            <a href="{% url 'logout' %}" class="list-group-item list-group-item-action text-danger">
-                                <i class="fas fa-sign-out-alt me-2"></i> Sair
-                            </a>
-                        </div>
+          {# Conteúdo Principal da Conta: Informações Pessoais #}
+          <div class="col-md-9">
+            <div class="card shadow-sm mb-4" id="perfil">
+              <div class="card-header bg-light">
+                <h5 class="mb-0">Informações Pessoais</h5>
+              </div>
+              <div class="card-body">
+                <form method="POST">
+                  {% csrf_token %}
+
+                  {# Campos do Modelo User (Nome e Sobrenome editáveis) #}
+                  <div class="mb-3">
+                    <label for="id_username" class="form-label">Nome de Usuário</label>
+                    <input type="text" class="form-control" id="id_username" value="{{ user.username }}" disabled />
+                    <small class="form-text text-muted">Não pode ser alterado.</small>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="{{ user_form.first_name.id_for_label }}" class="form-label">Nome</label>
+                    {{ user_form.first_name }}
+                    {% if user_form.first_name.errors %}
+                      <div class="text-danger small mt-1">{{ user_form.first_name.errors }}</div>
+                    {% endif %}
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="{{ user_form.last_name.id_for_label }}" class="form-label">Sobrenome</label>
+                    {{ user_form.last_name }}
+                    {% if user_form.last_name.errors %}
+                      <div class="text-danger small mt-1">{{ user_form.last_name.errors }}</div>
+                    {% endif %}
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="id_email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="id_email" value="{{ user.email }}" disabled />
+                  </div>
+
+                  {# CAMPO TIPO DE USUÁRIO (APENAS PARA ADMINISTRADOR) #}
+                  {% if is_admin %}
+                    <hr class="my-4" />
+                    <div class="mb-3 bg-light p-3 rounded border border-warning">
+                      <label for="{{ perfil_form.tipoUsuario.id_for_label }}" class="form-label fw-bold text-danger"><i class="fas fa-user-shield me-2"></i> Tipo de Usuário (Admin)</label>
+                      <div class="form-text text-muted mb-2">Permite alterar o nível de acesso do usuário.</div>
+                      {{ perfil_form.tipoUsuario }}
+                      {% if perfil_form.tipoUsuario.errors %}
+                        <div class="text-danger small mt-1">{{ perfil_form.tipoUsuario.errors }}</div>
+                      {% endif %}
                     </div>
-
-                    {# Conteúdo Principal da Conta #}
-                    <div class="col-md-9">
-                        <div class="card shadow-sm mb-4" id="perfil">
-                            <div class="card-header bg-light">
-                                <h5 class="mb-0">Informações Pessoais</h5>
-                            </div>
-                            <div class="card-body">
-                                <form method="POST">
-                                    {% csrf_token %}
-                                    
-                                    {# Campos do Modelo User #}
-                                    <div class="mb-3">
-                                        <label for="id_username" class="form-label">Nome de Usuário</label>
-                                        <input type="text" class="form-control" id="id_username" value="{{ user.username }}" disabled>
-                                        <small class="form-text text-muted">Não pode ser alterado.</small>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label for="{{ user_form.first_name.id_for_label }}" class="form-label">Nome</label>
-                                        {{ user_form.first_name }}
-                                        {% if user_form.first_name.errors %}<div class="text-danger small mt-1">{{ user_form.first_name.errors }}</div>{% endif %}
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label for="{{ user_form.last_name.id_for_label }}" class="form-label">Sobrenome</label>
-                                        {{ user_form.last_name }}
-                                        {% if user_form.last_name.errors %}<div class="text-danger small mt-1">{{ user_form.last_name.errors }}</div>{% endif %}
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label for="id_email" class="form-label">Email</label>
-                                        <input type="email" class="form-control" id="id_email" value="{{ user.email }}" disabled>
-                                    </div>
-
-                                    {# CAMPO TIPO DE USUÁRIO (APENAS PARA ADMINISTRADOR) #}
-                                    {% if is_admin %}
-                                    <hr class="my-4">
-                                    <div class="mb-3 bg-light p-3 rounded border border-warning">
-                                        <label for="{{ perfil_form.tipoUsuario.id_for_label }}" class="form-label fw-bold text-danger">
-                                            <i class="fas fa-user-shield me-2"></i> Tipo de Usuário (Admin)
-                                        </label>
-                                        <div class="form-text text-muted mb-2">Permite alterar o nível de acesso do usuário.</div>
-                                        {{ perfil_form.tipoUsuario }}
-                                        {% if perfil_form.tipoUsuario.errors %}<div class="text-danger small mt-1">{{ perfil_form.tipoUsuario.errors }}</div>{% endif %}
-                                    </div>
-                                    {% else %}
-                                    <div class="mb-3">
-                                        <label class="form-label">Seu Tipo de Acesso</label>
-                                        <input type="text" class="form-control" value="{{ user.perfil.tipoUsuario }}" disabled>
-                                    </div>
-                                    {% endif %}
-                                    {# FIM CAMPO TIPO DE USUÁRIO #}
-                                    
-                                    <button type="submit" class="btn btn-primary mt-3">Salvar Alterações</button>
-                                </form>
-                            </div>
-                        </div>
+                  {% else %}
+                    <div class="mb-3">
+                      <label class="form-label">Seu Tipo de Acesso</label>
+                      {# Assumindo que user.perfil.tipoUsuario é uma string legível para o usuário #}
+                      <input type="text" class="form-control" value="{{ user.perfil.tipoUsuario }}" disabled />
                     </div>
-                </div>
-            </main>
+                  {% endif %}
+                  {# FIM CAMPO TIPO DE USUÁRIO #}
+
+                  <button type="submit" class="btn btn-primary mt-3">Salvar Alterações</button>
+                </form>
+              </div>
+            </div>
+
+            {# Futuras Seções (Segurança e Dados) seriam adicionadas aqui com os respectivos IDs #}
+            <div class="card shadow-sm mb-4" id="seguranca" style="display:none;">
+              <div class="card-header bg-light">
+                <h5 class="mb-0">Segurança da Conta</h5>
+              </div>
+              <div class="card-body">
+                <p>Conteúdo para alteração de senha, autenticação de dois fatores, etc.</p>
+              </div>
+            </div>
+
+            <div class="card shadow-sm mb-4" id="dados" style="display:none;">
+              <div class="card-header bg-light">
+                <h5 class="mb-0">Dados e Privacidade</h5>
+              </div>
+              <div class="card-body">
+                <p>Conteúdo para exportação de dados e política de privacidade.</p>
+              </div>
+            </div>
+
+            {# Script simples para ativar a navegação por hash e mostrar/esconder as seções #}
+            <script>
+              document.addEventListener('DOMContentLoaded', () => {
+                const navLinks = document.querySelectorAll('.sidebar-menu-conta a')
+                const contentSections = document.querySelectorAll('.col-md-9 .card')
+              
+                const showSection = (hash) => {
+                  navLinks.forEach((link) => link.classList.remove('active'))
+                  contentSections.forEach((section) => (section.style.display = 'none'))
+              
+                  const targetSection = document.querySelector(hash)
+                  if (targetSection) {
+                    targetSection.style.display = 'block'
+                    document.querySelector(`.sidebar-menu-conta a[href="${hash}"]`).classList.add('active')
+                  } else {
+                    // Default to #perfil if hash is not found
+                    document.querySelector('#perfil').style.display = 'block'
+                    document.querySelector('.sidebar-menu-conta a[href="#perfil"]').classList.add('active')
+                  }
+                }
+              
+                navLinks.forEach((link) => {
+                  if (link.getAttribute('href').startsWith('#')) {
+                    link.addEventListener('click', (e) => {
+                      e.preventDefault()
+                      const hash = link.getAttribute('href')
+                      window.location.hash = hash
+                      showSection(hash)
+                    })
+                  }
+                })
+              
+                // Check initial hash on load
+                showSection(window.location.hash || '#perfil')
+              })
+            </script>
+          </div>
         </div>
+      </main>
     </div>
+  </div>
 {% endblock %}

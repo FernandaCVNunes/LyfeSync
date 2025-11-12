@@ -1,4 +1,3 @@
-# app_LyfeSync/views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.mail import EmailMessage
 from django.conf import settings
@@ -6,11 +5,11 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth import logout, login # Adicionado 'login'
-from django.contrib.auth.forms import UserCreationForm as CadastroForm # Importação para formulário de cadastro
+from django.contrib.auth import logout, login 
+from django.contrib.auth.forms import UserCreationForm as CadastroForm 
 from django.utils import timezone
 from django.db import transaction
-from datetime import date, timedelta # <-- CORREÇÃO 1: Adição de timedelta
+from datetime import date, timedelta 
 import json 
 import locale 
 import calendar 
@@ -329,7 +328,9 @@ def toggle_habito_day(request, habit_id, day):
 
 
 @require_POST
+@login_required
 def delete_habit(request, habit_id):
+    """Exclui um Hábito específico."""
     try:
         habit = get_object_or_404(Habito, id=habit_id, usuario=request.user)
         habit.delete()
@@ -356,12 +357,6 @@ def humor(request):
     data_hoje = timezone.localdate()
     humor_map = get_humor_map()
     
-    #user_id_logado = request.user.pk
-    #data_duas_semanas_atras = data_hoje - timedelta(days=14)
-    #print(f"DEBUG: ID Usuário: {user_id_logado}")
-    #print(f"DEBUG: Data de Hoje: {data_hoje}")
-    #print(f"DEBUG: Data Limite (14 dias atrás): {data_duas_semanas_atras}")
-
     # 1. Busca o Humor de Hoje
     try:
         humor_do_dia = Humor.objects.get(
@@ -382,9 +377,6 @@ def humor(request):
     ).exclude(
         data=data_hoje # Garante que o humor do dia não apareça no histórico
     ).order_by('-data')
-    
-    #count = humores_recentes_qs.count()
-    #print(f"DEBUG: Contagem de Histórico encontrada: {count}")
     
     # 3. Adicionar o caminho da imagem aos registros do histórico
     humores_recentes_list = []
@@ -447,6 +439,7 @@ def alterar_humor(request, humor_id):
     humor_map = get_humor_map()
     
     # 1. Tenta obter a instância do Humor
+    # CORREÇÃO: Usando idhumor como PK no model Humor
     instance = get_object_or_404(Humor, idhumor=humor_id, idusuario=request.user)
     
     # 2. Lógica de formulário
@@ -586,11 +579,46 @@ def registrar_gratidao(request):
     context = {'form': form}
     return render(request, 'app_LyfeSync/registrarGratidao.html', context)
 
+
+# -------------------------------------------------------------------
+# NOVAS VIEWS CORRIGIDAS/IMPLEMENTADAS
+# -------------------------------------------------------------------
+
 @login_required
-def alterar_gratidao(request):
-    # A view de alteração precisa de lógica de formulário (GET e POST)
-    messages.info(request, "Lógica completa de Alterar Gratidão pendente de implementação.")
-    return render(request, 'app_LyfeSync/alterarGratidao.html')
+def alterar_gratidao(request, gratidao_id): 
+    """Permite alterar uma Gratidao existente. Requer login e ID da Gratidão."""
+    
+    # Garante que a gratidão existe e pertence ao usuário logado
+    gratidao_instance = get_object_or_404(Gratidao, idgratidao=gratidao_id, idusuario=request.user) 
+    
+    if request.method == 'POST':
+        form = GratidaoForm(request.POST, instance=gratidao_instance)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Gratidão alterada com sucesso! 💖')
+            return redirect('gratidao') # Redireciona para a lista
+        else:
+            messages.error(request, 'Erro na validação do formulário. Verifique os campos.')
+    else:
+        # GET: Inicializa o formulário com os dados da instância
+        form = GratidaoForm(instance=gratidao_instance)
+        
+    context = {'form': form, 'gratidao_id': gratidao_id}
+    return render(request, 'app_LyfeSync/alterarGratidao.html', context)
+
+
+@require_POST
+@login_required
+def delete_gratidao(request, gratidao_id):
+    """Exclui um registro de Gratidão específico (via AJAX)."""
+    try:
+        # Garante que a gratidão existe e pertence ao usuário logado
+        gratidao_instance = get_object_or_404(Gratidao, idgratidao=gratidao_id, idusuario=request.user)
+        gratidao_instance.delete()
+        return JsonResponse({'status': 'success', 'message': f'Gratidão ID {gratidao_id} excluída.'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
 
 @login_required
 def registrar_afirmacao(request):
@@ -616,11 +644,41 @@ def registrar_afirmacao(request):
     context = {'form': form}
     return render(request, 'app_LyfeSync/registrarAfirmacao.html', context)
 
+
 @login_required
-def alterar_afirmacao(request):
-    # A view de alteração precisa de lógica de formulário (GET e POST)
-    messages.info(request, "Lógica completa de Alterar Afirmação pendente de implementação.")
-    return render(request, 'app_LyfeSync/alterarAfirmacao.html')
+def alterar_afirmacao(request, afirmacao_id):
+    """Permite alterar uma Afirmação existente. Requer login e ID da Afirmação."""
+    
+    # Garante que a afirmação existe e pertence ao usuário logado
+    afirmacao_instance = get_object_or_404(Afirmacao, idafirmacao=afirmacao_id, idusuario=request.user) 
+    
+    if request.method == 'POST':
+        form = AfirmacaoForm(request.POST, instance=afirmacao_instance)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Afirmação alterada com sucesso! ✨')
+            return redirect('afirmacao') # Redireciona para a lista
+        else:
+            messages.error(request, 'Erro na validação do formulário. Verifique os campos.')
+    else:
+        # GET: Inicializa o formulário com os dados da instância
+        form = AfirmacaoForm(instance=afirmacao_instance)
+        
+    context = {'form': form, 'afirmacao_id': afirmacao_id}
+    return render(request, 'app_LyfeSync/alterarAfirmacao.html', context)
+
+
+@require_POST
+@login_required
+def delete_afirmacao(request, afirmacao_id):
+    """Exclui um registro de Afirmação específico (via AJAX)."""
+    try:
+        # Garante que a afirmação existe e pertence ao usuário logado
+        afirmacao_instance = get_object_or_404(Afirmacao, idafirmacao=afirmacao_id, idusuario=request.user)
+        afirmacao_instance.delete()
+        return JsonResponse({'status': 'success', 'message': f'Afirmação ID {afirmacao_id} excluída.'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 # --- Views de Relatórios e Conta ---
 
@@ -634,7 +692,40 @@ def relatorio_habito(request):
 
 @login_required
 def relatorio_humor(request):
-    return render(request, 'app_LyfeSync/relatorioHumor.html')
+    """
+    Gera o relatório de humor, listando todos os registros do usuário 
+    em formato de tabela para exibição detalhada, incluindo o ícone do humor.
+    """
+    humor_map = get_humor_map()
+    
+    # 1. Buscar todos os registros de Humor do usuário, ordenados do mais novo para o mais antigo.
+    # ASSUMIDO: O model Humor tem um campo 'data' (date) e 'idusuario' (FK para User)
+    humores_qs = Humor.objects.filter(idusuario=request.user).order_by('-data')
+    
+    # 2. Processar os dados para adicionar o caminho da imagem e formatar a data.
+    humores_processados = []
+    for humor in humores_qs:
+        # Adiciona o caminho da imagem (necessário para a exibição no template)
+        image_path = humor_map.get(humor.estado, 'img/icon/default.png')
+        
+        # Formatar a data para exibição (ex: DD/MM/YYYY)
+        try:
+            data_formatada = humor.data.strftime('%d/%m/%Y')
+        except AttributeError:
+            data_formatada = 'Data Indefinida'
+
+        humores_processados.append({
+            'data': data_formatada,
+            'estado': humor.estado, # Nome do humor (Feliz, Triste, etc.)
+            'descricaohumor': humor.descricaohumor,
+            'image_path': image_path,
+        })
+
+    context = {
+        'humores_registrados': humores_processados,
+    }
+
+    return render(request, 'app_LyfeSync/relatorioHumor.html', context)
 
 @login_required
 def relatorio_gratidao(request):
@@ -682,6 +773,7 @@ def configuracoes_conta(request):
     from .models import PerfilUsuario # Garantindo que PerfilUsuario está importado
       
     try:
+        # Tenta obter o perfil existente
         perfil_instance = request.user.perfil 
 
     except PerfilUsuario.DoesNotExist: 

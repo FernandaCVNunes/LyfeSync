@@ -1,73 +1,51 @@
 {% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
 {% load static %}
 
-{% block title %}Registrar Gratidão{% endblock %}
+{% block title %}
+    Registrar Gratidão
+{% endblock %}
 
 {% block content_logado %}
-<script src="https://cdn.tailwindcss.com"></script>
+    {# Prepara a variável de desativação para o textarea #}
+    {% with is_disabled_content=form|yesno:'disabled,' %}
+        <div class="container-fluid p-4 p-md-5 bg-white gratidao-page-container">
+            <h1 class="h1 fw-semibold gratidao-title-color mb-4 gratidao-main-title">Gratidão</h1>
 
-<div class="max-w-full mx-auto p-4 sm:p-6 lg:p-8 bg-white min-h-screen">
-    
-    <h1 class="text-4xl font-semibold gratidao-title-color mb-10">
-        Gratidão
-    </h1>
+            <form method="POST">
+                {% csrf_token %}
 
-    <form method="POST">
-        {% csrf_token %}
+                <div class="row g-4 g-lg-5">
+                    <div class="col-12 col-lg-7 d-grid gap-4">
+                        <div class="text-center mb-4">
+                            <h3 class="fw-bold gratidao-question-color">O QUE VOCÊ GOSTARIA DE AGRADECER HOJE?</h3>
+                        </div>
 
-        <div class="flex flex-wrap lg:flex-nowrap gap-8">
+                        <div class="d-grid gap-3">
+                            {# Tag textarea em linha única com variável pré-calculada #}
+                            <textarea name="{{ form.conteudo.name|default:'conteudo' }}" id="{{ form.conteudo.id_for_label|default:'id_conteudo' }}" rows="12" class="gratidao-field-bg form-control p-4 text-dark shadow-sm gratidao-textarea" placeholder="Escreva sua primeira gratidão..." {{ is_disabled_content }}>{{ form.conteudo.value|default:'' }}</textarea>
 
-            <div class="w-full lg:w-3/5 space-y-8">
-                
-                <div class="text-center mb-10">
-                    <h2 class="text-2xl font-bold gratidao-question-color">
-                        O QUE VOCÊ GOSTARIA DE AGRADECER HOJE?
-                    </h2>
+                            {% if form.conteudo.errors %}
+                                <p class="text-danger small mt-2">{{ form.conteudo.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-5 d-flex flex-column align-items-lg-end">
+                        <div class="d-flex align-items-center gap-2 mb-4 mb-lg-5 gratidao-date-container">
+                            <label class="text-secondary fw-medium gratidao-date-label">Data:</label>
+
+                            {# Prepara a variável de desativação para o input de data #}
+                            {% with is_disabled_data=form.data.value|yesno:'disabled,' %}
+                                <input type="date" name="{{ form.data.name|default:'data' }}" value="{{ form.data.value|default:'' }}" class="date-input-placeholder form-control p-2 text-secondary text-center gratidao-date-input" {{ is_disabled_data }} />
+                            {% endwith %}
+                        </div>
+
+                        <button type="submit" class="btn-salvar-gratidao btn btn-lg text-white fw-bold shadow-lg text-uppercase">Salvar</button>
+                    </div>
                 </div>
+            </form>
 
-                <div class="space-y-4">
-                    <textarea 
-                        name="{{ form.conteudo.name|default:'conteudo' }}" 
-                        id="{{ form.conteudo.id_for_label|default:'id_conteudo' }}" 
-                        rows="12" 
-                        class="gratidao-field-bg block w-full p-4 border border-gray-300 focus:ring-green-500 focus:border-green-500 text-gray-800 transition duration-150 text-xl resize-none" 
-                        placeholder="Escreva sua primeira gratidão..."
-                        {% if not form %}disabled{% endif %}
-                    >{{ form.conteudo.value|default:"" }}</textarea>
-
-                    {% if form.conteudo.errors %}
-                        <p class="text-red-500 text-sm mt-2">{{ form.conteudo.errors.0 }}</p>
-                    {% endif %}
-                </div>
-
-            </div>
-
-            <div class="w-full lg:w-2/5 flex flex-col items-end">
-                
-                <div class="flex items-center space-x-2 mb-20 lg:mb-40">
-                    <label class="text-gray-700 text-lg font-medium">Data:</label>
-                    <input 
-                        type="date" 
-                        name="{{ form.data.name|default:'data' }}"
-                        value="{{ form.data.value|default:'' }}"
-                        class="date-input-placeholder p-2 text-gray-700 border border-gray-400 rounded-lg text-center"
-                        style="width: 150px;"
-                        {% if form.data.value %}disabled{% endif %}
-                    >
-                    
-                    {% comment %}
-                    <div class="date-input-placeholder"></div>
-                    {% endcomment %}
-                </div>
-
-                <button type="submit" class="btn-salvar-gratidao text-white font-extrabold rounded-lg shadow-xl transition duration-200 uppercase text-lg">
-                    Salvar
-                </button>
-            </div>
+            <div class="pt-5"></div>
         </div>
-    </form>
-
-    <div class="h-20"></div> 
-    
-</div>
+    {% endwith %}
 {% endblock %}

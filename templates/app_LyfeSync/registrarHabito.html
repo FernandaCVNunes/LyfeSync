@@ -1,98 +1,101 @@
 {% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
 {% load static %}
 
-{% block title %}Registrar Hábito{% endblock %}
+{% block title %}
+  Registrar Hábito
+{% endblock %}
 
 {% block content_logado %}
-    
-    {# MODAL DE REGISTRO DE HÁBITO (Efeito de incluir registrarHabito.html) #}
-        <div class="modal fade" id="registrarHabitoModal" tabindex="-1" aria-labelledby="registrarHabitoLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content modal-content-custom">
-                
-                {# Cabeçalho do Modal #}
-                <div class="modal-header modal-header-custom">
-                    <h5 class="modal-title modal-title-custom" id="registrarHabitoLabel">Novo Hábito</h5>
-                    {# Botão de fechar (X) no canto superior direito #}
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                </div>
-                
-                {# Corpo do Modal - Formulário #}
-                <div class="modal-body">
-                    <form method="POST" action="{% url 'registrar_habito' %}">
-                        {% csrf_token %}
-                        
-                        {# Nome do Hábito (Linha 1) #}
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <label for="nomeHabito" class="form-label visually-hidden">Nome do Hábito</label>
-                                <input type="text" class="form-control form-control-custom" id="nomeHabito" name="nome_habito" placeholder="Nome do Hábito" required>
-                            </div>
-                        </div>
-
-                        {# Data de Início e Fim (Linha 2) #}
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="dataInicio" class="form-label visually-hidden">Data de Início</label>
-                                <input type="date" class="form-control form-control-custom" id="dataInicio" name="data_inicio" placeholder="Data de Início" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="dataFim" class="form-label visually-hidden">Data de Fim</label>
-                                <input type="date" class="form-control form-control-custom" id="dataFim" name="data_fim" placeholder="Data de Fim">
-                            </div>
-                        </div>
-
-                        {# Quantidade e Frequência (Linha 3) #}
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="quantidade" class="form-label visually-hidden">Quantidade</label>
-                                <input type="number" class="form-control form-control-custom" id="quantidade" name="quantidade" placeholder="Quantidade" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="frequencia" class="form-label visually-hidden">Frequência</label>
-                                <select class="form-select form-control-custom" id="frequencia" name="frequencia" required>
-                                    <option value="" disabled selected>Frequência</option>
-                                    <option value="diario">Diária</option>
-                                    <option value="semanal">Semanal</option>
-                                    <option value="mensal">Mensal</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        {# Unidade (Linha 4) #}
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <label for="unidade" class="form-label visually-hidden">Unidade</label>
-                                <input type="text" class="form-control form-control-custom" id="unidade" name="unidade" placeholder="Unidade (Ex: vezes, minutos, páginas)">
-                            </div>
-                        </div>
-                        
-                        {# Alvo (Linha 5) #}
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <label for="alvo" class="form-label visually-hidden">Alvo</label>
-                                <input type="text" class="form-control form-control-custom" id="alvo" name="alvo" placeholder="Alvo (Opcional)">
-                            </div>
-                        </div>
-
-                        {# Descrição (Linha 6) #}
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <label for="descricao" class="form-label visually-hidden">Descrição</label>
-                                <textarea class="form-control form-control-custom" id="descricao" name="descricao" rows="3" placeholder="Descrição"></textarea>
-                            </div>
-                        </div>
-
-                        {# Botão Adicionar #}
-                        <div class="row">
-                            <div class="col-12 text-center">
-                                <button type="submit" class="btn btn-adicionar-habito">Adicionar</button>
-                            </div>
-                        </div>
-
-                    </form>
-                </div>
-            </div>
+  <!-- MODAL DE REGISTRO DE HÁBITO -->
+  <div class="modal fade" id="registrarHabitoModal" tabindex="-1" aria-labelledby="registrarHabitoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <!-- Aplica a classe customizada para o estilo único do conteúdo do modal -->
+      <div class="modal-content rs-modal-content shadow-lg rounded-3">
+        <!-- Cabeçalho do Modal -->
+        <!-- Utilizando classes nativas do Bootstrap para espaçamento e borda -->
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold fs-4" id="registrarHabitoLabel">Novo Hábito</h5>
+          <!-- Botão de fechar (X) no canto superior direito -->
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
         </div>
+
+        <!-- Corpo do Modal - Formulário -->
+        <div class="modal-body pt-3 px-4 pb-5">
+          <form method="POST" action="{% url 'registrar_habito' %}">
+            {% csrf_token %}
+
+            <!-- Nome do Hábito (Linha 1) -->
+            <div class="row mb-3">
+              <div class="col-12">
+                <label for="nomeHabito" class="form-label visually-hidden">Nome do Hábito</label>
+                <!-- Classe rs-form-control para estilização específica do input -->
+                <input type="text" class="form-control rs-form-control" id="nomeHabito" name="nome_habito" placeholder="Nome do Hábito" required />
+              </div>
+            </div>
+
+            <!-- Data de Início e Fim (Linha 2) -->
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="dataInicio" class="form-label visually-hidden">Data de Início</label>
+                <input type="date" class="form-control rs-form-control" id="dataInicio" name="data_inicio" placeholder="Data de Início" required />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="dataFim" class="form-label visually-hidden">Data de Fim</label>
+                <input type="date" class="form-control rs-form-control" id="dataFim" name="data_fim" placeholder="Data de Fim" />
+              </div>
+            </div>
+
+            <!-- Quantidade e Frequência (Linha 3) -->
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="quantidade" class="form-label visually-hidden">Quantidade</label>
+                <input type="number" class="form-control rs-form-control" id="quantidade" name="quantidade" placeholder="Quantidade" required />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="frequencia" class="form-label visually-hidden">Frequência</label>
+                <select class="form-select rs-form-control" id="frequencia" name="frequencia" required>
+                  <option value="" disabled selected>Frequência</option>
+                  <option value="diario">Diária</option>
+                  <option value="semanal">Semanal</option>
+                  <option value="mensal">Mensal</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Unidade (Linha 4) -->
+            <div class="row mb-3">
+              <div class="col-12">
+                <label for="unidade" class="form-label visually-hidden">Unidade</label>
+                <input type="text" class="form-control rs-form-control" id="unidade" name="unidade" placeholder="Unidade (Ex: vezes, minutos, páginas)" />
+              </div>
+            </div>
+
+            <!-- Alvo (Linha 5) -->
+            <div class="row mb-3">
+              <div class="col-12">
+                <label for="alvo" class="form-label visually-hidden">Alvo</label>
+                <input type="text" class="form-control rs-form-control" id="alvo" name="alvo" placeholder="Alvo (Opcional)" />
+              </div>
+            </div>
+
+            <!-- Descrição (Linha 6) -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <label for="descricao" class="form-label visually-hidden">Descrição</label>
+                <textarea class="form-control rs-form-control" id="descricao" name="descricao" rows="3" placeholder="Descrição"></textarea>
+              </div>
+            </div>
+
+            <!-- Botão Adicionar -->
+            <div class="row">
+              <div class="col-12 text-center">
+                <!-- Nova classe rs-btn-adicionar para estilização específica do botão -->
+                <button type="submit" class="btn rs-btn-adicionar">Adicionar</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
+  </div>
 {% endblock %}

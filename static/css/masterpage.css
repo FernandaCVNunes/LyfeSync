@@ -2,9 +2,11 @@
 :root {
     --primary-color: #f59e0b;
     --secondary-color: #f7a26c;
-    --bg-color-header: #F7F0DF; /* Fundo para o cabeçalho */
-    --bg-color-footer: #F7F0DF; /* Fundo para o rodapé */
-    --text-color: #29515F;
+    --bg-color-header: #F7F0DF;
+    /* Fundo para o cabeçalho */
+    --bg-color-footer: #F7F0DF;
+    /* Fundo para o rodapé */
+    --text-color: #0f3c4e;
     --link-color: #6c757d;
     --active-link-color: #f59e0b;
 }
@@ -68,9 +70,12 @@ body {
 }
 
 .btn-nav-login {
-    background-color: #29515F; /* Cor do botão */
-    color: #fff; /* Cor da fonte */
-    border-radius: 50px; /* Borda arredondada */
+    background-color: #29515F;
+    /* Cor do botão */
+    color: #fff;
+    /* Cor da fonte */
+    border-radius: 50px;
+    /* Borda arredondada */
     padding: 8px 25px;
     margin-left: 15px;
     transition: background-color 0.3s ease, color 0.3s ease;
@@ -78,17 +83,20 @@ body {
 
 /* Regra de estilo para a cor da fonte do link */
 .btn-nav-login.nav-link {
-    color: #fff; /* Cor da fonte */
+    color: #fff;
+    /* Cor da fonte */
 }
 
 .btn-nav-login:hover {
-    background-color: #3f6e80; /* Cor um pouco mais clara para o efeito hover */
+    background-color: #3f6e80;
+    /* Cor um pouco mais clara para o efeito hover */
     color: #fff;
 }
 
 /* Regra de estilo para a cor da fonte no hover */
 .btn-nav-login.nav-link:hover {
-    color: #fff; /* Garante que a cor da fonte não mude no hover */
+    color: #fff;
+    /* Garante que a cor da fonte não mude no hover */
 }
 
 /* ===================== ESTILO DO RODAPÉ ===================== */
@@ -132,11 +140,17 @@ body {
     transform: translateY(-5px);
 }
 
-.social-icon.facebook { background-color: #3b5998; }
-.social-icon.instagram { 
-    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%,#d6249f 60%,#285AEB 90%);
+.social-icon.facebook {
+    background-color: #3b5998;
 }
-.social-icon.whatsapp { background-color: #25d366; }
+
+.social-icon.instagram {
+    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+}
+
+.social-icon.whatsapp {
+    background-color: #25d366;
+}
 
 .footer-bottom {
     background-color: rgba(0, 0, 0, 0.05);

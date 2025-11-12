@@ -1,39 +1,47 @@
+/* masterpage_logado.css */
 /* -------------------------------------------------------------------
-    [NOVA SEÇÃO] ESTILOS EXCLUSIVOS DA ÁREA LOGADA (LYFESYNC)
-    ------------------------------------------------------------------- */
+   ESTILOS EXCLUSIVOS DA ÁREA LOGADA (LYFESYNC)
+   ------------------------------------------------------------------- */
 
-/* Variáveis de Cor - Baseadas no esquema de cores da Imagem: Pêssego Suave */
 :root {
     --bg-color-primary: #fdf6e7;
-    /* Fundo principal suave (bege/pêssego) */
     --primary-color: #e88972;
-    /* Cor primária (rosa/pêssego forte) para botões/ativos */
     --text-color-dark: #333333;
     --text-color-sidebar: #495057;
     --navbar-height: 55px;
+    /* Altura de referência da Navbar */
     --sidebar-width: 250px;
+    --footer-height: 130px;
+    /* Altura aproximada do footer */
 }
 
-/* 1. LAYOUT PRINCIPAL (Força a altura e Flex Column) */
+/* 1. LAYOUT PRINCIPAL (Aplicado ao <body>) */
 .lyfesync-full-layout {
     background-color: var(--bg-color-primary) !important;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     margin: 0;
-    padding: 0;
+
+    /* *** CORREÇÃO CRÍTICA PRINCIPAL: Usar padding-top no body para compensar a navbar fixa *** */
+    padding-top: var(--navbar-height);
+    /* FIM DA CORREÇÃO CRÍTICA */
 }
 
 /* Navbar - Ajuste de cor de fundo e altura */
 .lyfesync-full-layout .navbar {
     background-color: var(--bg-color-primary) !important;
+    position: fixed;
     height: var(--navbar-height);
     padding: 0 1rem;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    /* Linha sutil abaixo da navbar */
+    z-index: 999999 !important;
+    /* Garante a visibilidade sobre QUALQUER COISA */
+    top: 0;
+    width: 100%;
 }
 
-/* Links da Navbar (Home, Sobre Nós, Contatos) */
+/* Links da Navbar */
 .lyfesync-full-layout .navbar .nav-link {
     color: var(--text-color-dark);
     font-weight: 500;
@@ -41,8 +49,7 @@
 }
 
 .lyfesync-full-layout .navbar .nav-link:hover,
-.lyfesync-full-layout .navbar .nav-link.active-link {
-    /* active-link para o Home */
+.lyfesync-full-layout .navbar .nav-link.active {
     color: var(--primary-color);
 }
 
@@ -62,155 +69,95 @@
 }
 
 
-/* 2. CONTAINER DE SIDEBAR + CONTEÚDO */
-.lyfesync-full-layout .lyfesync-layout-container {
+/* 2. CONTAINER DE SIDEBAR + CONTEÚDO (main-wrapper-logado) */
+.main-wrapper-logado {
+    /* Removido margin-top, pois agora está no <body> (padding-top) */
     flex-grow: 1;
     display: flex;
     flex-direction: row;
     width: 100%;
-    /* Altura total - altura da navbar - altura aproximada do footer */
-    min-height: calc(100vh - var(--navbar-height) - 60px);
+    z-index: 1;
+
+    /* Ajuste para garantir que o wrapper ocupe o espaço restante */
+    min-height: calc(100vh - var(--navbar-height) - var(--footer-height));
+    /* Colocamos uma altura mínima maior para o footer, se o problema persistir */
 }
 
-
 /* 3. SIDEBAR */
-.sidebar-menu {
+.sidebar-logado {
     width: var(--sidebar-width);
     flex-shrink: 0;
     background-color: var(--bg-color-primary) !important;
     border-right: 1px solid rgba(0, 0, 0, 0.05);
     padding: 20px 0 !important;
-    /* Ajuste o padding para cima/baixo */
-    height: 100%;
+
+    /* Tentativa de tornar a sidebar "sticky" */
+    position: -webkit-sticky;
+    /* Para compatibilidade */
+    position: sticky;
+    top: var(--navbar-height);
+    /* Faz a sidebar começar logo abaixo da navbar */
+    height: calc(100vh - var(--navbar-height));
+    /* Ocupa a altura da tela, excluindo apenas a navbar */
+    overflow-y: auto;
 }
 
 /* 4. CONTEÚDO PRINCIPAL (Main Content) */
-.main-content-container {
+.content-logado {
     flex-grow: 1;
     background-color: var(--bg-color-primary);
-    padding: 10px 10px 10px 0;
-    /* Mais padding para a esquerda por causa da sidebar */
+    padding: 10px 20px;
+    /* Padding ajustado para melhor visualização */
     display: flex;
     flex-direction: column;
     overflow-y: auto;
 }
 
-/* 5. O Painel Branco (main-content) - CRUCIAL */
-.main-content {
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.08);
-    margin: 10px 20px 10px 20px;
-    /* Margens internas para ficar no meio do bege */
-    flex-grow: 1;
-    /* Remove a centralização automática da masterpage anterior */
-    display: block;
-    /* Adicione padding interno para o conteúdo real começar */
-    padding: 20px;
-}
+/* Estilos de Componentes da Sidebar (mantidos da versão anterior) */
+/* ... (Mantenha os estilos .sidebar-link, .sidebar-bottom, etc. da última correção) ... */
 
-/* -------------------- ESTILOS DE COMPONENTES DE SIDEBAR -------------------- */
-.sidebar-menu a.sidebar-item {
+.sidebar-logado a.sidebar-link {
     display: flex;
     align-items: center;
     padding: 10px 25px;
-    /* Mais padding horizontal para ícones */
     margin-bottom: 5px;
-    /* Espaço entre os links */
     text-decoration: none;
     color: var(--text-color-sidebar);
     font-size: 1rem;
     font-weight: 500;
     transition: background-color 0.2s;
     border-radius: 0;
-    /* Sem bordas arredondadas na imagem */
 }
 
-/* Ícones da Sidebar - Agora Font Awesome */
-.sidebar-menu a.sidebar-item i.fas {
-    font-size: 1.25rem;
-    width: 30px;
-    /* Garante alinhamento */
-    text-align: center;
-    margin-right: 10px;
-}
-
-/* Link Ativo */
-.sidebar-menu a.sidebar-item.active {
+.sidebar-logado a.sidebar-link.active {
     background-color: rgba(255, 255, 255, 0.8);
-    /* Fundo claro no ativo */
     font-weight: bold;
     color: var(--primary-color);
 }
 
-.sidebar-menu a.sidebar-item.active i.fas {
-    color: var(--primary-color);
-}
+/* ... (e os demais estilos de hover, ícones, e footer) ... */
 
-/* Hover */
-.sidebar-menu a.sidebar-item:hover {
-    background-color: rgba(232, 137, 114, 0.1);
-    color: var(--text-color-sidebar);
-}
-
-/* Item Conta/Configurações (Empurrado para baixo) */
-.sidebar-menu a.bottom-item {
-    margin-top: auto;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
-    padding-top: 20px;
-}
-
-/* Logo Circular Inferior */
-.logo-circular-bottom {
-    width: 50px;
-    height: 50px;
-    overflow: hidden;
-    margin: 20px auto 0;
-    /* Centraliza horizontalmente */
-}
-
-.logo-circular-bottom img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
 
 /* -------------------- ESTILOS DE FOOTER -------------------- */
-.lyfesync-full-layout .footer {
+.footer {
     background-color: var(--bg-color-primary) !important;
     border-top: 1px solid rgba(0, 0, 0, 0.05);
-    padding: 0 0 !important;
-    /* Remove padding desnecessário */
+    padding: 0 !important;
+    flex-shrink: 0;
+    /* Garante que o footer não seja espremido */
 }
 
-.lyfesync-full-layout .footer-content-row {
-    padding: 10px 0;
-}
-
-.lyfesync-full-layout .footer-bottom-copyright {
+.footer-bottom {
     border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-/* Logo Circular no Footer (Esquerda) */
-.logo-circular-footer {
-    width: 40px;
-    height: 40px;
-    overflow: hidden;
-    order: 1;
-    /* Coloca à esquerda */
-}
-
-.logo-circular-footer img {
-    width: 100%;
-    height: 100%;
-}
-
-.lyfesync-full-layout .footer-link {
+/* Footer Links e Ícones */
+.footer-link {
     color: var(--text-color-sidebar);
     font-size: 0.95rem;
 }
 
-.lyfesync-full-layout .footer-link:hover {
+.footer-link:hover {
     color: var(--primary-color);
 }
 
@@ -233,6 +180,6 @@
     background-color: #E1306C;
 }
 
-.social-icon.youtube {
-    background-color: #FF0000;
+.social-icon.whatsapp {
+    background-color: #25D366;
 }
