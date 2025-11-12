@@ -1,13 +1,21 @@
-# forms.py #
+# Este arquivo contém os Formulários do Django, usados para renderização
+# HTML, validação e personalização da interface de administração.
+
 from django import forms
-# A importação do modelo Dicas já está correta
-from .models import Habito, Gratidao, Afirmacao, Humor, Dicas, PerfilUsuario
 from django.utils import timezone
 from django.forms import ModelForm, TextInput, DateInput, NumberInput, Select, Textarea, RadioSelect
 from django.contrib.auth.forms import UserChangeForm
-from django.contrib.auth.models import User
+# ALTERAÇÃO: Usar get_user_model é uma boa prática para garantir compatibilidade
+from django.contrib.auth import get_user_model
 from allauth.account.forms import SignupForm
 from django.db import transaction
+
+# Importação dos modelos, assumindo que eles existem no diretório pai ou estão configurados
+# NOTA: O nome dos modelos aqui é baseado na estrutura do Forms e não nos Models anteriormente vistos.
+from .models import Habito, Gratidao, Afirmacao, Humor, Dicas, PerfilUsuario
+
+# Obtém o modelo de Usuário ativo (padrão ou customizado)
+User = get_user_model()
 
 # -------------------------------------------------------------------
 # 1. FORMULÁRIO DE HÁBITO
@@ -24,7 +32,6 @@ class HabitoForm(forms.ModelForm):
         widgets = {
             'nome': TextInput(attrs={'placeholder': 'Ex: Beber água, Meditar', 'class': 'form-control'}),
             'data_inicio': DateInput(
-                # ALTERAÇÃO: Usando timezone.localdate() é mais seguro para campos DateField
                 attrs={'type': 'date', 'class': 'form-control', 'value': timezone.localdate().strftime('%Y-%m-%d')},
                 format='%Y-%m-%d'
             ),
@@ -52,7 +59,7 @@ class HabitoForm(forms.ModelForm):
         }
 
 # -------------------------------------------------------------------
-# 2. FORMULÁRIOS PARA AUTOCUIDADO (IMPLEMENTADOS)
+# 2. FORMULÁRIOS PARA AUTOCUIDADO
 # -------------------------------------------------------------------
 
 class GratidaoForm(forms.ModelForm):
@@ -107,7 +114,7 @@ class HumorForm(forms.ModelForm):
         fields = ['estado', 'descricaohumor', 'data'] 
         
         widgets = {
-            # O campo 'estado' se beneficia de um Select com as choices definidas no Model
+            # O campo 'estado' se beneficia de um RadioSelect com as choices definidas no Model
             'estado': RadioSelect(attrs={'class': 'form-control'}), 
             'descricaohumor': Textarea(attrs={'placeholder': 'Opcional: Descreva o que motivou este humor.', 'rows': 4, 'class': 'form-control'}),
             'data': DateInput(
@@ -125,31 +132,30 @@ class HumorForm(forms.ModelForm):
             'estado': {
                 'required': 'Por favor, selecione seu humor para prosseguir.',
             },
-            # Se você quiser alterar a mensagem de data:
             'data': {
                  'required': 'A data do registro é obrigatória.',
             }
         }
 
-class DicasForm(forms.ModelForm): # NOME SUGERIDO CORRIGIDO PARA 'DicasForm'
+class DicasForm(forms.ModelForm):
     """
     Formulário para o administrador cadastrar novas dicas de humor.
     """
     
     class Meta:
-        model = Dicas  # <--- CORREÇÃO CRÍTICA AQUI! Deve ser 'Dicas'.
-        fields = ['TipoHumor', 'nomeDica', 'descricaoDica'] # CORRIGIDO: Campos para corresponder ao models.py
+        model = Dicas
+        # ASSUMIDO: Campos para corresponder ao modelo Dicas
+        fields = ['TipoHumor', 'nomeDica', 'descricaoDica']
         
         widgets = {
-            # ALTERAÇÃO: Padronizando o uso de 'form-control' para consistência
             'TipoHumor': forms.Select(attrs={
                 'class': 'form-control' 
             }),
-            'nomeDica': forms.TextInput(attrs={ # CORRIGIDO: nomeDica
+            'nomeDica': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Digite um título curto para a dica'
             }),
-            'descricaoDica': forms.Textarea(attrs={ # CORRIGIDO: descricaoDica
+            'descricaoDica': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 5, 
                 'placeholder': 'Escreva aqui a descrição detalhada da dica...',
@@ -163,30 +169,28 @@ class DicasForm(forms.ModelForm): # NOME SUGERIDO CORRIGIDO PARA 'DicasForm'
 
 class UserUpdateForm(UserChangeForm):
     """
-    Formulário para o usuário editar seu nome e sobrenome.
+    Formulário para o usuário editar seu nome e sobrenome (AuthUser).
     """
     class Meta:
-        model = User
-        fields = ('first_name', 'last_name') # Campos que o cliente pode editar
+        # CORREÇÃO: Usando o modelo User obtido via get_user_model()
+        model = User 
+        fields = ('first_name', 'last_name') 
         
-        # ADICIONADO: Widgets para aplicar o estilo Bootstrap
         widgets = {
             'first_name': TextInput(attrs={'class': 'form-control'}),
             'last_name': TextInput(attrs={'class': 'form-control'}),
         }
 
-
     # Removemos o campo 'password' para evitar que o cliente altere a senha acidentalmente
     def __init__(self, *args, **kwargs):
         super(UserUpdateForm, self).__init__(*args, **kwargs)
         if 'password' in self.fields:
-            # Garante que o campo 'password' é removido
             del self.fields['password'] 
         
-        # ADICIONADO: Aplica a classe de estilo Bootstrap no init também para garantir
+        # Garante que todos os campos restantes recebam a classe Bootstrap
         for field in self.fields.values():
-             field.widget.attrs.update({'class': 'form-control'})
-             
+            field.widget.attrs.update({'class': 'form-control'})
+            
 # Formulário para o Perfil (Contém tipoUsuario)
 class PerfilUsuarioForm(forms.ModelForm):
     """
@@ -194,44 +198,51 @@ class PerfilUsuarioForm(forms.ModelForm):
     """
     class Meta:
         model = PerfilUsuario
-        fields = ('tipoUsuario',) # O campo que queremos mostrar e editar
+        fields = ('tipoUsuario',)
         
-        # ALTERAÇÃO: Movido a definição de widget para a classe Meta, seguindo o padrão
         widgets = {
              'tipoUsuario': Select(attrs={'class': 'form-select'}),
         }
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        pass
+        # O campo 'tipoUsuario' deve ser o único visível/editável se este formulário for usado isoladamente.
+
 
 class CustomSignupForm(SignupForm):
-    # 1. Adiciona os campos de Nome e Sobrenome e os torna obrigatórios (required=True é o padrão)
-    first_name = forms.CharField(max_length=150, label='Nome')
-    last_name = forms.CharField(max_length=150, label='Sobrenome')
+    """
+    Estende o formulário de cadastro do Django-allauth para incluir
+    os campos first_name e last_name.
+    """
+    first_name = forms.CharField(max_length=150, label='Nome', widget=TextInput(attrs={'class': 'form-control'}))
+    last_name = forms.CharField(max_length=150, label='Sobrenome', widget=TextInput(attrs={'class': 'form-control'}))
 
     @transaction.atomic
     def save(self, request):
-        # O método super().save(request) cria o objeto User, mas não salva first_name e last_name 
-        # a menos que estejam na lista ACCOUNT_SIGNUP_FIELDS.
-        # Mesmo que estejam, vamos garantir que o salvamento é feito aqui.
-        
-        # 2. Chama o método save da classe pai (SignupForm)
-        # Isso cria o objeto User (auth_user)
         user = super(CustomSignupForm, self).save(request)
         
-        # 3. Adiciona os dados extras do formulário ao objeto User
         user.first_name = self.cleaned_data['first_name']
         user.last_name = self.cleaned_data['last_name']
-        
-        # 4. Salva o User atualizado com Nome e Sobrenome
         user.save()
         
-        # 5. Lógica para garantir que o PerfilUsuario está configurado
-        # O seu signal já cuida da criação e definição de 'Cliente', mas repetimos
-        # a lógica de segurança (verificando se o perfil existe)
-        if hasattr(user, 'perfil'):
-            user.perfil.tipoUsuario = 'Cliente'
-            user.perfil.save()
+        # NOTA IMPORTANTE:
+        # Esta lógica assume que o related_name de PerfilUsuario para User é 'perfil'.
+        # Se você estiver usando o modelo 'UserProfile' do seu models.py anterior, o nome
+        # de relacionamento padrão é 'userprofile', e você precisaria de 'user.userprofile.save()'.
+        try:
+             if hasattr(user, 'perfilusuario'): # Tentativa com o nome do modelo em minúsculo
+                 perfil = user.perfilusuario
+             elif hasattr(user, 'perfil'): # Tentativa com o related_name 'perfil'
+                 perfil = user.perfil
+             else:
+                 # Se o signal post_save não criou o perfil ou o related_name é diferente
+                 # Você pode precisar de UserProfile.objects.get_or_create(user=user)
+                 perfil = PerfilUsuario.objects.get(user=user)
+
+             perfil.tipoUsuario = 'Cliente'
+             perfil.save()
+        except Exception as e:
+            # Em caso de erro na manipulação do perfil (ex: related_name errado ou perfil não criado)
+            print(f"ATENÇÃO: Não foi possível salvar tipoUsuario no Perfil. Verifique o related_name da FK. Erro: {e}")
         
         return user

@@ -32,5 +32,5 @@ def registrar_dica(request):
     context = {
         'form': form,
     }
-    # CORREÇÃO: Template movido para a subpasta 'humor'
+    # CAMINHO CORRIGIDO: Template agora aponta para a subpasta 'humor'
     return render(request, 'app_LyfeSync/humor/dicas.html', context)

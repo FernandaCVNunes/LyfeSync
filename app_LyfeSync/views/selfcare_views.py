@@ -20,7 +20,7 @@ def autocuidado(request):
     afirmacoes = Afirmacao.objects.filter(idusuario=request.user).order_by('?')[:5]
     
     context = {'afirmacoes': afirmacoes}
-    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
+    # Mantém o template principal de menu na pasta 'autocuidado'
     return render(request, 'app_LyfeSync/autocuidado/autocuidado.html', context)
 
 
@@ -67,8 +67,8 @@ def humor(request):
         'humores_recentes': humores_recentes_list, 
         'humor_icon_class_map': humor_map 
     }
-    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
-    return render(request, 'app_LyfeSync/autocuidado/humor.html', context)
+    # ALTERAÇÃO: Template movido para a subpasta 'humor'
+    return render(request, 'app_LyfeSync/humor/humor.html', context)
 
     
 @login_required(login_url='login')
@@ -101,8 +101,8 @@ def registrar_humor(request):
         'form': form,
         'humor_icon_class_map': humor_icon_class_map 
     }
-    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
-    return render(request, 'app_LyfeSync/autocuidado/registrarHumor.html', context)
+    # ALTERAÇÃO: Template movido para a subpasta 'humor'
+    return render(request, 'app_LyfeSync/humor/registrarHumor.html', context)
 
 @login_required(login_url='login')
 def alterar_humor(request, humor_id): 
@@ -131,8 +131,8 @@ def alterar_humor(request, humor_id):
         'humor_id': humor_id, 
     }
     
-    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
-    return render(request, 'app_LyfeSync/autocuidado/alterarHumor.html', context)
+    # ALTERAÇÃO: Template movido para a subpasta 'humor'
+    return render(request, 'app_LyfeSync/humor/alterarHumor.html', context)
 
 @require_POST
 @login_required(login_url='login')
@@ -218,8 +218,8 @@ def gratidao(request):
         'ano_atual': data_hoje.year,
     }
 
-    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
-    return render(request, 'app_LyfeSync/autocuidado/gratidao.html', context)
+    # ALTERAÇÃO: Template movido para a subpasta 'gratidao'
+    return render(request, 'app_LyfeSync/gratidao/gratidao.html', context)
 
 
 @login_required(login_url='login') 
@@ -243,8 +243,8 @@ def registrar_gratidao(request):
         form = GratidaoForm()
         
     context = {'form': form}
-    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
-    return render(request, 'app_LyfeSync/autocuidado/registrarGratidao.html', context)
+    # ALTERAÇÃO: Template movido para a subpasta 'gratidao'
+    return render(request, 'app_LyfeSync/gratidao/registrarGratidao.html', context)
 
 
 @login_required(login_url='login')
@@ -265,8 +265,8 @@ def alterar_gratidao(request, gratidao_id):
         form = GratidaoForm(instance=gratidao_instance)
         
     context = {'form': form, 'gratidao_id': gratidao_id}
-    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
-    return render(request, 'app_LyfeSync/autocuidado/alterarGratidao.html', context)
+    # ALTERAÇÃO: Template movido para a subpasta 'gratidao'
+    return render(request, 'app_LyfeSync/gratidao/alterarGratidao.html', context)
 
 
 @require_POST
@@ -296,8 +296,8 @@ def afirmacao(request):
         'ultimas_afirmacoes': ultimas_afirmacoes,
     }
 
-    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
-    return render(request, 'app_LyfeSync/autocuidado/afirmacao.html', context)
+    # ALTERAÇÃO: Template movido para a subpasta 'afirmacao'
+    return render(request, 'app_LyfeSync/afirmacao/afirmacao.html', context)
 
 
 @login_required(login_url='login')
@@ -321,8 +321,8 @@ def registrar_afirmacao(request):
         form = AfirmacaoForm()
         
     context = {'form': form}
-    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
-    return render(request, 'app_LyfeSync/autocuidado/registrarAfirmacao.html', context)
+    # ALTERAÇÃO: Template movido para a subpasta 'afirmacao'
+    return render(request, 'app_LyfeSync/afirmacao/registrarAfirmacao.html', context)
 
 
 @login_required(login_url='login')
@@ -343,8 +343,8 @@ def alterar_afirmacao(request, afirmacao_id):
         form = AfirmacaoForm(instance=afirmacao_instance)
         
     context = {'form': form, 'afirmacao_id': afirmacao_id}
-    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
-    return render(request, 'app_LyfeSync/autocuidado/alterarAfirmacao.html', context)
+    # ALTERAÇÃO: Template movido para a subpasta 'afirmacao'
+    return render(request, 'app_LyfeSync/afirmacao/alterarAfirmacao.html', context)
 
 
 @require_POST
