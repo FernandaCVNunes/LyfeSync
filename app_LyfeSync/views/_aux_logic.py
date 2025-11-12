@@ -1,4 +1,4 @@
-# app_LyfeSync/views/_aux_logic.py
+# app_LyfeSync/views/_aux.logic.py
 from datetime import date
 from ..models import StatusDiario
 

@@ -15,11 +15,13 @@ from django.contrib.auth.forms import UserCreationForm as CadastroForm
 
 def home(request):
     """Página inicial do site."""
-    return render(request, 'app_LyfeSync/home.html')
+    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'public'
+    return render(request, 'app_LyfeSync/public/home.html')
 
 def sobre_nos(request):
     """Página sobre a equipe e missão."""
-    return render(request, 'app_LyfeSync/sobreNos.html')
+    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'public'
+    return render(request, 'app_LyfeSync/public/sobreNos.html')
 
 def contatos(request):
     """Processa e renderiza a página de contato com envio de e-mail."""
@@ -52,25 +54,29 @@ def contatos(request):
         
         # 4. Anexa o arquivo, se existir
         if anexo:
+            # O anexo.read() já deve ser binário e o content_type é lido do arquivo
             mail.attach(anexo.name, anexo.read(), anexo.content_type)
         
         # 5. Tenta enviar o e-mail
         try:
             mail.send(fail_silently=False)
             messages.success(request, 'Mensagem enviada com sucesso! Em breve entraremos em contato.')
+            # Redireciona para a mesma página para limpar o POST
             return HttpResponseRedirect(reverse('contatos')) 
         except Exception as e:
             print(f"ERRO AO ENVIAR EMAIL: {e}")
             messages.error(request, f'Ocorreu um erro ao enviar a mensagem. Por favor, tente novamente mais tarde.')
 
-    return render(request, 'app_LyfeSync/contatos.html')
+    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'public'
+    return render(request, 'app_LyfeSync/public/contatos.html')
 
 def login_view(request): 
     """Página de login."""
     # Instancia um formulário de cadastro vazio para o modal, se necessário
     form_cadastro = CadastroForm()
     context = {'form_cadastro': form_cadastro} # Passa o formulário para o template, se necessário
-    return render(request, 'app_LyfeSync/login.html', context) 
+    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'public'
+    return render(request, 'app_LyfeSync/public/login.html', context) 
 
 def cadastro(request):
     """Função de view para o cadastro de novos usuários."""
@@ -82,9 +88,10 @@ def cadastro(request):
             login(request, user) 
             messages.success(request, f'Bem-vindo(a), {user.username}! Seu cadastro foi realizado com sucesso.')
             # Redireciona para o dashboard após o login
-            return redirect('home_lyfesync') 
+            return redirect('homeLyfesync') 
         else:
-            # Se o formulário for inválido, redireciona para login.html 
+            # Se o formulário for inválido, redireciona para login.html
+            # E adiciona mensagens de erro
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(request, f"Erro em {field}: {error}")

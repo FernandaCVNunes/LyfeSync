@@ -22,6 +22,7 @@ def registrar_dica(request):
             dica.criado_por = request.user
             dica.save()
             messages.success(request, 'Dica cadastrada com sucesso!')
+            # Após o sucesso, redireciona para a mesma view para novo registro.
             return redirect('registrar_dica') 
         else:
             messages.error(request, 'Erro ao cadastrar a dica. Verifique os campos.')
@@ -31,4 +32,5 @@ def registrar_dica(request):
     context = {
         'form': form,
     }
-    return render(request, 'app_LyfeSync/dicas.html', context)
+    # CORREÇÃO: Template movido para a subpasta 'humor'
+    return render(request, 'app_LyfeSync/humor/dicas.html', context)

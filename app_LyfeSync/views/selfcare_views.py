@@ -13,19 +13,22 @@ from ..models import Gratidao, Afirmacao, Humor
 from ._aux_logic import get_humor_map # Importa a lógica auxiliar
 
 
-@login_required
+@login_required(login_url='login')
 def autocuidado(request):
     """Página de Autocuidado, que pode listar Afirmações, Gratidão e Humor. Requer login."""
     # CORREÇÃO/IMPORTANTE: Usando 'idusuario' para Afirmacao
     afirmacoes = Afirmacao.objects.filter(idusuario=request.user).order_by('?')[:5]
     
     context = {'afirmacoes': afirmacoes}
-    return render(request, 'app_LyfeSync/autocuidado.html', context)
+    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
+    return render(request, 'app_LyfeSync/autocuidado/autocuidado.html', context)
 
 
-# --- Views de Humor ---
+# -------------------------------------------------------------------
+# VIEWS DE HUMOR
+# -------------------------------------------------------------------
 
-@login_required
+@login_required(login_url='login')
 def humor(request):
     """Página de Humor. Requer login."""
     
@@ -64,10 +67,11 @@ def humor(request):
         'humores_recentes': humores_recentes_list, 
         'humor_icon_class_map': humor_map 
     }
-    return render(request, 'app_LyfeSync/humor.html', context)
+    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
+    return render(request, 'app_LyfeSync/autocuidado/humor.html', context)
 
     
-@login_required
+@login_required(login_url='login')
 def registrar_humor(request):
     """Permite registrar um novo Humor. Requer login."""
     
@@ -97,14 +101,16 @@ def registrar_humor(request):
         'form': form,
         'humor_icon_class_map': humor_icon_class_map 
     }
-    return render(request, 'app_LyfeSync/registrarHumor.html', context)
+    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
+    return render(request, 'app_LyfeSync/autocuidado/registrarHumor.html', context)
 
-@login_required
+@login_required(login_url='login')
 def alterar_humor(request, humor_id): 
     """Permite alterar um Humor existente. Requer login."""
     
     humor_map = get_humor_map()
     
+    # Assume que o campo de ID é idhumor
     instance = get_object_or_404(Humor, idhumor=humor_id, idusuario=request.user)
     
     if request.method == 'POST':
@@ -125,9 +131,22 @@ def alterar_humor(request, humor_id):
         'humor_id': humor_id, 
     }
     
-    return render(request, 'app_LyfeSync/alterarHumor.html', context)
+    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
+    return render(request, 'app_LyfeSync/autocuidado/alterarHumor.html', context)
 
-@login_required
+@require_POST
+@login_required(login_url='login')
+def delete_humor(request, humor_id):
+    """Exclui um registro de Humor específico (via AJAX)."""
+    try:
+        humor_instance = get_object_or_404(Humor, idhumor=humor_id, idusuario=request.user)
+        humor_instance.delete()
+        return JsonResponse({'status': 'success', 'message': f'Humor ID {humor_id} excluído.'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+
+@login_required(login_url='login')
 def load_humor_by_date(request):
     """API para buscar dados de humor para uma data específica (via AJAX)."""
     
@@ -167,9 +186,11 @@ def load_humor_by_date(request):
         return JsonResponse({'exists': False, 'error': 'Erro interno do servidor ao buscar humor.'}, status=500)
 
 
-# --- Views de Gratidão ---
+# -------------------------------------------------------------------
+# VIEWS DE GRATIDÃO
+# -------------------------------------------------------------------
 
-@login_required
+@login_required(login_url='login')
 def gratidao(request):
     
     data_hoje = timezone.localdate()
@@ -181,6 +202,7 @@ def gratidao(request):
     ).order_by('-data') 
     
     try:
+        # Tenta configurar o locale para exibir o nome do mês corretamente
         locale.setlocale(locale.LC_ALL, 'pt_BR.utf8')
     except locale.Error:
         try:
@@ -196,10 +218,11 @@ def gratidao(request):
         'ano_atual': data_hoje.year,
     }
 
-    return render(request, 'app_LyfeSync/gratidao.html', context)
+    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
+    return render(request, 'app_LyfeSync/autocuidado/gratidao.html', context)
 
 
-@login_required 
+@login_required(login_url='login') 
 def registrar_gratidao(request):
     """Permite registrar uma nova Gratidão. Requer login."""
     if request.method == 'POST':
@@ -220,10 +243,11 @@ def registrar_gratidao(request):
         form = GratidaoForm()
         
     context = {'form': form}
-    return render(request, 'app_LyfeSync/registrarGratidao.html', context)
+    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
+    return render(request, 'app_LyfeSync/autocuidado/registrarGratidao.html', context)
 
 
-@login_required
+@login_required(login_url='login')
 def alterar_gratidao(request, gratidao_id): 
     """Permite alterar uma Gratidao existente. Requer login e ID da Gratidão."""
     
@@ -241,11 +265,12 @@ def alterar_gratidao(request, gratidao_id):
         form = GratidaoForm(instance=gratidao_instance)
         
     context = {'form': form, 'gratidao_id': gratidao_id}
-    return render(request, 'app_LyfeSync/alterarGratidao.html', context)
+    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
+    return render(request, 'app_LyfeSync/autocuidado/alterarGratidao.html', context)
 
 
 @require_POST
-@login_required
+@login_required(login_url='login')
 def delete_gratidao(request, gratidao_id):
     """Exclui um registro de Gratidão específico (via AJAX)."""
     try:
@@ -256,9 +281,11 @@ def delete_gratidao(request, gratidao_id):
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 
-# --- Views de Afirmação ---
+# -------------------------------------------------------------------
+# VIEWS DE AFIRMAÇÃO
+# -------------------------------------------------------------------
 
-@login_required
+@login_required(login_url='login')
 def afirmacao(request):
     
     ultimas_afirmacoes = Afirmacao.objects.filter(
@@ -269,10 +296,11 @@ def afirmacao(request):
         'ultimas_afirmacoes': ultimas_afirmacoes,
     }
 
-    return render(request, 'app_LyfeSync/afirmacao.html', context)
+    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
+    return render(request, 'app_LyfeSync/autocuidado/afirmacao.html', context)
 
 
-@login_required
+@login_required(login_url='login')
 def registrar_afirmacao(request):
     """Permite registrar uma nova Afirmação e redireciona para a listagem."""
     if request.method == 'POST':
@@ -293,10 +321,11 @@ def registrar_afirmacao(request):
         form = AfirmacaoForm()
         
     context = {'form': form}
-    return render(request, 'app_LyfeSync/registrarAfirmacao.html', context)
+    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
+    return render(request, 'app_LyfeSync/autocuidado/registrarAfirmacao.html', context)
 
 
-@login_required
+@login_required(login_url='login')
 def alterar_afirmacao(request, afirmacao_id):
     """Permite alterar uma Afirmação existente. Requer login e ID da Afirmação."""
     
@@ -314,11 +343,12 @@ def alterar_afirmacao(request, afirmacao_id):
         form = AfirmacaoForm(instance=afirmacao_instance)
         
     context = {'form': form, 'afirmacao_id': afirmacao_id}
-    return render(request, 'app_LyfeSync/alterarAfirmacao.html', context)
+    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
+    return render(request, 'app_LyfeSync/autocuidado/alterarAfirmacao.html', context)
 
 
 @require_POST
-@login_required
+@login_required(login_url='login')
 def delete_afirmacao(request, afirmacao_id):
     """Exclui um registro de Afirmação específico (via AJAX)."""
     try:

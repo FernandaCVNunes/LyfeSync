@@ -1,77 +1,83 @@
 # app_LyfeSync/urls.py
 
 from django.urls import path, include
-# Importa o módulo 'views' que é o seu arquivo 'views/__init__.py'
-from .views import views 
+# Importa todas as views exportadas via __init__.py
+# A partir de agora, use 'views.' seguido do nome da função (ex: views.home)
+from .views import (
+    home, sobre_nos, contatos, cadastro, login_view, logout_view,
+    home_lyfesync, habito, registrar_habito, alterar_habito, toggle_habito_day, delete_habit,
+    autocuidado, humor, registrar_humor, alterar_humor, load_humor_by_date,
+    gratidao, registrar_gratidao, alterar_gratidao,
+    afirmacao, registrar_afirmacao, alterar_afirmacao,
+    relatorios, relatorio_habito, relatorio_humor, relatorio_gratidao, relatorio_afirmacao,
+    conta, configuracoes_conta, registrar_dica
+)
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     # -------------------------------------------------------------------
     # PÁGINAS PÚBLICAS E AUTENTICAÇÃO
     # -------------------------------------------------------------------
-    path('', views.home, name='home'),
-    path('sobre-nos/', views.sobre_nos, name='sobre_nos'),
-    path('contatos/', views.contatos, name='contatos'),
-    path('cadastro/', views.cadastro, name='cadastro'),
+    path('', home, name='home'),
+    path('sobre-nos/', sobre_nos, name='sobre_nos'),
+    path('contatos/', contatos, name='contatos'),
+    path('cadastro/', cadastro, name='cadastro'),
     
-    # As URLs de Login/Logout do Django (se você não estiver usando allauth para elas)
-    path('login/', views.login_view, name='login'),
-    path('logout/', views.logout_view, name='logout'), 
+    # Views customizadas de Login/Logout
+    path('login/', login_view, name='login'),
+    path('logout/', logout_view, name='logout'), 
     
     # Dashboard (Página Inicial Logada)
-    path('home-lyfesync/', views.home_lyfesync, name='homeLyfesync'),
+    path('home-lyfesync/', home_lyfesync, name='homeLyfesync'),
     
     # -------------------------------------------------------------------
     # HÁBITOS
     # -------------------------------------------------------------------
-    path('habito/', views.habito, name='habito'),
-    path('habitos/registrar/', views.registrar_habito, name='registrar_habito'),
-    path('habitos/alterar/<int:habito_id>/', views.alterar_habito, name='alterar_habito'), 
-    path('habitos/toggle_day/<int:habit_id>/<str:day>/', views.toggle_habito_day, name='toggle_habit_day'),
-    path('habitos/delete/<int:habit_id>/', views.delete_habit, name='delete_habit'),
+    path('habito/', habito, name='habito'),
+    path('habitos/registrar/', registrar_habito, name='registrar_habito'),
+    path('habitos/alterar/<int:habito_id>/', alterar_habito, name='alterar_habito'), 
+    path('habitos/toggle_day/<int:habit_id>/<str:day>/', toggle_habito_day, name='toggle_habit_day'),
+    path('habitos/delete/<int:habit_id>/', delete_habit, name='delete_habit'),
 
     # -------------------------------------------------------------------
     # AUTOCUIDADO (Página principal e sub-módulos)
     # -------------------------------------------------------------------
-    path('autocuidado/', views.autocuidado, name='autocuidado'),
+    path('autocuidado/', autocuidado, name='autocuidado'),
     
     # HUMOR
-    path('humor/', views.humor, name='humor'),
-    path('humor/registrar/', views.registrar_humor, name='registrarHumor'),
-    path('api/humor/load/', views.load_humor_by_date, name='load_humor_by_date'),
-    path('humor/alterar/<int:humor_id>/', views.alterar_humor, name='alterarHumor'),
+    path('humor/', humor, name='humor'),
+    path('humor/registrar/', registrar_humor, name='registrarHumor'),
+    path('api/humor/load/', load_humor_by_date, name='load_humor_by_date'),
+    path('humor/alterar/<int:humor_id>/', alterar_humor, name='alterarHumor'),
     
     # GRATIDÃO
-    path('gratidao/', views.gratidao, name='gratidao'),
-    path('gratidao/registrar/', views.registrar_gratidao, name='registrar_gratidao'),
-    # Atenção: 'alterar_gratidao' provavelmente precisa de um ID do objeto
-    path('gratidao/alterar/<int:gratidao_id>/', views.alterar_gratidao, name='alterar_gratidao'), 
+    path('gratidao/', gratidao, name='gratidao'),
+    path('gratidao/registrar/', registrar_gratidao, name='registrar_gratidao'),
+    path('gratidao/alterar/<int:gratidao_id>/', alterar_gratidao, name='alterar_gratidao'), 
     
     # AFIRMAÇÃO
-    path('afirmacao/', views.afirmacao, name='afirmacao'),
-    path('afirmacao/registrar/', views.registrar_afirmacao, name='registrar_afirmacao'),
-    # Atenção: 'alterar_afirmacao' provavelmente precisa de um ID do objeto
-    path('afirmacao/alterar/<int:afirmacao_id>/', views.alterar_afirmacao, name='alterar_afirmacao'), 
+    path('afirmacao/', afirmacao, name='afirmacao'),
+    path('afirmacao/registrar/', registrar_afirmacao, name='registrar_afirmacao'),
+    path('afirmacao/alterar/<int:afirmacao_id>/', alterar_afirmacao, name='alterar_afirmacao'), 
 
     # -------------------------------------------------------------------
     # RELATÓRIOS
     # -------------------------------------------------------------------
-    path('relatorios/', views.relatorios, name='relatorios'),
-    path('relatorios/habito/', views.relatorio_habito, name='relatorio_habito'),
-    path('relatorios/humor/', views.relatorio_humor, name='relatorio_humor'),
-    path('relatorios/gratidao/', views.relatorio_gratidao, name='relatorio_gratidao'),
-    path('relatorios/afirmacao/', views.relatorio_afirmacao, name='relatorio_afirmacao'),
+    path('relatorios/', relatorios, name='relatorios'),
+    path('relatorios/habito/', relatorio_habito, name='relatorio_habito'),
+    path('relatorios/humor/', relatorio_humor, name='relatorio_humor'),
+    path('relatorios/gratidao/', relatorio_gratidao, name='relatorio_gratidao'),
+    path('relatorios/afirmacao/', relatorio_afirmacao, name='relatorio_afirmacao'),
     
     # -------------------------------------------------------------------
     # CONTA E ADMIN
     # -------------------------------------------------------------------
-    path('conta/', views.conta, name='conta'),
-    path('configuracoes/', views.configuracoes_conta, name='configuracoes_conta'),
-    path('dicas/registrar/', views.registrar_dica, name='registrar_dica'),
+    path('conta/', conta, name='conta'),
+    path('configuracoes/', configuracoes_conta, name='configuracoes_conta'),
+    path('dicas/registrar/', registrar_dica, name='registrar_dica'),
     
     # -------------------------------------------------------------------
-    # INTEGRAÇÃO COM ALLAUTH
+    # INTEGRAÇÃO COM ALLAUTH (Se aplicável)
     # -------------------------------------------------------------------
-    # Mantenha esta linha se estiver usando o django-allauth.
     path('accounts/', include('allauth.urls')),
 ]
