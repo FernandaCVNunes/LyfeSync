@@ -1,0 +1,482 @@
+/* homeLyfesync.css - REVISADO E CONSOLIDADO */
+/* ------------------------------------------------------------------- */
+
+/* VARIÁVEIS DE TEMA */
+:root {
+    --lyfesync-red-salvar: #E5534B;
+    --lyfesync-green: #48BB78;
+    /* O verde desejado para títulos de autocuidado */
+    --lyfesync-text-emerald: #10B981;
+    /* O verde principal para botões/humor */
+    --lyfesync-gray-input: #E9ECEF;
+    --lyfesync-text-gray: #4A5568;
+
+    /* VARIÁVEIS PARA O RELATÓRIO DE HUMOR */
+    --mood-great: var(--lyfesync-green);
+    --mood-good: var(--lyfesync-text-emerald);
+    --mood-ok: #F6E05E;
+    --mood-sad: #4299E1;
+    --mood-angry: var(--lyfesync-red-salvar);
+}
+
+/* ========================================================= */
+/* --- DIMENSIONAMENTO DE IMAGENS E ÍCONES (CONSOLIDADO) --- */
+/* ========================================================= */
+
+/* Ícones de Autocuidado no Menu (40px) */
+/* Garante o tamanho correto para os ícones na página autocuidado.html */
+.autocuidado-icon-lg {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+/* Ícones de Humor (48px) no formulário */
+.humor-image-lg {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    margin-bottom: 0.5rem;
+}
+
+/* Ícones pequenos (Humor, Gratidão, Genérico) (30px) - Consolidação */
+.humor-image-small,
+.gratidao-icon-size,
+.img-small {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+}
+
+
+/* ========================================================= */
+/* --- ESTILOS DE AUTOCUIDADO (Garantindo Cor e Ícones) --- */
+/* ========================================================= */
+
+/* Título H2 do Menu de Autocuidado: Cor verde #48BB78 */
+.autocuidado-link-title {
+    color: var(--lyfesync-green, #48BB78);
+    /* Garante a cor verde exata desejada */
+}
+
+/* Título de Card de Dica */
+.dica-card-title {
+    color: var(--lyfesync-green, #48BB78);
+}
+
+/* Fundo verde claro para o card de dica */
+.dica-card-green {
+    background-color: #ECFDF5;
+    /* Fundo verde muito claro */
+    border-color: var(--lyfesync-green, #48BB78) !important;
+}
+
+/* ========================================================= */
+/* --- COMPONENTES DE FORMULÁRIO GERAL (MODAL/INPUT) --- */
+/* ========================================================= */
+
+.rs-modal-content {
+    background-color: #FFFFFF;
+    border-radius: 1rem;
+    border: none;
+}
+
+.rs-form-control {
+    background-color: var(--lyfesync-gray-input, #E9ECEF);
+    border: 1px solid var(--lyfesync-gray-input, #E9ECEF);
+    border-radius: 0.5rem;
+    box-shadow: none !important;
+    padding: 0.75rem 1rem;
+    color: var(--lyfesync-text-gray, #4A5568);
+}
+
+.rs-form-control:focus {
+    border-color: var(--lyfesync-green, #48BB78);
+    box-shadow: 0 0 0 0.25rem rgba(72, 187, 120, 0.25) !important;
+}
+
+.custom-textarea {
+    min-height: 150px;
+    border-radius: 8px;
+    padding: 1rem;
+    font-size: 1rem;
+}
+
+
+/* ========================================================= */
+/* --- ESTILOS PÁGINA REGISTRAR HUMOR (DETALHES DO CARD) --- */
+/* ========================================================= */
+
+.humor-title {
+    color: var(--lyfesync-text-emerald, #10B981);
+    font-size: 2.25rem;
+    font-weight: 700;
+}
+
+.humor-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem 0;
+}
+
+.humor-option-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 120px;
+    padding: 0.5rem;
+    border: 2px solid #E5E7EB;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    background-color: #FFFFFF;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+}
+
+.humor-option-card:hover {
+    border-color: #34D399;
+    transform: translateY(-2px);
+}
+
+.humor-option-card.active {
+    border-color: var(--lyfesync-text-emerald, #10B981);
+    background-color: #ECFDF5;
+    box-shadow: 0 0 0 3px #34D399, 0 6px 10px -3px rgba(0, 0, 0, 0.15);
+}
+
+.humor-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #4B5563;
+    text-align: center;
+}
+
+.humor-option-card.active .humor-label {
+    font-weight: 700;
+    color: var(--lyfesync-text-emerald, #10B981);
+}
+
+.humor-page-container {
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+@media (max-width: 640px) {
+    .humor-option-card {
+        flex-basis: 25%;
+    }
+}
+
+
+/* ========================================================= */
+/* --- ESTILOS PÁGINA REGISTRAR GRATIDÃO / AFIRMAÇÃO --- */
+/* ========================================================= */
+
+/* Gratidão */
+.gratidao-page-container {
+    min-height: 100vh;
+}
+
+.gratidao-main-title {
+    font-size: 2.25rem;
+}
+
+.gratidao-textarea {
+    font-size: 1.15rem !important;
+    resize: none !important;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.gratidao-date-container {
+    margin-bottom: 5rem !important;
+}
+
+.gratidao-date-label {
+    font-size: 1.125rem;
+}
+
+.gratidao-date-input {
+    width: 150px;
+    border-radius: 0.5rem;
+}
+
+.gratidao-title-color {
+    color: var(--lyfesync-red-salvar, #E5534B);
+}
+
+.gratidao-question-color {
+    color: var(--lyfesync-green, #48BB78);
+}
+
+.gratidao-field-bg {
+    background-color: #C6F6D5;
+    border: none !important;
+    box-shadow: none !important;
+    min-height: 120px;
+}
+
+/* Afirmação */
+.afirmacao-page-container {
+    min-height: 100vh;
+}
+
+.afirmacao-main-title {
+    font-size: 2.25rem;
+}
+
+.afirmacao-date-label {
+    font-size: 1.125rem;
+}
+
+.afirmacao-date-input {
+    width: 150px;
+    background-color: #BDBDBD !important;
+    border-radius: 0.5rem;
+    border: none !important;
+    color: #4A5568 !important;
+}
+
+.afirmacao-text-container {
+    max-width: 500px;
+}
+
+.afirmacao-circle-group {
+    margin-bottom: 5rem !important;
+}
+
+.afirmacao-circle {
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.circle-blue {
+    background-color: #C0CFF7;
+}
+
+.circle-pink {
+    background-color: #F7C0C0;
+}
+
+.circle-green {
+    background-color: #C0F7C9;
+}
+
+.afirmacao-textarea {
+    resize: none;
+    font-size: 1.25rem;
+    font-style: italic;
+    box-shadow: none !important;
+    background: transparent;
+    border: none;
+    text-align: center;
+}
+
+.afirmacao-error-message {
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    position: absolute;
+}
+
+
+/* ========================================================= */
+/* --- ESTILOS DE BOTÃO (Salvar/Adicionar) --- */
+/* ========================================================= */
+
+/* Botão Adicionar (Geral, Vermelho) */
+.rs-btn-adicionar {
+    background-color: var(--lyfesync-red-salvar, #E5534B);
+    color: #FFFFFF;
+    width: 100%;
+    max-width: 250px;
+    padding: 0.75rem 1.5rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 1.125rem;
+    border-radius: 0.5rem;
+    border: none;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s ease;
+}
+
+.rs-btn-adicionar:hover {
+    background-color: #C5443C;
+}
+
+/* Botões de Salvar (Vermelho - Gratidão/Afirmação) */
+.btn-salvar-gratidao,
+.btn-salvar-form-afirmacao-new,
+.btn-salvar-humor-red {
+    background-color: var(--lyfesync-red-salvar, #E5534B) !important;
+    color: #FFFFFF;
+    width: 250px;
+    padding: 1rem 2rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 1.125rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border: none;
+    transition: background-color 0.2s ease;
+}
+
+.btn-salvar-gratidao:hover,
+.btn-salvar-form-afirmacao-new:hover,
+.btn-salvar-humor-red:hover {
+    background-color: #E24F34 !important;
+}
+
+/* Botão de Salvar (Verde - Registrar Humor) */
+.btn-salvar-form {
+    background-color: var(--lyfesync-text-emerald, #10B981);
+    border: none;
+    padding: 0.75rem 2rem;
+    font-size: 1.125rem;
+    transition: background-color 0.2s;
+    color: #FFFFFF;
+    font-weight: bold;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+}
+
+.btn-salvar-form:hover {
+    background-color: #059669;
+}
+
+.humor-btn-salvar {
+    margin-top: 3rem;
+    max-width: 300px;
+    width: 100%;
+}
+
+/* ========================================================= */
+/* --- ESTILOS RELATÓRIO DE HUMOR (MOOD TRACKER) --- */
+/* ========================================================= */
+
+.mood-report-header {
+    font-size: 1.5rem;
+    font-weight: 700;
+    padding: 1.5rem 0;
+}
+
+.mood-header-title {
+    color: var(--lyfesync-green);
+}
+
+.mood-header-month {
+    color: var(--lyfesync-red-salvar);
+}
+
+.mood-report-table {
+    table-layout: fixed;
+    width: 100%;
+    border-collapse: collapse;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background-color: #FFFFFF;
+}
+
+.mood-report-table thead th {
+    background-color: #F7FAFC;
+    font-weight: 600;
+    color: var(--lyfesync-text-gray);
+    padding: 0.75rem 0.2rem;
+    border: 1px solid #E2E8F0;
+    font-size: 0.8rem;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.mood-report-table tbody td {
+    height: 48px;
+    padding: 0;
+    border: 1px solid #E2E8F0;
+    vertical-align: middle;
+}
+
+.col-humor {
+    width: 100px;
+    background-color: #FEFCE8;
+    padding: 0.5rem;
+}
+
+.col-day {
+    width: 2.5%;
+    text-align: center;
+}
+
+.col-result {
+    width: 80px;
+}
+
+.mood-icon-cell svg {
+    width: 40px;
+    height: 40px;
+    vertical-align: middle;
+    display: block;
+    margin: 0 auto;
+}
+
+.mood-fill {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.mood-fill-great {
+    background-color: var(--mood-great);
+}
+
+.mood-fill-good {
+    background-color: var(--mood-good);
+}
+
+.mood-fill-ok {
+    background-color: var(--mood-ok);
+}
+
+.mood-fill-sad {
+    background-color: var(--mood-sad);
+}
+
+.mood-fill-angry {
+    background-color: var(--mood-angry);
+}
+
+@media (max-width: 768px) {
+    .mood-report-header {
+        font-size: 1.1rem;
+    }
+
+    .mood-report-table thead th {
+        font-size: 0.6rem;
+        padding: 0.5rem 0.1rem;
+    }
+
+    .col-humor {
+        width: 60px;
+        padding: 0.2rem;
+    }
+
+    .mood-icon-cell svg {
+        width: 30px;
+        height: 30px;
+    }
+
+    .col-result {
+        width: 60px;
+    }
+}

@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
       LyfeSync -{% block title %}
-
       {% endblock %}
     </title>
 
@@ -15,15 +14,18 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
 
     {# Arquivos de Estilo Personalizados #}
+    {# masterpage.css é carregado primeiro para estilos comuns (navbar/footer) #}
     <link rel="stylesheet" href="{% static 'css/masterpage.css' %}" />
-    {# O masterpage_logado.css DEVE ser o último para garantir a aplicação das correções de layout (padding-top e z-index) #}
+    {# masterpage_logado.css sobrescreve para o layout sidebar/fixed-navbar #}
     <link rel="stylesheet" href="{% static 'css/masterpage_logado.css' %}" />
   </head>
+  
   <body class="lyfesync-full-layout">
-    {# A NAVBAR ESTÁ CORRETAMENTE FORA DO BLOCO DE CONTEÚDO, GARANTINDO QUE ELA NÃO SEJA SUBSTITUÍDA #}
+    
+    {# NAVBAR - Usa classes do masterpage.css, mas é fixed-top e tem estilo de área logada #}
     <nav class="navbar navbar-expand-lg fixed-top">
       <div class="container-fluid">
-        {# Logo e Título: APONTANDO PARA O DASHBOARD/ÁREA LOGADA #}
+        {# Logo e Título #}
         <a class="navbar-brand" href="{% url 'homeLyfesync' %}">
           <img src="{% static 'img/logo/logo2.png' %}" alt="Logo LyfeSync" class="navbar-logo" />
           <span class="logo-text">LyfeSync</span>
@@ -34,22 +36,15 @@
 
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ms-auto">
-            {# Item: HOME/DASHBOARD (REINCLUÍDO E APONTANDO PARA A ÁREA LOGADA) #}
             <li class="nav-item">
               <a class="nav-link active" aria-current="page" href="{% url 'homeLyfesync' %}">Home</a>
             </li>
-
-            {# Item: SOBRE NÓS (REINCLUÍDO) #}
             <li class="nav-item">
               <a class="nav-link" href="{% url 'sobre_nos' %}">Sobre Nós</a>
             </li>
-
-            {# Item: CONTATOS (REINCLUÍDO) #}
             <li class="nav-item">
               <a class="nav-link" href="{% url 'contatos' %}">Contatos</a>
             </li>
-
-            {# Item: MINHA CONTA #}
             <li class="nav-item">
               <a class="nav-link" href="{% url 'conta' %}"><i class="fas fa-user-circle"></i> Minha Conta</a>
             </li>
@@ -62,79 +57,73 @@
       </div>
     </nav>
 
-    {# O CONTEÚDO PRINCIPAL (Sidebar + Main) ESTÁ CORRETAMENTE ENVOLTO EM body_content #}
-    {% block body_content %}
-      <div class="main-wrapper-logado">
-        {# ---------------- Menu Lateral (Sidebar) ---------------- #}
-        <aside class="sidebar-logado">
-          <nav class="nav-sidebar">
-            <ul class="list-unstyled">
-              {# Item: HOME/DASHBOARD - CORRIGIDO NO SIDEBAR #}
-              <li>
-                <a href="{% url 'homeLyfesync' %}" class="sidebar-link active">
-                  <i class="fas fa-home sidebar-icon"></i>
-                  <span>Início</span>
+    {# O CONTEÚDO PRINCIPAL (Sidebar + Main) #}
+    <div class="main-wrapper-logado">
+      {# ---------------- Menu Lateral (Sidebar) ---------------- #}
+      <aside class="sidebar-logado">
+        <nav class="nav-sidebar">
+          <ul class="list-unstyled">
+            {# Itens de Navegação #}
+            <li>
+              <a href="{% url 'homeLyfesync' %}" class="sidebar-link active">
+                <i class="fas fa-home sidebar-icon"></i>
+                <span>Início</span>
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'habito' %}" class="sidebar-link">
+                <img src="{% static 'img/icon/planner.png' %}" alt="Ícone Hábitos" class="sidebar-icon" />
+                <span>Hábitos</span>
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'autocuidado' %}" class="sidebar-link">
+                <img src="{% static 'img/icon/autocuidado.png' %}" alt="Ícone Autocuidado" class="sidebar-icon" />
+                <span>Autocuidado</span>
+              </a>
+            </li>
+
+            {# ITEM: DICAS (Apenas para Administrador) #}
+            {% if user.is_authenticated and user.is_superuser %}
+              <li class="mb-1 border-top pt-2 mt-2">
+                <a href="{% url 'registrar_dica' %}" class="sidebar-link text-success">
+                  <i class="fas fa-lightbulb sidebar-icon"></i>
+                  <span>Dicas (Admin)</span>
                 </a>
               </li>
-              {# Item: Hábitos #}
-              <li>
-                <a href="{% url 'habito' %}" class="sidebar-link">
-                  <img src="{% static 'img/icon/planner.png' %}" alt="Ícone Hábitos" class="sidebar-icon" />
-                  <span>Hábitos</span>
-                </a>
-              </li>
+            {% endif %}
 
-              {# Item: Autocuidado #}
-              <li>
-                <a href="{% url 'autocuidado' %}" class="sidebar-link">
-                  <img src="{% static 'img/icon/autocuidado.png' %}" alt="Ícone Autocuidado" class="sidebar-icon" />
-                  <span>Autocuidado</span>
-                </a>
-              </li>
+            <li>
+              <a href="{% url 'relatorios' %}" class="sidebar-link">
+                <img src="{% static 'img/icon/relatorio.png' %}" alt="Ícone Relatórios" class="sidebar-icon" />
+                <span>Relatórios</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
 
-              {# ITEM: DICAS (Apenas para Administrador) #}
-              {% if user.is_authenticated and user.is_superuser %}
-                <li class="mb-1 border-top pt-2 mt-2">
-                  <a href="{% url 'registrar_dica' %}" class="sidebar-link text-success">
-                    <i class="fas fa-lightbulb"></i>
-                    <span>Dicas (Admin)</span>
-                  </a>
-                </li>
-              {% endif %}
+        {# Ícone de Conta (Alinhado ao Rodapé do Sidebar) #}
+        <div class="sidebar-bottom">
+          <a href="{% url 'conta' %}" class="sidebar-link-conta">
+            <img src="{% static 'img/icon/conf.png' %}" alt="Ícone Conta" class="sidebar-icon" />
+            <span>Conta</span>
+          </a>
+          <a href="{% url 'account_logout' %}" class="sidebar-link-conta mt-2">
+            <i class="fas fa-sign-out-alt sidebar-icon"></i>
+            <span>Sair</span>
+          </a>
+        </div>
+      </aside>
 
-              {# Item: Relatórios #}
-              <li>
-                <a href="{% url 'relatorios' %}" class="sidebar-link">
-                  <img src="{% static 'img/icon/relatorio.png' %}" alt="Ícone Relatórios" class="sidebar-icon" />
-                  <span>Relatórios</span>
-                </a>
-              </li>
-            </ul>
-          </nav>
+      {# ---------------- Conteúdo Principal ---------------- #}
+      <main class="content-logado">
+        {% block content_logado %}
+        {# Conteúdo da página real será inserido aqui #}
+        {% endblock %}
+      </main>
+    </div>
 
-          {# Ícone de Conta (Alinhado ao Rodapé do Sidebar) #}
-          <div class="sidebar-bottom">
-            <a href="{% url 'conta' %}" class="sidebar-link-conta">
-              <img src="{% static 'img/icon/conf.png' %}" alt="Ícone Conta" class="sidebar-icon" />
-              <span>Conta</span>
-            </a>
-            <a href="{% url 'account_logout' %}" class="sidebar-link-conta mt-2">
-              <i class="fas fa-sign-out-alt sidebar-icon"></i>
-              <span>Sair</span>
-            </a>
-          </div>
-        </aside>
-
-        {# ---------------- Conteúdo Principal ---------------- #}
-        <main class="content-logado">
-          {% block content_logado %}
-
-          {% endblock %}
-        </main>
-      </div>
-    {% endblock %}
-
-    {# Rodapé: MANTIDO COM LINKS PÚBLICOS COMO NO CÓDIGO FORNECIDO #}
+    {# Rodapé (Herdado de masterpage.css) #}
     <footer class="footer">
       <div class="container-fluid py-4">
         <div class="row text-center align-items-center">
@@ -179,8 +168,6 @@
     {# SCRIPTS OBRIGATÓRIOS DO BOOTSTRAP #}
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    {# 🚨 CORREÇÃO: O Tailwind CSS CDN foi comentado para eliminar possíveis conflitos de estilo com o Bootstrap e o layout fixo. #}
-    {# <script src="https://cdn.tailwindcss.com"></script> #}
 
     {% block extra_js %}
     {% endblock %}

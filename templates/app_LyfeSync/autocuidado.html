@@ -1,70 +1,62 @@
-{# autocuidado.html - Versão Corrigida para Bootstrap e Clean CSS #}
+{# autocuidado.html#}
 {% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
 {% load static %}
 
 {% block title %}
-  Autocuidado e Bem-estar
+  Autocuidado e Bem-estar
 {% endblock %}
 
 {% block content_logado %}
-  {# Container principal Bootstrap, centralizado, largura máxima (max-w-4xl) e padding #}
-  <div class="container py-4 mt-5 autocuidado-max-width">
-    {# text-4xl font-extrabold -> h1 text-dark #}
-    <h1 class="h1 text-center mb-5 autocuidado-title">Seu Espaço de Autocuidado</h1>
+  <div class="container py-4 mt-5 autocuidado-max-width">
+    <h1 class="h1 text-center mb-5 autocuidado-title">Seu Espaço de Autocuidado</h1>
 
-    {% if ultima_afirmacao %}
-      {# bg-indigo-50 border-l-4 border-indigo-500 p-4 mb-8 rounded-lg shadow-md -> alert-primary #}
-      <div class="alert alert-primary border-start border-5 border-primary p-4 mb-5 rounded shadow-sm" role="alert">
-        <div class="d-flex align-items-center">
-          {# Ícone substituído por um Bootstrap Icon (ou material icon, se carregado) #}
-          <i class="bi bi-lightning-fill text-primary me-3 h5 mb-0"></i>
-          <p class="font-weight-bold text-primary mb-0">Afirmação de Poder:</p>
-        </div>
-        <p class="mt-2 text-dark fst-italic">"{{ ultima_afirmacao.texto }}"</p>
-      </div>
-    {% endif %}
+    {% if ultima_afirmacao %}
+      <div class="alert alert-primary border-start border-5 border-primary p-4 mb-5 rounded shadow-sm" role="alert">
+        <div class="d-flex align-items-center">
+          <i class="bi bi-lightning-fill text-primary me-3 h5 mb-0"></i>
+          <p class="font-weight-bold text-primary mb-0">Afirmação de Poder:</p>
+        </div>
+        <p class="mt-2 text-dark fst-italic">"{{ ultima_afirmacao.texto }}"</p>
+      </div>
+    {% endif %}
 
-    {# space-y-6 -> usando mb-4 nos itens #}
-    <div class="menuAutocuidado">
-      {# block autocuidado-card bg-white p-6 border rounded-xl shadow-lg hover:shadow-xl -> list-group-item, card, shadow #}
-      <a href="{% url 'humor' %}" class="list-group-item list-group-item-action p-4 mb-4 border rounded shadow-sm hover-shadow-lg">
-        <div class="d-flex align-items-center">
-          {# flex items-start space-x-4 -> d-flex align-items-center me-3 #}
-          <img src="{% static 'img/icon/adchumor.png' %}" alt="Ícone de Humor" class="me-3 autocuidado-icon-lg" />
-          <div>
-            <h2 class="h5 font-weight-bold autocuidado-link-title">Humor</h2>
-            <p class="text-secondary mb-0">Registre seu estado emocional e acompanhe seu bem-estar.</p>
-          </div>
-        </div>
-      </a>
+    <div class="menuAutocuidado">
+      <a href="{% url 'humor' %}" class="list-group-item list-group-item-action p-4 mb-4 border rounded shadow-sm hover-shadow-lg">
+        <div class="d-flex align-items-center">
+          <img src="{% static 'img/icon/adchumor.png' %}" alt="Ícone de Humor" class="me-3 autocuidado-icon-lg" />
+          <div>
+                        <h2 class="h5 font-weight-bold autocuidado-link-title">Humor</h2>
+            <p class="text-secondary mb-0">Registre seu estado emocional e acompanhe seu bem-estar.</p>
+          </div>
+        </div>
+      </a>
 
-      <a href="{% url 'gratidao' %}" class="list-group-item list-group-item-action p-4 mb-4 border rounded shadow-sm hover-shadow-lg">
-        <div class="d-flex align-items-center">
-          <img src="{% static 'img/icon/gratidao.png' %}" alt="Ícone de Gratidão" class="me-3 autocuidado-icon-lg" />
-          <div>
-            <h2 class="h5 font-weight-bold autocuidado-link-title">Gratidão</h2>
-            <p class="text-secondary mb-0">Cultive o positivo. Anote as coisas pelas quais você é grato hoje.</p>
-          </div>
-        </div>
-      </a>
+      <a href="{% url 'gratidao' %}" class="list-group-item list-group-item-action p-4 mb-4 border rounded shadow-sm hover-shadow-lg">
+        <div class="d-flex align-items-center">
+          <img src="{% static 'img/icon/gratidao.png' %}" alt="Ícone de Gratidão" class="me-3 autocuidado-icon-lg" />
+          <div>
+            <h2 class="h5 font-weight-bold autocuidado-link-title">Gratidão</h2>
+            <p class="text-secondary mb-0">Cultive o positivo. Anote as coisas pelas quais você é grato hoje.</p>
+          </div>
+        </div>
+      </a>
 
-      <a href="{% url 'afirmacao' %}" class="list-group-item list-group-item-action p-4 mb-4 border rounded shadow-sm hover-shadow-lg">
-        <div class="d-flex align-items-center">
-          <img src="{% static 'img/icon/afirmacoes.png' %}" alt="Ícone de Afirmações" class="me-3 autocuidado-icon-lg" />
-          <div>
-            <h2 class="h5 font-weight-bold autocuidado-link-title">Afirmações</h2>
-            <p class="text-secondary mb-0">Defina intenções positivas para fortalecer sua mentalidade.</p>
-          </div>
-        </div>
-      </a>
-    </div>
+      <a href="{% url 'afirmacao' %}" class="list-group-item list-group-item-action p-4 mb-4 border rounded shadow-sm hover-shadow-lg">
+        <div class="d-flex align-items-center">
+          <img src="{% static 'img/icon/afirmacoes.png' %}" alt="Ícone de Afirmações" class="me-3 autocuidado-icon-lg" />
+          <div>
+            <h2 class="h5 font-weight-bold autocuidado-link-title">Afirmações</h2>
+            <p class="text-secondary mb-0">Defina intenções positivas para fortalecer sua mentalidade.</p>
+          </div>
+        </div>
+      </a>
+    </div>
 
-    {# mt-10 p-6 bg-green-50 border-l-4 border-lyfesync-green rounded-lg shadow-inner -> card #}
-    <div class="card mt-5 p-4 border-start border-5 dica-card-green">
-      <div class="card-body p-0">
-        <h3 class="h5 font-weight-bold mb-2 dica-card-title">Dica Rápida de Autocuidado</h3>
-        <p class="text-dark mb-0">Lembre-se de fazer uma pausa de 5 minutos a cada hora. Levante-se, alongue-se e beba um copo d'água. Pequenas pausas aumentam a produtividade e reduzem o estresse.</p>
-      </div>
-    </div>
-  </div>
+    <div class="card mt-5 p-4 border-start border-5 dica-card-green">
+      <div class="card-body p-0">
+        <h3 class="h5 font-weight-bold mb-2 dica-card-title">Dica Rápida de Autocuidado</h3>
+        <p class="text-dark mb-0">Lembre-se de fazer uma pausa de 5 minutos a cada hora. Levante-se, alongue-se e beba um copo d'água. Pequenas pausas aumentam a produtividade e reduzem o estresse.</p>
+      </div>
+    </div>
+  </div>
 {% endblock %}

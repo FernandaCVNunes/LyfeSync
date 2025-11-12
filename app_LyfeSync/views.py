@@ -1,3 +1,4 @@
+#views.py#
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.mail import EmailMessage
 from django.conf import settings

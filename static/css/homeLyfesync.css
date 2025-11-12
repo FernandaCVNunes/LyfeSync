@@ -1,120 +1,48 @@
-/* homeLyfesync.css */
-/* Estas variáveis são cruciais para que o CSS funcione corretamente */
+/* homeLyfesync.css - REVISADO E CONSOLIDADO */
+/* ------------------------------------------------------------------- */
+
+/* VARIÁVEIS DE TEMA */
 :root {
     --lyfesync-red-salvar: #E5534B;
     --lyfesync-green: #48BB78;
+    /* O verde desejado para títulos de autocuidado */
     --lyfesync-text-emerald: #10B981;
-    /* Novo: Para o título e destaque de humor */
+    /* O verde principal para botões/humor */
     --lyfesync-gray-input: #E9ECEF;
     --lyfesync-text-gray: #4A5568;
-    /* NOVAS VARIÁVEIS PARA O RELATÓRIO DE HUMOR */
+
+    /* VARIÁVEIS PARA O RELATÓRIO DE HUMOR */
     --mood-great: var(--lyfesync-green);
-    /* Verde Escuro */
     --mood-good: var(--lyfesync-text-emerald);
-    /* Verde Esmeralda/Aqua */
     --mood-ok: #F6E05E;
-    /* Amarelo */
     --mood-sad: #4299E1;
-    /* Azul */
     --mood-angry: var(--lyfesync-red-salvar);
-    /* Vermelho */
 }
 
 /* ========================================================= */
-/* --- NOVOS ESTILOS PARA REGISTRAR HÁBITO (MODAL) --- */
+/* --- DIMENSIONAMENTO DE IMAGENS E ÍCONES (CONSOLIDADO) --- */
 /* ========================================================= */
 
-.rs-modal-content {
-    /* Estilo do conteúdo do modal - Adicione aqui cores de fundo, bordas, etc. */
-    background-color: #FFFFFF;
-    /* Fundo branco padrão, ajuste se precisar de cor customizada */
-    border-radius: 1rem;
-    /* Borda arredondada (ajuste conforme seu design) */
-    border: none;
-}
-
-.rs-form-control {
-    /* Estilo customizado para todos os campos de formulário no modal */
-    background-color: var(--lyfesync-gray-input, #E9ECEF);
-    /* Cor de fundo clara para inputs */
-    border: 1px solid var(--lyfesync-gray-input, #E9ECEF);
-    border-radius: 0.5rem;
-    box-shadow: none !important;
-    padding: 0.75rem 1rem;
-    color: var(--lyfesync-text-gray, #4A5568);
-}
-
-.rs-form-control:focus {
-    /* Estilo ao focar no campo */
-    border-color: var(--lyfesync-green, #48BB78);
-    box-shadow: 0 0 0 0.25rem rgba(72, 187, 120, 0.25) !important;
-}
-
-.rs-btn-adicionar {
-    /* Estilo para o botão "Adicionar" (antes btn-adicionar-habito) */
-    background-color: var(--lyfesync-red-salvar, #E5534B);
-    color: #FFFFFF;
-    width: 100%;
-    /* Ocupa a largura total da coluna */
-    max-width: 250px;
-    padding: 0.75rem 1.5rem;
-    font-weight: bold;
-    text-transform: uppercase;
-    font-size: 1.125rem;
-    border-radius: 0.5rem;
-    border: none;
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.2s ease;
-}
-
-.rs-btn-adicionar:hover {
-    background-color: #C5443C;
-    /* Cor mais escura no hover */
-}
-
-/* ========================================================= */
-/* --- DIMENSIONAMENTO DE IMAGENS E ÍCONES (ATUALIZADO) --- */
-/* ========================================================= */
-
-/* Ícones de Autocuidado (40px) */
-.autocuidado-icon-lg {
-    width: 40px;
-    height: 40px;
+/* Ícones de Autocuidado no Menu (40px) */
+/* Garante o tamanho correto para os ícones na página autocuidado.html */
+img .autocuidado-icon-lg {
+    max-width: 8% !important;
+    width: 50px;
+    height: 50px;
     object-fit: contain;
 }
 
-/* Mantido para compatibilidade, mas a nova classe é preferencial */
-.img-autocuidado {
-    width: 40px;
-    height: 40px;
-    object-fit: contain;
-}
-
-/* * Ícones de Humor (48px) - Atualizado para o tamanho do template */
+/* Ícones de Humor (48px) no formulário */
 .humor-image-lg {
     width: 48px;
     height: 48px;
     object-fit: contain;
     margin-bottom: 0.5rem;
-    /* Adicionado do template */
 }
 
-/* Imagens de Humor (30px) */
-.humor-image-small {
-    max-width: 30px;
-    height: auto;
-    /* Garante que a altura é ajustada automaticamente */
-    object-fit: contain;
-}
-
-/* Ícones de Gratidão (30px) */
-.gratidao-icon-size {
-    width: 30px;
-    height: 30px;
-    object-fit: contain;
-}
-
-/* Itens Pequenos Genéricos (30px) - Mantido */
+/* Ícones pequenos (Humor, Gratidão, Genérico) (30px) - Consolidação */
+.humor-image-small,
+.gratidao-icon-size,
 .img-small {
     width: 30px;
     height: 30px;
@@ -123,82 +51,56 @@
 
 
 /* ========================================================= */
-/* --- CORES DE TÍTULO E LINKS (ATUALIZADO) --- */
+/* --- ESTILOS DE AUTOCUIDADO (Garantindo Cor e Ícones) --- */
 /* ========================================================= */
 
-/* Título de Link de Autocuidado (cor verde #48BB78) */
+/* Título H2 do Menu de Autocuidado: Cor verde #48BB78 */
 .autocuidado-link-title {
     color: var(--lyfesync-green, #48BB78);
+    /* Garante a cor verde exata desejada */
 }
 
-/* Título de Card de Dica (cor verde #48BB78) */
+/* Título de Card de Dica */
 .dica-card-title {
     color: var(--lyfesync-green, #48BB78);
 }
 
-
-/* ========================================================= */
-/* --- GRÁTIDÃO/AFIRMAÇÃO/DICAS (Formulários) - CORRIGIDOS --- */
-/* ========================================================= */
-
-.gratidao-title-color {
-    color: var(--lyfesync-red-salvar, #E5534B);
+/* Fundo verde claro para o card de dica */
+.dica-card-green {
+    background-color: #ECFDF5;
+    /* Fundo verde muito claro */
+    border-color: var(--lyfesync-green, #48BB78) !important;
 }
 
-.gratidao-question-color {
-    color: var(--lyfesync-green, #48BB78);
+/* ========================================================= */
+/* --- COMPONENTES DE FORMULÁRIO GERAL (MODAL/INPUT) --- */
+/* ========================================================= */
+
+.rs-modal-content {
+    background-color: #FFFFFF;
+    border-radius: 1rem;
+    border: none;
 }
 
-.gratidao-field-bg {
-    background-color: #C6F6D5;
-    border: none !important;
+.rs-form-control {
+    background-color: var(--lyfesync-gray-input, #E9ECEF);
+    border: 1px solid var(--lyfesync-gray-input, #E9ECEF);
+    border-radius: 0.5rem;
     box-shadow: none !important;
-    min-height: 120px;
+    padding: 0.75rem 1rem;
+    color: var(--lyfesync-text-gray, #4A5568);
 }
 
-/* ESTILO DO BOTÃO SALVAR (BOTÕES VERMELHOS - Gratidão/Afirmação) */
-.btn-salvar-gratidao,
-.btn-salvar-form-afirmacao-new,
-.btn-salvar-humor-red {
-    /* Novo nome para evitar conflito com o botão verde abaixo */
-    background-color: var(--lyfesync-red-salvar, #E5534B) !important;
-    /* !important para garantir a cor */
-    color: #FFFFFF;
-    width: 250px;
-    padding: 1rem 2rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    font-size: 1.125rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    border: none;
-    transition: background-color 0.2s ease;
+.rs-form-control:focus {
+    border-color: var(--lyfesync-green, #48BB78);
+    box-shadow: 0 0 0 0.25rem rgba(72, 187, 120, 0.25) !important;
 }
 
-.btn-salvar-gratidao:hover,
-.btn-salvar-form-afirmacao-new:hover,
-.btn-salvar-humor-red:hover {
-    background-color: #E24F34 !important;
-}
-
-/* ESTILO DO BOTÃO SALVAR (BOTÃO VERDE - Registrar Humor) */
-.btn-salvar-form {
-    background-color: var(--lyfesync-text-emerald, #10B981);
-    /* Verde principal */
-    border: none;
-    padding: 0.75rem 2rem;
-    font-size: 1.125rem;
-    transition: background-color 0.2s;
-    /* Mantém os estilos comuns de fonte/sombra se não for sobrescrito pela classe anterior */
-    color: #FFFFFF;
-    font-weight: bold;
-    border-radius: 0.5rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
-}
-
-.btn-salvar-form:hover {
-    background-color: #059669;
-    /* Verde mais escuro no hover */
+.custom-textarea {
+    min-height: 150px;
+    border-radius: 8px;
+    padding: 1rem;
+    font-size: 1rem;
 }
 
 
@@ -209,7 +111,6 @@
 .humor-title {
     color: var(--lyfesync-text-emerald, #10B981);
     font-size: 2.25rem;
-    /* Ajustado para ser grande */
     font-weight: 700;
 }
 
@@ -230,7 +131,6 @@
     height: 120px;
     padding: 0.5rem;
     border: 2px solid #E5E7EB;
-    /* Cinza claro */
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
@@ -240,15 +140,12 @@
 
 .humor-option-card:hover {
     border-color: #34D399;
-    /* Verde claro ao passar o mouse */
     transform: translateY(-2px);
 }
 
 .humor-option-card.active {
     border-color: var(--lyfesync-text-emerald, #10B981);
-    /* Verde principal para seleção */
     background-color: #ECFDF5;
-    /* Fundo verde muito claro */
     box-shadow: 0 0 0 3px #34D399, 0 6px 10px -3px rgba(0, 0, 0, 0.15);
 }
 
@@ -256,7 +153,6 @@
     font-size: 0.875rem;
     font-weight: 500;
     color: #4B5563;
-    /* Cinza escuro */
     text-align: center;
 }
 
@@ -265,19 +161,7 @@
     color: var(--lyfesync-text-emerald, #10B981);
 }
 
-.custom-textarea {
-    min-height: 150px;
-    border-radius: 8px;
-    padding: 1rem;
-    font-size: 1rem;
-}
-
-/* ========================================================= */
-/* --- ESTILOS PÁGINA REGISTRAR HUMOR (OUTROS ESTILOS) --- */
-/* ========================================================= */
-
 .humor-page-container {
-    /* Container principal com centralização e espaçamento */
     min-height: 100vh;
     padding: 2rem 1rem;
     display: flex;
@@ -285,35 +169,61 @@
     align-items: center;
 }
 
-/* OBS: A regra humor-title já foi atualizada acima */
-
-/* OBS: A regra humor-grid já foi atualizada acima */
-
-/* OBS: A regra humor-option-card já foi atualizada acima */
-
 @media (max-width: 640px) {
     .humor-option-card {
-        /* 3 colunas em dispositivos móveis */
         flex-basis: 25%;
     }
 }
 
-/* OBS: humor-option-card:hover e .active já foram atualizados acima */
 
-/* OBS: .humor-label já foi atualizada acima */
+/* ========================================================= */
+/* --- ESTILOS PÁGINA REGISTRAR GRATIDÃO / AFIRMAÇÃO --- */
+/* ========================================================= */
 
-.humor-btn-salvar {
-    /* Reutiliza o estilo do botão de salvar, centralizando na página de Humor */
-    margin-top: 3rem;
-    max-width: 300px;
-    width: 100%;
+/* Gratidão */
+.gratidao-page-container {
+    min-height: 100vh;
 }
 
+.gratidao-main-title {
+    font-size: 2.25rem;
+}
 
-/* ========================================================= */
-/* --- ESTILOS PÁGINA REGISTRAR AFIRMAÇÃO --- */
-/* ========================================================= */
+.gratidao-textarea {
+    font-size: 1.15rem !important;
+    resize: none !important;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
 
+.gratidao-date-container {
+    margin-bottom: 5rem !important;
+}
+
+.gratidao-date-label {
+    font-size: 1.125rem;
+}
+
+.gratidao-date-input {
+    width: 150px;
+    border-radius: 0.5rem;
+}
+
+.gratidao-title-color {
+    color: var(--lyfesync-red-salvar, #E5534B);
+}
+
+.gratidao-question-color {
+    color: var(--lyfesync-green, #48BB78);
+}
+
+.gratidao-field-bg {
+    background-color: #C6F6D5;
+    border: none !important;
+    box-shadow: none !important;
+    min-height: 120px;
+}
+
+/* Afirmação */
 .afirmacao-page-container {
     min-height: 100vh;
 }
@@ -369,7 +279,6 @@
     font-size: 1.25rem;
     font-style: italic;
     box-shadow: none !important;
-    /* Certifique-se de que o textarea dentro do círculo tem a aparência correta */
     background: transparent;
     border: none;
     text-align: center;
@@ -382,74 +291,107 @@
     position: absolute;
 }
 
+
 /* ========================================================= */
-/* --- ESTILOS PÁGINA REGISTRAR GRATIDÃO --- */
+/* --- ESTILOS DE BOTÃO (Salvar/Adicionar) --- */
 /* ========================================================= */
 
-.gratidao-page-container {
-    min-height: 100vh;
-}
-
-.gratidao-main-title {
-    font-size: 2.25rem;
-}
-
-.gratidao-textarea {
-    font-size: 1.15rem !important;
-    resize: none !important;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-}
-
-.gratidao-date-container {
-    margin-bottom: 5rem !important;
-}
-
-.gratidao-date-label {
+/* Botão Adicionar (Geral, Vermelho) */
+.rs-btn-adicionar {
+    background-color: var(--lyfesync-red-salvar, #E5534B);
+    color: #FFFFFF;
+    width: 100%;
+    max-width: 250px;
+    padding: 0.75rem 1.5rem;
+    font-weight: bold;
+    text-transform: uppercase;
     font-size: 1.125rem;
-}
-
-.gratidao-date-input {
-    width: 150px;
     border-radius: 0.5rem;
+    border: none;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s ease;
+}
+
+.rs-btn-adicionar:hover {
+    background-color: #C5443C;
+}
+
+/* Botões de Salvar (Vermelho - Gratidão/Afirmação) */
+.btn-salvar-gratidao,
+.btn-salvar-form-afirmacao-new,
+.btn-salvar-humor-red {
+    background-color: var(--lyfesync-red-salvar, #E5534B) !important;
+    color: #FFFFFF;
+    width: 250px;
+    padding: 1rem 2rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 1.125rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border: none;
+    transition: background-color 0.2s ease;
+}
+
+.btn-salvar-gratidao:hover,
+.btn-salvar-form-afirmacao-new:hover,
+.btn-salvar-humor-red:hover {
+    background-color: #E24F34 !important;
+}
+
+/* Botão de Salvar (Verde - Registrar Humor) */
+.btn-salvar-form {
+    background-color: var(--lyfesync-text-emerald, #10B981);
+    border: none;
+    padding: 0.75rem 2rem;
+    font-size: 1.125rem;
+    transition: background-color 0.2s;
+    color: #FFFFFF;
+    font-weight: bold;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+}
+
+.btn-salvar-form:hover {
+    background-color: #059669;
+}
+
+.humor-btn-salvar {
+    margin-top: 3rem;
+    max-width: 300px;
+    width: 100%;
 }
 
 /* ========================================================= */
-/* --- NOVOS ESTILOS PARA RELATÓRIO DE HUMOR (MOOD TRACKER) --- */
+/* --- ESTILOS RELATÓRIO DE HUMOR (MOOD TRACKER) --- */
 /* ========================================================= */
 
-/* Título e Mês */
 .mood-report-header {
-    padding: 1.5rem 0;
     font-size: 1.5rem;
     font-weight: 700;
+    padding: 1.5rem 0;
 }
 
 .mood-header-title {
     color: var(--lyfesync-green);
-    /* Verde do LyfeSync */
 }
 
 .mood-header-month {
     color: var(--lyfesync-red-salvar);
-    /* Vermelho do LyfeSync */
 }
 
-/* Tabela */
 .mood-report-table {
     table-layout: fixed;
-    /* Força largura uniforme das colunas */
     width: 100%;
     border-collapse: collapse;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     border-radius: 0.75rem;
     overflow: hidden;
-    /* Importante para bordas arredondadas e quebras de linha */
     background-color: #FFFFFF;
 }
 
 .mood-report-table thead th {
     background-color: #F7FAFC;
-    /* Fundo cinza claro no cabeçalho */
     font-weight: 600;
     color: var(--lyfesync-text-gray);
     padding: 0.75rem 0.2rem;
@@ -457,38 +399,30 @@
     font-size: 0.8rem;
     vertical-align: middle;
     white-space: nowrap;
-    /* Impede a quebra de linha nos números do dia */
 }
 
 .mood-report-table tbody td {
     height: 48px;
-    /* Altura da linha para os ícones e barras */
     padding: 0;
     border: 1px solid #E2E8F0;
     vertical-align: middle;
 }
 
-/* Colunas Específicas */
 .col-humor {
     width: 100px;
-    /* Largura fixa para a coluna de humor/ícone */
     background-color: #FEFCE8;
-    /* Fundo levemente amarelado para a coluna de humor (como na imagem) */
     padding: 0.5rem;
 }
 
 .col-day {
     width: 2.5%;
-    /* Ocupa o restante da largura (31 dias) */
     text-align: center;
 }
 
 .col-result {
     width: 80px;
-    /* Largura fixa para a coluna de resultado */
 }
 
-/* Ícone dentro da célula */
 .mood-icon-cell svg {
     width: 40px;
     height: 40px;
@@ -497,12 +431,10 @@
     margin: 0 auto;
 }
 
-/* Preenchimento das células de humor (as 'barras' coloridas) */
 .mood-fill {
     width: 100%;
     height: 100%;
     display: block;
-    /* Garante que o div preencha a célula corretamente */
 }
 
 .mood-fill-great {
@@ -525,7 +457,6 @@
     background-color: var(--mood-angry);
 }
 
-/* Responsividade - Ajuste para telas menores */
 @media (max-width: 768px) {
     .mood-report-header {
         font-size: 1.1rem;
