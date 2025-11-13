@@ -5,10 +5,6 @@ from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from django.contrib.auth import logout, login 
-from django.contrib.auth.forms import UserCreationForm as CadastroForm 
-
-
 # -------------------------------------------------------------------
 # VIEWS PÚBLICAS (Sem necessidade de login)
 # -------------------------------------------------------------------
@@ -67,41 +63,4 @@ def contatos(request):
             print(f"ERRO AO ENVIAR EMAIL: {e}")
             messages.error(request, f'Ocorreu um erro ao enviar a mensagem. Por favor, tente novamente mais tarde.')
 
-    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'public'
     return render(request, 'app_LyfeSync/public/contatos.html')
-
-def login_view(request): 
-    """Página de login."""
-    # Instancia um formulário de cadastro vazio para o modal, se necessário
-    form_cadastro = CadastroForm()
-    context = {'form_cadastro': form_cadastro} # Passa o formulário para o template, se necessário
-    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'public'
-    return render(request, 'app_LyfeSync/public/login.html', context) 
-
-def cadastro(request):
-    """Função de view para o cadastro de novos usuários."""
-    if request.method == 'POST':
-        form = CadastroForm(request.POST) 
-        if form.is_valid():
-            user = form.save()
-            # Loga o usuário imediatamente após o registro
-            login(request, user) 
-            messages.success(request, f'Bem-vindo(a), {user.username}! Seu cadastro foi realizado com sucesso.')
-            # Redireciona para o dashboard após o login
-            return redirect('homeLyfesync') 
-        else:
-            # Se o formulário for inválido, redireciona para login.html
-            # E adiciona mensagens de erro
-            for field, errors in form.errors.items():
-                for error in errors:
-                    messages.error(request, f"Erro em {field}: {error}")
-            return redirect('login') 
-            
-    # Se for GET, apenas redireciona para a página de login/cadastro
-    return redirect('login') 
-
-def logout_view(request):
-    """Realiza o logout do usuário e redireciona para a home."""
-    logout(request)
-    messages.info(request, "Sessão encerrada com sucesso.")
-    return redirect('home')

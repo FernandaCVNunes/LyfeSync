@@ -85,6 +85,12 @@ DATABASES = {
         'PASSWORD': 'root0208', 
         'HOST': '127.0.0.1',         
         'PORT': '3306',
+
+        # --- NOVO TRECHO ADICIONADO ---
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES', default_storage_engine=INNODB, character_set_connection=utf8mb4, collation_connection=utf8mb4_unicode_ci",
+            'charset': 'utf8mb4',
+        }
     }
 }
 
@@ -145,3 +151,11 @@ LOGIN_REDIRECT_URL = '/home-lyfesync/'
 ACCOUNT_FORMS = {
     'signup': 'app_LyfeSync.forms.CustomSignupForm',
 }
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+ACCOUNT_EMAIL_VERIFICATION = 'none' 
+
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = True

@@ -1,3 +1,4 @@
+<!-- masterpage.html -->
 {% load static %}
 
 <!DOCTYPE html>
@@ -13,6 +14,7 @@
 
     {# Arquivos de Estilo Personalizados #}
     <link rel="stylesheet" href="{% static 'css/masterpage.css' %}">
+    <link rel="stylesheet" href="{% static 'css/account.css' %}">
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
 </head>
 <body>
@@ -50,15 +52,19 @@
                     {# Lógica de Autenticação: Entrar vs. Sair #}
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'homeLyfesync' %}">
+                            <!-- Link para a tela de conta/perfil. Usando uma URL nomeada, como 'conta'. -->
+                            <a class="nav-link" href="{% url 'conta' %}"> 
                                 <i class="fas fa-user-circle"></i> Minha Conta
                             </a>
                         </li>
                         <li class="nav-item">
+                            <!-- Link para Sair (usando a URL do allauth) -->
+                            <!-- O class="btn-logout" será usado pelo script para submeter o formulário POST -->
                             <a class="btn-nav-login nav-link btn-logout" href="{% url 'account_logout' %}">Sair</a>
                         </li>
                     {% else %}
                         <li class="nav-item">
+                            <!-- Link para Entrar (usando a URL do allauth) -->
                             <a class="btn-nav-login nav-link" href="{% url 'account_login' %}">Entrar</a>
                         </li>
                     {% endif %}
@@ -107,9 +113,38 @@
         </div>
     </footer>
 
+    {# FORMULÁRIO DE LOGOUT ESCONDIDO PARA GARANTIR POST/CSRF #}
+    <!-- O estilo o coloca fora da tela, tornando-o invisível -->
+    <div id="logout-wrapper" style="position: absolute; left: -9999px; top: -9999px;">
+        <form id="hidden-logout-form" method="POST" action="{% url 'account_logout' %}">
+            {% csrf_token %}
+        </form>
+    </div>
+
     {# SCRIPTS OBRIGATÓRIOS DO BOOTSTRAP #}
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    {# SCRIPT PERSONALIZADO PARA LOGOUT #}
+    <script>
+        // Garante que o script só rode após o DOM estar totalmente carregado
+        document.addEventListener('DOMContentLoaded', function() {
+            // Seleciona o link de Sair (que possui a classe 'btn-logout')
+            const logoutButton = document.querySelector('.btn-logout');
+            // Seleciona o formulário POST escondido
+            const hiddenForm = document.getElementById('hidden-logout-form');
+
+            if (logoutButton && hiddenForm) {
+                // Adiciona um listener de clique ao link
+                logoutButton.addEventListener('click', function(e) {
+                    // 1. Impede a ação padrão do link (que seria um GET)
+                    e.preventDefault(); 
+                    // 2. Submete o formulário POST escondido, enviando o CSRF token
+                    hiddenForm.submit(); 
+                });
+            }
+        });
+    </script>
 
 </body>
 </html>

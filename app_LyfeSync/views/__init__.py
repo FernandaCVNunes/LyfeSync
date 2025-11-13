@@ -5,7 +5,7 @@
 # Views Públicas (public_views.py)
 # Adicione aqui todas as suas importações de public_views
 from .public_views import (
-    home, sobre_nos, contatos, login_view, cadastro, logout_view
+    home, sobre_nos, contatos,
 )
 
 # Views de Hábito (habit_views.py)
@@ -17,7 +17,7 @@ from .habit_views import (
     alterar_habito,
     toggle_habito_day,
     delete_habit,
-    get_habit_data,        # <--- Esta é a view que estava faltando ser exportada!
+    get_habit_data,       
 )
 
 # Views de Autocuidado (selfcare_views.py)

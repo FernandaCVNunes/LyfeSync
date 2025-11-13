@@ -4,8 +4,8 @@ from django.urls import path, include
 # Importa todas as views exportadas via __init__.py
 # A partir de agora, use 'views.' seguido do nome da função (ex: views.home)
 from .views import (
-    home, sobre_nos, contatos, cadastro, login_view, logout_view,
-    home_lyfesync, habito, registrar_habito, alterar_habito, toggle_habito_day, delete_habit,
+    home, sobre_nos, contatos,home_lyfesync, habito, registrar_habito, 
+    alterar_habito, toggle_habito_day, delete_habit,
     autocuidado, humor, registrar_humor, alterar_humor, load_humor_by_date,
     gratidao, registrar_gratidao, alterar_gratidao,
     afirmacao, registrar_afirmacao, alterar_afirmacao,
@@ -21,11 +21,11 @@ urlpatterns = [
     path('', home, name='home'),
     path('sobre-nos/', sobre_nos, name='sobre_nos'),
     path('contatos/', contatos, name='contatos'),
-    path('cadastro/', cadastro, name='cadastro'),
+    #path('cadastro/', cadastro, name='cadastro'),
     
-    # Views customizadas de Login/Logout
-    path('login/', login_view, name='login'),
-    path('logout/', logout_view, name='logout'), 
+    # Views customizadas de Login/Logout - REMOVIDO: Views customizadas de Login/Logout para evitar conflito com 'allauth'
+    #path('login/', login_view, name='login'),
+    #path('logout/', logout_view, name='logout'), 
     
     # Dashboard (Página Inicial Logada)
     path('home-lyfesync/', home_lyfesync, name='homeLyfesync'),

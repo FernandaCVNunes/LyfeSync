@@ -15,7 +15,7 @@
     <div class="row g-4">
       {# Coluna Principal: Humor de Hoje (Largo) - col-lg-7 é aproximadamente 3/5 (58%) #}
       <div class="col-lg-7">
-        <div class="card shadow-lg mb-4 border-top border-5 border-success">
+        <div class="card shadow-lg mb-4 border-top border border-success">
           <div class="card-body">
             <h1 class="h3 font-weight-bold text-dark mb-4">Meu Humor</h1>
 
@@ -66,7 +66,7 @@
 
       {# Coluna Lateral: Dicas de Autocuidado (Estreito) - col-lg-5 é aproximadamente 2/5 (42%) #}
       <div class="col-lg-5">
-        <div class="card shadow-lg mb-4 border-top border-5 border-danger">
+        <div class="card shadow-lg mb-4 border-top border border-danger">
           <div class="card-body">
             <h2 class="h4 font-weight-bold text-dark mb-4">Dicas de Autocuidado</h2>
             <p class="text-muted">Espaço reservado para dicas.</p>
@@ -78,7 +78,7 @@
     {# Histórico de Humor (Ocupa a largura total abaixo das colunas) #}
     <div class="row mt-4">
       <div class="col-12">
-        <div class="card shadow-lg mb-4 border-top border-5 border-success">
+        <div class="card shadow-lg mb-4 border-top border border-success">
           <div class="card-body">
             <h2 class="h4 font-weight-bold text-dark mb-4 border-bottom pb-2">Histórico de Humor (Últimas 2 Semanas)</h2>
 
@@ -86,7 +86,7 @@
               <div class="list-group">
                 {% for humor_registro in humores_recentes %}
                   {# Item da Lista Bootstrap - Adicionada classe humor-list-item-hover #}
-                  <div class="list-group-item d-flex justify-content-between align-items-center bg-light border-secondary mb-2 rounded hover-shadow humor-list-item-hover">
+                  <div class="list-group-item d-flex justify-content-between align-items-center bg-light mb-2 rounded hover-shadow humor-list-item-hover">
                     <div class="d-flex align-items-center flex-grow-1">
                       <div class="flex-shrink-0 me-3 humor-image-sm">
                         {# CORREÇÃO: Acessa o ícone pelo objeto HumorTipo via Foreign Key #}

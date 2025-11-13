@@ -65,5 +65,5 @@ def configuracoes_conta(request):
         'perfil_form': perfil_form,
         'is_admin': is_admin,
     }
-    # CORREÇÃO: Template movido para a subpasta 'conta'
+
     return render(request, 'app_LyfeSync/conta/conta.html', context)

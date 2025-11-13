@@ -1,0 +1,35 @@
+<!-- account_logout.html -->
+{% extends "app_LyfeSync/layouts/masterpage.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}Saindo...{% endblock %}
+
+{% block content %}
+    <div class="container text-center py-5" style="min-height: 70vh;">
+        <form method="post" action="{% url 'account_logout' %}" id="logout-form">
+            {% csrf_token %}
+            <div class="card p-5 shadow-lg rounded-4" style="max-width: 500px; margin: 0 auto;">
+                <h1 class="mb-4 text-red-dark">Até logo!</h1>
+                <p class="lead text-muted">Saindo da sua conta... Aguarde um momento.</p>
+                <!-- Indicador de carregamento (spinner) para feedback visual -->
+                <div class="spinner-border text-red" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+            <!-- Botão escondido que será submetido pelo JavaScript (não precisa, mas mantido) -->
+            <button type="submit" style="display:none;">Sair</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const form = document.getElementById('logout-form');
+                if (form) {
+                    form.submit();
+                }
+            }, 200); // Pequeno atraso de 100ms
+        });
+    </script>
+{% endblock %}

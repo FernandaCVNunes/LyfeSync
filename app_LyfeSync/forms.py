@@ -231,27 +231,26 @@ class CustomSignupForm(SignupForm):
    Formulário de cadastro customizado para incluir nome e sobrenome no User.
    Integrado com allauth.
    """
-   # Adiciona os campos de Nome e Sobrenome
+   # Estes campos serão incluídos no formulário de cadastro do allauth
    first_name = forms.CharField(max_length=150, label='Nome', widget=TextInput(attrs={'class': 'form-control'}))
    last_name = forms.CharField(max_length=150, label='Sobrenome', widget=TextInput(attrs={'class': 'form-control'}))
 
    @transaction.atomic
    def save(self, request):
       
-      # 1. Chama o método save da classe pai (SignupForm)
+      # 1. Chama o save original (cria o objeto User, mas sem nome/sobrenome ainda)
       user = super(CustomSignupForm, self).save(request)
       
-      # 2. Adiciona os dados extras do formulário ao objeto User
+      # 2. Atualiza os campos extras
       user.first_name = self.cleaned_data['first_name']
       user.last_name = self.cleaned_data['last_name']
       
-      # 3. Salva o User atualizado com Nome e Sobrenome
+      # 3. Salva o User
       user.save()
       
-      # 4. Lógica para garantir que o PerfilUsuario está configurado
-      # Assumindo que um sinal (post_save) está configurado para criar o perfil.
+      # 4. Configura o PerfilUsuario (Assumindo que o sinal já o criou)
       if hasattr(user, 'perfil'):
-         user.perfil.tipoUsuario = 'Cliente'
-         user.perfil.save()
+        user.perfil.tipoUsuario = 'Cliente'
+        user.perfil.save()
       
       return user
