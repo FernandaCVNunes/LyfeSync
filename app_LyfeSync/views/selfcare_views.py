@@ -1,26 +1,52 @@
 # app_LyfeSync/views/selfcare_views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.http import JsonResponse, HttpResponse
-from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils import timezone
 from datetime import timedelta
 import locale
 import json
 from django.views.decorators.http import require_POST
-from ..forms import GratidaoForm, AfirmacaoForm, HumorForm
-from ..models import Gratidao, Afirmacao, Humor
-from ._aux_logic import get_humor_map # Importa a lógica auxiliar
+from ..forms import GratidaoForm, AfirmacaoForm, HumorForm, DicasForm
+from ..models import Gratidao, Afirmacao, Humor, HumorTipo, Dicas 
+# Importando a função utilitária do arquivo auxiliar
+from ._aux_logic import get_humor_map # <-- NOVO IMPORT
 
+# Configuração de locale para formatação de data/mês em português
+try:
+    locale.setlocale(locale.LC_ALL, 'pt_BR.utf8')
+except locale.Error:
+    try:
+        locale.setlocale(locale.LC_ALL, 'pt_BR')
+    except:
+        pass
+
+# -------------------------------------------------------------------
+# FUNÇÃO DE TESTE DE AUTORIZAÇÃO (para Dicas)
+# -------------------------------------------------------------------
+
+def is_staff_user(user):
+    """Função de teste para o decorador @user_passes_test.
+    Verifica se o usuário é staff/administrador (e ativo).
+    """
+    # Certifique-se de que o usuário é ativo e tem permissão de staff
+    return user.is_active and user.is_staff
+
+# REMOVIDO: A função get_humor_map foi movida para _aux_logic.py
+
+# -------------------------------------------------------------------
+# VIEW PRINCIPAL
+# -------------------------------------------------------------------
 
 @login_required(login_url='login')
 def autocuidado(request):
     """Página de Autocuidado, que pode listar Afirmações, Gratidão e Humor. Requer login."""
-    # CORREÇÃO/IMPORTANTE: Usando 'idusuario' para Afirmacao
+    # Busca 5 afirmações aleatórias do usuário
     afirmacoes = Afirmacao.objects.filter(idusuario=request.user).order_by('?')[:5]
     
     context = {'afirmacoes': afirmacoes}
-    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
+    # CAMINHO CORRETO: app_LyfeSync/autocuidado/autocuidado.html
     return render(request, 'app_LyfeSync/autocuidado/autocuidado.html', context)
 
 
@@ -33,22 +59,24 @@ def humor(request):
     """Página de Humor. Requer login."""
     
     data_hoje = timezone.localdate()
-    humor_map = get_humor_map()
     
     # 1. Busca o Humor de Hoje
     try:
-        humor_do_dia = Humor.objects.get(
+        # CORREÇÃO: Usamos select_related('estado') para buscar o objeto HumorTipo
+        humor_do_dia = Humor.objects.select_related('estado').get( 
             idusuario=request.user, 
             data=data_hoje
         )
-        humor_do_dia.image_path = humor_map.get(humor_do_dia.estado, 'img/icon/default.png')
+        # CORREÇÃO: O caminho do ícone é acessado via 'estado.icone'
+        humor_do_dia.image_path = humor_do_dia.estado.icone
     except Humor.DoesNotExist:
         humor_do_dia = None
 
     # 2. Lógica do Histórico (Últimas 2 Semanas)
     data_duas_semanas_atras = data_hoje - timedelta(days=14)
     
-    humores_recentes_qs = Humor.objects.filter(
+    # CORREÇÃO: Usamos select_related('estado') para otimizar a busca do objeto HumorTipo
+    humores_recentes_qs = Humor.objects.select_related('estado').filter(
         idusuario=request.user, 
         data__gte=data_duas_semanas_atras
     ).exclude(
@@ -58,24 +86,28 @@ def humor(request):
     # 3. Adicionar o caminho da imagem aos registros do histórico
     humores_recentes_list = []
     for registro in humores_recentes_qs:
-        registro.image_path = humor_map.get(registro.estado, 'img/icon/default.png')
+        # CORREÇÃO: Acessa diretamente o icone do objeto relacionado via 'estado.icone'
+        registro.image_path = registro.estado.icone 
         humores_recentes_list.append(registro)
         
-    # 4. Contexto
+    # 4. Busca os tipos de humor para o contexto (útil para exibir a lista completa de humores no template)
+    tipos_de_humor = HumorTipo.objects.all()
+    
     context = {
         'humor_do_dia': humor_do_dia,
         'humores_recentes': humores_recentes_list, 
-        'humor_icon_class_map': humor_map 
+        'tipos_de_humor': tipos_de_humor,
     }
-    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
-    return render(request, 'app_LyfeSync/autocuidado/humor.html', context)
+    # CAMINHO CORRETO: app_LyfeSync/humor/humor.html
+    return render(request, 'app_LyfeSync/humor/humor.html', context)
 
     
 @login_required(login_url='login')
 def registrar_humor(request):
     """Permite registrar um novo Humor. Requer login."""
     
-    humor_icon_class_map = get_humor_map()
+    # Obtém todos os tipos de humor disponíveis para o formulário/template (usando o icone)
+    humores_disponiveis = HumorTipo.objects.all()
     
     if request.method == 'POST':
         form = HumorForm(request.POST)
@@ -90,28 +122,30 @@ def registrar_humor(request):
                 humor_obj.save()
                 messages.success(request, 'Seu humor foi registrado com sucesso! 😊')
                 return redirect('humor')
-            except Exception: # Simplificando a captura de exceção de duplicidade
-                messages.error(request, f'Erro ao salvar: Você já registrou um humor para esta data.')
+            except Exception: # Captura exceção de duplicidade (unique_together) ou outras falhas
+                messages.error(request, f'Erro ao salvar: Você já registrou um humor para esta data, ou houve um erro de validação.')
         else:
             messages.error(request, 'Houve um erro ao registrar o humor. Verifique os campos.')
     else:
-        form = HumorForm()
+        # Inicializa o formulário com a data de hoje
+        form = HumorForm(initial={'data': timezone.localdate()})
         
     context = {
         'form': form,
-        'humor_icon_class_map': humor_icon_class_map 
+        'humores_disponiveis': humores_disponiveis 
     }
-    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
-    return render(request, 'app_LyfeSync/autocuidado/registrarHumor.html', context)
+    # CAMINHO CORRETO: app_LyfeSync/humor/registrarHumor.html
+    return render(request, 'app_LyfeSync/humor/registrarHumor.html', context)
 
 @login_required(login_url='login')
 def alterar_humor(request, humor_id): 
-    """Permite alterar um Humor existente. Requer login."""
+    """Permite alterar um Humor existente. Requer login e ID do Humor."""
     
-    humor_map = get_humor_map()
+    # CORREÇÃO: Busca o registro de Humor usando select_related('estado')
+    instance = get_object_or_404(Humor.objects.select_related('estado'), pk=humor_id, idusuario=request.user)
     
-    # Assume que o campo de ID é idhumor
-    instance = get_object_or_404(Humor, idhumor=humor_id, idusuario=request.user)
+    # Obtém todos os tipos de humor para o template
+    humores_disponiveis = HumorTipo.objects.all()
     
     if request.method == 'POST':
         form = HumorForm(request.POST, instance=instance)
@@ -127,19 +161,21 @@ def alterar_humor(request, humor_id):
         
     context = {
         'form': form,
-        'humor_icon_class_map': humor_map,
+        'humores_disponiveis': humores_disponiveis,
         'humor_id': humor_id, 
+        'humor_atual': instance, # Passa a instância para exibir o estado atual
     }
     
-    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
-    return render(request, 'app_LyfeSync/autocuidado/alterarHumor.html', context)
+    # CAMINHO CORRETO: app_LyfeSync/humor/alterarHumor.html
+    return render(request, 'app_LyfeSync/humor/alterarHumor.html', context)
 
 @require_POST
 @login_required(login_url='login')
 def delete_humor(request, humor_id):
     """Exclui um registro de Humor específico (via AJAX)."""
     try:
-        humor_instance = get_object_or_404(Humor, idhumor=humor_id, idusuario=request.user)
+        # Busca o objeto pela Primary Key (pk)
+        humor_instance = get_object_or_404(Humor, pk=humor_id, idusuario=request.user)
         humor_instance.delete()
         return JsonResponse({'status': 'success', 'message': f'Humor ID {humor_id} excluído.'})
     except Exception as e:
@@ -158,22 +194,21 @@ def load_humor_by_date(request):
     selected_date = None
     
     try:
-        # Tenta o formato padrão ISO (YYYY-MM-DD)
+        # Espera o formato padrão ISO (YYYY-MM-DD)
         selected_date = timezone.datetime.strptime(date_str, '%Y-%m-%d').date()
     except ValueError:
-        try:
-            # Tenta o formato comum brasileiro (DD/MM/YYYY)
-            selected_date = timezone.datetime.strptime(date_str, '%d/%m/%Y').date()
-        except ValueError:
-            return JsonResponse({'exists': False, 'error': f'Formato de data inválido: {date_str}'}, status=400) 
+        return JsonResponse({'exists': False, 'error': f'Formato de data inválido. Esperado YYYY-MM-DD.'}, status=400) 
             
     try:
-        humor_registro = Humor.objects.get(idusuario=request.user, data=selected_date)
+        # CORREÇÃO: Usando select_related('estado') para buscar o tipo de humor junto
+        humor_registro = Humor.objects.select_related('estado').get(idusuario=request.user, data=selected_date)
         
         data = {
             'exists': True,
-            'id': humor_registro.idhumor, 
-            'estado': humor_registro.estado,
+            'id': humor_registro.pk, 
+            # CORREÇÃO: Acessar nome e ícone via 'estado.estado' e 'estado.icone'
+            'nome_humor': humor_registro.estado.estado, 
+            'icone_path': humor_registro.estado.icone, 
             'descricaohumor': humor_registro.descricaohumor,
         }
         return JsonResponse(data)
@@ -185,6 +220,40 @@ def load_humor_by_date(request):
         print(f"Erro ao carregar humor no servidor: {e}")
         return JsonResponse({'exists': False, 'error': 'Erro interno do servidor ao buscar humor.'}, status=500)
 
+
+@login_required(login_url='login')
+@user_passes_test(is_staff_user, login_url='/') # ALTERAÇÃO: Restringe o acesso a usuários Staff/Admin.
+def registrar_dica(request):
+    """Permite registrar uma nova dica (Admin/Staff ou usuário autorizado)."""
+    
+    if request.method == 'POST':
+        form = DicasForm(request.POST)
+        if form.is_valid():
+            dica_obj = form.save(commit=False)
+            dica_obj.criado_por = request.user # Adicionado: Preenche o campo 'criado_por'
+            dica_obj.save() # Salva a dica no banco de dados
+            messages.success(request, "Dica de autocuidado cadastrada com sucesso!")
+            return redirect('registrar_dica') # Redireciona para a mesma página
+        else:
+            messages.error(request, "Erro ao cadastrar dica. Verifique os campos.")
+    else:
+        form = DicasForm()
+
+    # Obtém o mapa de imagens de humor do arquivo auxiliar
+    humor_map = get_humor_map() 
+    
+    # Busca a lista de dicas cadastradas para exibição (assumindo que existe um model 'Dicas')
+    try:
+        dicas_list = Dicas.objects.all().order_by('-data_criacao')
+    except Exception:
+        dicas_list = [] # Fallback se houver qualquer erro na busca
+
+    context = {
+        'form': form,
+        'humor_icon_class_map': humor_map, 
+        'dicas_list': dicas_list,
+    }
+    return render(request, 'app_LyfeSync/humor/dicas.html', context)
 
 # -------------------------------------------------------------------
 # VIEWS DE GRATIDÃO
@@ -201,15 +270,7 @@ def gratidao(request):
         data__gte=primeiro_dia_mes
     ).order_by('-data') 
     
-    try:
-        # Tenta configurar o locale para exibir o nome do mês corretamente
-        locale.setlocale(locale.LC_ALL, 'pt_BR.utf8')
-    except locale.Error:
-        try:
-            locale.setlocale(locale.LC_ALL, 'pt_BR')
-        except:
-            pass
-            
+    # Formatação do nome do mês em português
     mes_atual_extenso = data_hoje.strftime('%B').capitalize()
 
     context = {
@@ -218,8 +279,8 @@ def gratidao(request):
         'ano_atual': data_hoje.year,
     }
 
-    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
-    return render(request, 'app_LyfeSync/autocuidado/gratidao.html', context)
+    # CAMINHO CORRETO: app_LyfeSync/gratidao/gratidao.html
+    return render(request, 'app_LyfeSync/gratidao/gratidao.html', context)
 
 
 @login_required(login_url='login') 
@@ -240,18 +301,19 @@ def registrar_gratidao(request):
         else:
             messages.error(request, 'Houve um erro ao registrar sua gratidão. Verifique os campos.')
     else:
-        form = GratidaoForm()
+        form = GratidaoForm(initial={'data': timezone.localdate()})
         
     context = {'form': form}
-    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
-    return render(request, 'app_LyfeSync/autocuidado/registrarGratidao.html', context)
+    # CAMINHO CORRETO: app_LyfeSync/gratidao/registrarGratidao.html
+    return render(request, 'app_LyfeSync/gratidao/registrarGratidao.html', context)
 
 
 @login_required(login_url='login')
 def alterar_gratidao(request, gratidao_id): 
     """Permite alterar uma Gratidao existente. Requer login e ID da Gratidão."""
     
-    gratidao_instance = get_object_or_404(Gratidao, idgratidao=gratidao_id, idusuario=request.user) 
+    # Busca o objeto pela Primary Key (pk)
+    gratidao_instance = get_object_or_404(Gratidao, pk=gratidao_id, idusuario=request.user) 
     
     if request.method == 'POST':
         form = GratidaoForm(request.POST, instance=gratidao_instance)
@@ -265,8 +327,8 @@ def alterar_gratidao(request, gratidao_id):
         form = GratidaoForm(instance=gratidao_instance)
         
     context = {'form': form, 'gratidao_id': gratidao_id}
-    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
-    return render(request, 'app_LyfeSync/autocuidado/alterarGratidao.html', context)
+    # CAMINHO CORRETO: app_LyfeSync/gratidao/alterarGratidao.html
+    return render(request, 'app_LyfeSync/gratidao/alterarGratidao.html', context)
 
 
 @require_POST
@@ -274,7 +336,8 @@ def alterar_gratidao(request, gratidao_id):
 def delete_gratidao(request, gratidao_id):
     """Exclui um registro de Gratidão específico (via AJAX)."""
     try:
-        gratidao_instance = get_object_or_404(Gratidao, idgratidao=gratidao_id, idusuario=request.user)
+        # Busca o objeto pela Primary Key (pk)
+        gratidao_instance = get_object_or_404(Gratidao, pk=gratidao_id, idusuario=request.user)
         gratidao_instance.delete()
         return JsonResponse({'status': 'success', 'message': f'Gratidão ID {gratidao_id} excluída.'})
     except Exception as e:
@@ -296,8 +359,8 @@ def afirmacao(request):
         'ultimas_afirmacoes': ultimas_afirmacoes,
     }
 
-    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
-    return render(request, 'app_LyfeSync/autocuidado/afirmacao.html', context)
+    # CAMINHO CORRETO: app_LyfeSync/afirmacao/afirmacao.html
+    return render(request, 'app_LyfeSync/afirmacao/afirmacao.html', context)
 
 
 @login_required(login_url='login')
@@ -318,18 +381,19 @@ def registrar_afirmacao(request):
         else:
             messages.error(request, 'Houve um erro ao registrar a afirmação. Verifique os campos.')
     else:
-        form = AfirmacaoForm()
+        form = AfirmacaoForm(initial={'data': timezone.localdate()})
         
     context = {'form': form}
-    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
-    return render(request, 'app_LyfeSync/autocuidado/registrarAfirmacao.html', context)
+    # CAMINHO CORRETO: app_LyfeSync/afirmacao/registrarAfirmacao.html
+    return render(request, 'app_LyfeSync/afirmacao/registrarAfirmacao.html', context)
 
 
 @login_required(login_url='login')
 def alterar_afirmacao(request, afirmacao_id):
     """Permite alterar uma Afirmação existente. Requer login e ID da Afirmação."""
     
-    afirmacao_instance = get_object_or_404(Afirmacao, idafirmacao=afirmacao_id, idusuario=request.user) 
+    # Busca o objeto pela Primary Key (pk)
+    afirmacao_instance = get_object_or_404(Afirmacao, pk=afirmacao_id, idusuario=request.user) 
     
     if request.method == 'POST':
         form = AfirmacaoForm(request.POST, instance=afirmacao_instance)
@@ -343,8 +407,8 @@ def alterar_afirmacao(request, afirmacao_id):
         form = AfirmacaoForm(instance=afirmacao_instance)
         
     context = {'form': form, 'afirmacao_id': afirmacao_id}
-    # CORREÇÃO DE CAMINHO: Template movido para a subpasta 'autocuidado'
-    return render(request, 'app_LyfeSync/autocuidado/alterarAfirmacao.html', context)
+    # CAMINHO CORRETO: app_LyfeSync/afirmacao/alterarAfirmacao.html
+    return render(request, 'app_LyfeSync/afirmacao/alterarAfirmacao.html', context)
 
 
 @require_POST
@@ -352,7 +416,8 @@ def alterar_afirmacao(request, afirmacao_id):
 def delete_afirmacao(request, afirmacao_id):
     """Exclui um registro de Afirmação específico (via AJAX)."""
     try:
-        afirmacao_instance = get_object_or_404(Afirmacao, idafirmacao=afirmacao_id, idusuario=request.user)
+        # Busca o objeto pela Primary Key (pk)
+        afirmacao_instance = get_object_or_404(Afirmacao, pk=afirmacao_id, idusuario=request.user)
         afirmacao_instance.delete()
         return JsonResponse({'status': 'success', 'message': f'Afirmação ID {afirmacao_id} excluída.'})
     except Exception as e:

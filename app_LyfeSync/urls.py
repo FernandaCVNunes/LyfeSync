@@ -12,7 +12,7 @@ from .views import (
     relatorios, relatorio_habito, relatorio_humor, relatorio_gratidao, relatorio_afirmacao,
     conta, configuracoes_conta, registrar_dica
 )
-from django.contrib.auth import views as auth_views
+#from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     # -------------------------------------------------------------------
@@ -37,7 +37,7 @@ urlpatterns = [
     path('habitos/registrar/', registrar_habito, name='registrar_habito'),
     path('habitos/alterar/<int:habito_id>/', alterar_habito, name='alterar_habito'), 
     path('habitos/toggle_day/<int:habit_id>/<str:day>/', toggle_habito_day, name='toggle_habit_day'),
-    path('habitos/delete/<int:habit_id>/', delete_habit, name='delete_habit'),
+    path('habitos/excluir/<int:habit_id>/', delete_habit, name='delete_habit'),
 
     # -------------------------------------------------------------------
     # AUTOCUIDADO (Página principal e sub-módulos)

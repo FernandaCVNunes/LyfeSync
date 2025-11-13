@@ -1,21 +1,18 @@
 # app_LyfeSync/views/_aux.logic.py
 from datetime import date
-from ..models import StatusDiario
+from ..models import StatusDiario, HumorTipo # Adicionar HumorTipo aqui
+from django.utils import timezone # Adicionar timezone para uso consistente
 
 # -------------------------------------------------------------------
 # LÓGICA AUXILIAR PARA HUMOR
 # -------------------------------------------------------------------
 
 def get_humor_map():
-    """Define o mapeamento dos códigos de humor (salvos no BD) para os caminhos das imagens estáticas."""
-    # Caminhos relativos à sua pasta static (ex: static/img/icon/)
-    return {
-        'Feliz': 'img/icon/feliz.png',
-        'Calmo': 'img/icon/calmo.png',
-        'Ansioso': 'img/icon/ansioso.png',
-        'Triste': 'img/icon/triste.png',
-        'Irritado': 'img/icon/raiva.png',
-    }
+    """Retorna um dicionário mapeando o nome do humor (estado) para o caminho do ícone."""
+    # Busca todos os tipos de humor disponíveis
+    humor_tipos = HumorTipo.objects.all()
+    # Cria o mapeamento: {'Estado do Humor': 'icone'}
+    return {tipo.estado: tipo.icone for tipo in humor_tipos} 
 
 
 # -------------------------------------------------------------------
@@ -23,18 +20,18 @@ def get_humor_map():
 # -------------------------------------------------------------------
 
 def _get_checked_days_for_current_month(habito_obj):
-    """Busca os dias em que o hábito foi concluído no mês atual."""
-    month = date.today().month
-    year = date.today().year
-    
-    # Consulta todas as conclusões para o hábito no mês e ano atuais
-    # ASSUMIDO: O campo de data em StatusDiario é 'data_conclusao'
-    completions = StatusDiario.objects.filter(
-        habito=habito_obj, 
-        data_conclusao__year=year, 
-        data_conclusao__month=month
-    )
-    
-    # Cria o dicionário de mapa: {dia_do_mês: True}
-    checked_days = {c.data_conclusao.day: True for c in completions}
-    return checked_days
+   """Busca os dias em que o hábito foi concluído no mês atual."""
+   month = timezone.localdate().month
+   year = timezone.localdate().year
+   
+   # CORREÇÃO CRÍTICA: O campo de data em StatusDiario é 'data', não 'data_conclusao'.
+   completions = StatusDiario.objects.filter(
+      habito=habito_obj, 
+      data__year=year, 
+      data__month=month,
+      concluido=True # Adicionar filtro para garantir que só conta o que foi concluído
+   )
+   
+   # CORREÇÃO: Usar o campo 'data' (do model)
+   checked_days = {c.data.day: True for c in completions}
+   return checked_days

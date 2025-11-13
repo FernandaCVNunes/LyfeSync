@@ -1,151 +1,292 @@
+{# dicas.html #}
 {% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
 {% load static %}
+{% load custom_filters %}
+{% load app_LyfeSync_extras %}
 
 {% block title %}
-  Registrar Dicas (Admin)
+Gestão de Dicas de Autocuidado
 {% endblock %}
 
 {% block content_logado %}
-  {# max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 bg-white rounded-xl shadow-2xl mt-8 #}
-  <div class="container mt-5 mb-5">
+
+{# Necessário para os estilos de seleção de humor. Assumindo que este CSS contém estilos Bootstrap-friendly. #}
+<link rel="stylesheet" href="{% static 'css/homeLyfesync.css' %}">
+
+<!-- Conteúdo Principal -->
+<div class="container my-5">
     <div class="row justify-content-center">
-      <div class="col-12 col-lg-8 card p-4 p-md-5 rounded-4 shadow-lg border-0">
-        <div class="mb-4">
-          <button type="button" class="btn-adicionar-dica btn btn-sm btn-outline-success mb-2 d-flex align-items-center">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="btn-add-dica-icon">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>Adicionar Dicas
-          </button>
-          {# text-3xl font-extrabold text-gray-800 mt-2 border-b pb-2 #}
-          <h1 class="h3 fw-bolder text-dark border-bottom pb-2">Cadastro de Dicas de Autocuidado</h1>
-        </div>
-
-        {% if messages %}
-          <div class="messages">
-            {% for message in messages %}
-              {# Substituindo classes de tags por alertas Bootstrap #}
-              <div class="alert alert-{{ message.tags|default_if_none:'info' }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-              </div>
-            {% endfor %}
-          </div>
-        {% endif %}
-
-        {# space-y-6 -> usando mb-4 e pt-4 #}
-        <form method="post" action="{% url 'registrar_dica' %}">
-          {% csrf_token %}
-
-          <div class="mb-4">
-            {# dica-label-text block text-xl mb-3 -> form-label #}
-            <label class="form-label mb-3 dica-humor-label">Selecione o Humor:</label>
-            {# dica-emoji-selector -> d-flex flex-wrap gap-2 #}
-            <div class="dica-emoji-selector d-flex flex-wrap gap-2">
-              {{ form.estado.as_hidden }}
-
-              {% for value, label in form.fields.estado.choices %}
-                {# dica-emoji-option (usar classe customizada e p-2 rounded) #}
-                <div class="dica-emoji-option p-2 rounded text-center cursor-pointer" data-humor-value="{{ value }}" id="emoji-{{ value }}">
-                  <span class="dica-emoji-icon emoji-{{ value|lower }}">
-                    {% if value == 'Feliz' %}
-                      😀
-                    {% elif value == 'Calmo' %}
-                      😌
-                    {% elif value == 'Ansioso' %}
-                      😟
-                    {% elif value == 'Triste' %}
-                      😥
-                    {% elif value == 'Irritado' %}
-                      😡
-                    {% else %}
-                      ?
-                    {% endif %}
-                  </span>
-                  {# dica-emoji-text text-{{ value|lower }} -> small #}
-                  <small class="dica-emoji-text text-{{ value|lower }} d-block">{{ label }}</small>
-                </div>
-              {% endfor %}
+        <div class="col-12 col-lg-8">
+            
+            <!-- Título e Botão de Ação -->
+            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+                <h1 class="h3 fw-bolder text-dark m-0">Gestão de Dicas de Autocuidado</h1>
+                
+                {# BOTÃO QUE AGORA ABRE O MODAL #}
+                <button type="button" class="btn btn-sm btn-success fw-bold d-flex align-items-center shadow-sm"
+                        data-bs-toggle="modal" data-bs-target="#adicionarDicaModal">
+                    <!-- Ícone + -->
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Adicionar Dicas
+                </button>
             </div>
-            {# text-red-500 block mt-1 -> text-danger small d-block mt-1 #}
-            {% if form.estado.errors %}
-              <small class="text-danger d-block mt-1">{{ form.estado.errors }}</small>
+            
+            <!-- Mensagens do Django -->
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default_if_none:'info' }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
             {% endif %}
-          </div>
 
-          <div class="mb-4">
-            {# dica-label-text block -> form-label #}
-            <label for="{{ form.nome_dica.id_for_label }}" class="form-label dica-label-text">Nome da Dica:</label>
-            {# O widget de form do Django deve ser customizado com .form-control no `forms.py` ou adicionado via JS #}
-            {{ form.nome_dica }}
-            {% if form.nome_dica.errors %}
-              <small class="text-danger d-block mt-1">{{ form.nome_dica.errors }}</small>
-            {% endif %}
-          </div>
+            <!-- ================================================================= -->
+            <!-- 1. SEÇÃO DE LISTAGEM DE DICAS CADASTRADAS -->
+            <!-- ================================================================= -->
+            <div class="card p-4 rounded-4 shadow-lg border-0 mt-4">
+                <h2 class="h5 fw-bold text-secondary mb-3">Dicas Cadastradas ({% if dicas_list %}{{ dicas_list|length }}{% else %}0{% endif %} itens)</h2>
+                
+                {% if dicas_list %}
+                <ul class="list-group list-group-flush">
+                    {% for dica in dicas_list %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center p-3 border-bottom">
+                        <div>
+                            <p class="fw-bold mb-1 text-primary">{{ dica.nomeDica }}</p>
+                            <p class="mb-1 small text-muted">Humor: {{ dica.humor_relacionado }}</p> 
+                            <p class="mb-0 small">{{ dica.descricaoDica|truncatechars:100 }}</p>
+                        </div>
+                        <div class="btn-group" role="group">
+                            {# Botão de Edição (Placeholder) #}
+                            <button type="button" class="btn btn-sm btn-outline-info" 
+                                data-bs-toggle="tooltip" title="Editar Dica">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            {# Botão de Exclusão (Dispara o Modal de Confirmação) #}
+                            <button type="button" class="btn btn-sm btn-outline-danger" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#excluirDicaModal"
+                                data-dica-id="{{ dica.pk }}"
+                                data-dica-nome="{{ dica.nomeDica }}"
+                                title="Excluir Dica">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="alert alert-info text-center mt-3" role="alert">
+                    Nenhuma dica de autocuidado cadastrada ainda. Use o botão "Adicionar Dicas" acima para registar a primeira!
+                </div>
+                {% endif %}
+            </div>
 
-          <div class="mb-4">
-            {# dica-label-text block -> form-label #}
-            <label for="{{ form.descricao.id_for_label }}" class="form-label dica-label-text">Descrição:</label>
-            {# O widget de form do Django deve ser customizado com .form-control no `forms.py` ou adicionado via JS #}
-            {{ form.descricao }}
-            {% if form.descricao.errors %}
-              <small class="text-danger d-block mt-1">{{ form.descricao.errors }}</small>
-            {% endif %}
-          </div>
-
-          {# flex justify-end pt-4 -> d-flex justify-content-end pt-3 #}
-          <div class="d-flex justify-content-end pt-3">
-            {# btn-salvar-dica -> btn btn-primary (ou outra cor) #}
-            <button type="submit" class="btn-salvar-dica btn btn-lg btn-success fw-bold">Salvar Dica</button>
-          </div>
-        </form>
-      </div>
+        </div>
     </div>
-  </div>
+</div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const emojiOptions = document.querySelectorAll('.dica-emoji-option')
-      const estadoInput = document.querySelector('input[name="estado"]')
-      const defaultHumor = 'Feliz' // Define um humor padrão
-      // Função para selecionar um emoji visualmente e no input oculto
-      function selectEmoji(element, value) {
-        // 1. Limpa a seleção anterior
-        emojiOptions.forEach((opt) => opt.classList.remove('selected-dica-emoji'))
-        // 2. Aplica a seleção atual (Recomendado: defina o estilo para 'selected-dica-emoji' no seu CSS)
-        if (element) {
-          element.classList.add('selected-dica-emoji')
-        }
-        // 3. Atualiza o valor do input oculto
-        estadoInput.value = value
-      }
-      // Adiciona listener de click para cada emoji
-      emojiOptions.forEach((option) => {
-        option.addEventListener('click', function () {
-          const value = this.getAttribute('data-humor-value')
-          selectEmoji(this, value)
+<!-- ================================================================= -->
+<!-- 2. MODAL DE ADIÇÃO DE DICA (Com o Formulário Corrigido dentro) -->
+<!-- ================================================================= -->
+<div class="modal fade" id="adicionarDicaModal" tabindex="-1" aria-labelledby="adicionarDicaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4 shadow-lg">
+            
+            {% if not form %}
+                <div class="alert alert-danger p-5 text-center">
+                    Erro: O formulário de cadastro não foi carregado corretamente. Verifique sua função de *view* (registrar_dica).
+                </div>
+            {% else %}
+                <form method="post" action="{% url 'registrar_dica' %}">
+                    {% csrf_token %}
+                    <div class="modal-header border-bottom-0">
+                        <h5 class="modal-title fw-bolder text-dark" id="adicionarDicaModalLabel">Adicionar Nova Dica</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+
+                        {# Bloco de Seleção de Humor #}
+                        <div class="mb-4">
+                            <label class="form-label h5 fw-semibold text-secondary mb-3">Selecione o Humor:</label>
+                            
+                            {# Oculta o widget completo do Django, mas renderiza os rádios #}
+                            <div id="hidden-radio-widget" class="d-none">{{ form.humor_relacionado }}</div>
+
+                            <div class="d-flex flex-wrap justify-content-center gap-3 humor-grid">
+                                {% for value, label in form.humor_relacionado.field.choices %}
+                                {% if value %}
+                                {% with image_path=humor_icon_class_map|get_item:label|default:'img/icon/adchumor.png' %}
+                                <div class="humor-option-card" data-humor-container data-humor-value="{{ value }}" onclick="selectHumor('{{ value }}', this)">
+                                    <img src="{% static image_path %}" alt="{{ label }}" class="humor-image-lg" />
+                                    <span class="humor-label">{{ label }}</span>
+                                </div>
+                                {% endwith %}
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+
+                            {% if form.humor_relacionado.errors %}
+                            <div class="text-danger small mt-1">{{ form.humor_relacionado.errors }}</div>
+                            {% endif %}
+                        </div>
+                        {# FIM DO BLOCO DE SELEÇÃO DE HUMOR #}
+                        
+                        {# Campo Nome da Dica #}
+                        <div class="mb-4">
+                            <label for="{{ form.nomeDica.id_for_label }}" class="form-label fw-semibold">Nome da Dica:</label>
+                            {{ form.nomeDica }}
+                            {% if form.nomeDica.errors %}
+                            <small class="text-danger d-block mt-1">{{ form.nomeDica.errors }}</small>
+                            {% endif %}
+                        </div>
+
+                        {# Campo Descrição #}
+                        <div class="mb-4">
+                            <label for="{{ form.descricaoDica.id_for_label }}" class="form-label fw-semibold">Descrição:</label>
+                            {{ form.descricaoDica }}
+                            {% if form.descricaoDica.errors %}
+                            <small class="text-danger d-block mt-1">{{ form.descricaoDica.errors }}</small>
+                            {% endif %}
+                        </div>
+
+                    </div>
+                    <div class="modal-footer border-top-0 justify-content-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                        <button type="submit" class="btn btn-success fw-bold">Salvar Dica</button>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- 3. MODAL DE CONFIRMAÇÃO DE EXCLUSÃO (NOVO) -->
+<!-- ================================================================= -->
+<div class="modal fade" id="excluirDicaModal" tabindex="-1" aria-labelledby="excluirDicaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 shadow">
+            <div class="modal-header bg-danger text-white border-0">
+                <h5 class="modal-title" id="excluirDicaModalLabel">Confirmar Exclusão</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" id="form-excluir-dica">
+                {% csrf_token %}
+                <!-- O action será preenchido via JavaScript -->
+                <div class="modal-body">
+                    <p class="mb-3">Tem certeza de que deseja **excluir** a dica:</p>
+                    <p class="fw-bold text-danger text-center h5" id="dica-nome-confirmacao"></p>
+                    <p class="mt-3">Esta ação não pode ser desfeita.</p>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger fw-bold">Sim, Excluir</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // A função de seleção de humor é crítica para o funcionamento do RadioSelect disfarçado de cards
+    function selectHumor(humorValue, element) {
+        const val = String(humorValue)
+        const formFieldName = 'humor_relacionado'
+
+        // 1. Remove a classe de seleção de todos os containers DENTRO DO MODAL
+        document.querySelectorAll('#adicionarDicaModal [data-humor-container]').forEach(function (el) {
+            el.classList.remove('active') // 'active' é a classe customizada para o estado selecionado
         })
-      })
-      // 4. Inicializa com o valor padrão (para garantir que um valor seja enviado)
-      const initialSelected = document.querySelector(`.dica-emoji-option[data-humor-value="${estadoInput.value || defaultHumor}"]`)
-      if (initialSelected) {
-        selectEmoji(initialSelected, estadoInput.value || defaultHumor)
-      } else {
-        // Garante que o input tenha um valor mesmo que não haja seleção visual
-        estadoInput.value = defaultHumor
-      }
-      // Aplica classes Bootstrap aos campos de formulário renderizados pelo Django
-      // Você DEVE garantir que esses IDs existam ou que o Django renderize a classe form-control diretamente.
-      const nomeDicaInput = document.getElementById('{{ form.nome_dica.id_for_label }}')
-      const descricaoTextarea = document.getElementById('{{ form.descricao.id_for_label }}')
-    
-      if (nomeDicaInput) {
-        nomeDicaInput.classList.add('form-control')
-        nomeDicaInput.classList.add('custom-dica-input') // Mantendo classe customizada
-      }
-      if (descricaoTextarea) {
-        descricaoTextarea.classList.add('form-control')
-        descricaoTextarea.classList.add('custom-dica-textarea') // Mantendo classe customizada
-      }
+
+        // 2. Adiciona a classe de seleção ao elemento clicado
+        element.classList.add('active')
+
+        // 3. ENCONTRA O INPUT DE RÁDIO CORRESPONDENTE E O MARCA COMO CHECADO
+        const radioInputs = document.querySelectorAll(`#adicionarDicaModal input[name="${formFieldName}"][type="radio"]`)
+        let found = false
+        radioInputs.forEach(function (input) {
+            if (input.value === val) {
+                input.checked = true
+                found = true
+            } else {
+                input.checked = false
+            }
+        })
+        if (!found) {
+            console.warn(`Aviso: O input de rádio para o valor "${humorValue}" não foi encontrado. O form pode falhar.`)
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        
+        // Aplica classes de formulário (embora o widget já faça isso, é uma redundância segura)
+        const formFieldName = 'humor_relacionado'
+
+        // ------------------------------------------------------------------
+        // Lógica de Pré-Seleção e Marcação Inicial (Para o caso de re-renderização com erro)
+        // ------------------------------------------------------------------
+        const checkedRadio = document.querySelector(`#adicionarDicaModal input[name="${formFieldName}"][type="radio"]:checked`)
+        let preSelectedValue = null
+
+        if (checkedRadio) {
+            preSelectedValue = checkedRadio.value
+            
+            // Força a abertura do modal se houver um erro de validação
+            if (document.querySelector('.messages .alert-danger')) {
+                var modalEl = document.getElementById('adicionarDicaModal');
+                if (modalEl) {
+                    var modal = new bootstrap.Modal(modalEl);
+                    modal.show();
+                }
+            }
+        }
+
+        // Inicializa o estilo do container selecionado APENAS SE HOUVER UM VALOR PRÉ-SELECIONADO
+        if (preSelectedValue) {
+            const initialElement = document.querySelector(`#adicionarDicaModal [data-humor-value="${String(preSelectedValue)}"]`)
+            if (initialElement) {
+                initialElement.classList.add('active')
+            }
+        } else {
+            // Garante que NENHUM rádio esteja marcado no carregamento para novos registros
+            document.querySelectorAll(`#adicionarDicaModal input[name="${formFieldName}"][type="radio"]`).forEach(function (input) {
+                input.checked = false
+            })
+        }
+        
+        // ------------------------------------------------------------------
+        // Inicializa Tooltips do Bootstrap
+        // ------------------------------------------------------------------
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+
+        // ------------------------------------------------------------------
+        // Lógica para o Modal de Exclusão (Passa dados da dica para o modal)
+        // ------------------------------------------------------------------
+        var excluirDicaModal = document.getElementById('excluirDicaModal')
+        if (excluirDicaModal) {
+            excluirDicaModal.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget
+                var dicaId = button.getAttribute('data-dica-id')
+                var dicaNome = button.getAttribute('data-dica-nome')
+                
+                var modalNomeDica = excluirDicaModal.querySelector('#dica-nome-confirmacao')
+                var modalForm = excluirDicaModal.querySelector('#form-excluir-dica')
+
+                // Atualiza a exibição do nome da dica e a action do formulário
+                modalNomeDica.textContent = dicaNome
+                
+                // Assumindo a URL de exclusão é /dicas/excluir/{pk}/
+                modalForm.setAttribute('action', `/dicas/excluir/${dicaId}/`)
+            })
+        }
     })
-  </script>
+</script>
 {% endblock %}

@@ -1,13 +1,11 @@
-/* homeLyfesync.css - REVISADO E CONSOLIDADO */
+/* homeLyfesync.css - Estilos Customizados para Bootstrap 5 */
 /* ------------------------------------------------------------------- */
 
 /* VARIÁVEIS DE TEMA */
 :root {
     --lyfesync-red-salvar: #E5534B;
     --lyfesync-green: #48BB78;
-    /* O verde desejado para títulos de autocuidado */
     --lyfesync-text-emerald: #10B981;
-    /* O verde principal para botões/humor */
     --lyfesync-gray-input: #E9ECEF;
     --lyfesync-text-gray: #4A5568;
 
@@ -23,9 +21,8 @@
 /* --- DIMENSIONAMENTO DE IMAGENS E ÍCONES (CONSOLIDADO) --- */
 /* ========================================================= */
 
-/* Ícones de Autocuidado no Menu (40px) */
-/* Garante o tamanho correto para os ícones na página autocuidado.html */
-img .autocuidado-icon-lg {
+/* Ícones de Autocuidado no Menu (50px) */
+.autocuidado-icon-lg {
     max-width: 8% !important;
     width: 50px;
     height: 50px;
@@ -41,14 +38,13 @@ img .autocuidado-icon-lg {
 }
 
 /* Ícones pequenos (Humor, Gratidão, Genérico) (30px) - Consolidação */
-.humor-image-small,
+.humor-image-sm,
 .gratidao-icon-size,
 .img-small {
     width: 30px;
     height: 30px;
     object-fit: contain;
 }
-
 
 /* ========================================================= */
 /* --- ESTILOS DE AUTOCUIDADO (Garantindo Cor e Ícones) --- */
@@ -57,7 +53,6 @@ img .autocuidado-icon-lg {
 /* Título H2 do Menu de Autocuidado: Cor verde #48BB78 */
 .autocuidado-link-title {
     color: var(--lyfesync-green, #48BB78);
-    /* Garante a cor verde exata desejada */
 }
 
 /* Título de Card de Dica */
@@ -68,7 +63,6 @@ img .autocuidado-icon-lg {
 /* Fundo verde claro para o card de dica */
 .dica-card-green {
     background-color: #ECFDF5;
-    /* Fundo verde muito claro */
     border-color: var(--lyfesync-green, #48BB78) !important;
 }
 
@@ -82,6 +76,7 @@ img .autocuidado-icon-lg {
     border: none;
 }
 
+/* Estilo para Inputs Customizados (simula a estética Tailwind de fundo cinza) */
 .rs-form-control {
     background-color: var(--lyfesync-gray-input, #E9ECEF);
     border: 1px solid var(--lyfesync-gray-input, #E9ECEF);
@@ -101,8 +96,8 @@ img .autocuidado-icon-lg {
     border-radius: 8px;
     padding: 1rem;
     font-size: 1rem;
+    resize: vertical;
 }
-
 
 /* ========================================================= */
 /* --- ESTILOS PÁGINA REGISTRAR HUMOR (DETALHES DO CARD) --- */
@@ -122,6 +117,7 @@ img .autocuidado-icon-lg {
     padding: 1rem 0;
 }
 
+/* Card de Opção de Humor */
 .humor-option-card {
     display: flex;
     flex-direction: column;
@@ -143,10 +139,12 @@ img .autocuidado-icon-lg {
     transform: translateY(-2px);
 }
 
+/* ESTILO ATIVO: Corrigido - Simula o efeito de seleção forte */
 .humor-option-card.active {
     border-color: var(--lyfesync-text-emerald, #10B981);
     background-color: #ECFDF5;
-    box-shadow: 0 0 0 3px #34D399, 0 6px 10px -3px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 0 0 4px #10B981, 0 8px 12px -3px rgba(0, 0, 0, 0.2);
+    transform: scale(1.05);
 }
 
 .humor-label {
@@ -171,10 +169,11 @@ img .autocuidado-icon-lg {
 
 @media (max-width: 640px) {
     .humor-option-card {
-        flex-basis: 25%;
+        /* Ajuste responsivo para telas menores */
+        flex-basis: calc(33.333% - 1rem);
+        width: auto;
     }
 }
-
 
 /* ========================================================= */
 /* --- ESTILOS PÁGINA REGISTRAR GRATIDÃO / AFIRMAÇÃO --- */
@@ -291,7 +290,6 @@ img .autocuidado-icon-lg {
     position: absolute;
 }
 
-
 /* ========================================================= */
 /* --- ESTILOS DE BOTÃO (Salvar/Adicionar) --- */
 /* ========================================================= */
@@ -360,6 +358,25 @@ img .autocuidado-icon-lg {
     margin-top: 3rem;
     max-width: 300px;
     width: 100%;
+}
+
+/* Estilo para Botões de Alterar (btn-warning) - Força a cor Laranja/Vermelha da paleta */
+.btn-warning {
+    background-color: var(--lyfesync-red-salvar) !important;
+    border-color: var(--lyfesync-red-salvar) !important;
+    color: white !important;
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.btn-warning:hover {
+    background-color: #C5443C !important;
+    border-color: #C5443C !important;
+    color: white !important;
+    opacity: 0.9;
+}
+
+.btn-warning:focus {
+    box-shadow: 0 0 0 0.25rem rgba(229, 83, 75, 0.5) !important;
 }
 
 /* ========================================================= */
@@ -480,4 +497,35 @@ img .autocuidado-icon-lg {
     .col-result {
         width: 60px;
     }
+}
+
+/* Novo estilo para o item de histórico de humor ao passar o mouse */
+.humor-list-item-hover:hover {
+    background-color: #e9ecef !important;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo para a mensagem de carregamento/sucesso */
+.loading-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 1.5rem 2.5rem;
+    background-color: #FFFFFF;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    font-size: 1.25rem;
+    font-weight: 600;
+    z-index: 1050;
+    display: none;
+    text-align: center;
+}
+
+.loading-message.success {
+    color: var(--lyfesync-text-emerald);
+}
+
+.loading-message.error {
+    color: var(--lyfesync-red-salvar);
 }

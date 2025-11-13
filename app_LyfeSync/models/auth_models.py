@@ -1,11 +1,10 @@
-# models.py#
+#models/auth_models
 from django.db import models
 from django.contrib.auth import get_user_model
-from django.utils import timezone
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-
+# Obtém o modelo de usuário ativo do Django (necessário para a FK em PerfilUsuario)
 User = get_user_model()
 
 # ===================================================================
@@ -36,7 +35,7 @@ class AccountEmailaddress(models.Model):
     email = models.CharField(max_length=254)
     verified = models.IntegerField()
     primary = models.IntegerField()
-    # FK para AuthUser com models.DO_NOTHING, pois é managed=False
+    # FK para AuthUser
     user = models.ForeignKey(AuthUser, models.DO_NOTHING) 
 
     class Meta:
@@ -188,8 +187,9 @@ class SocialaccountSocialtoken(models.Model):
         managed = False
         db_table = 'socialaccount_socialtoken'
         unique_together = (('app', 'account'),)
-        
+
 class Usuario(models.Model):
+    """Modelo Managed=False para a tabela 'usuario' legada."""
     idusuario = models.AutoField(db_column='idUsuario', primary_key=True) 
     nome = models.CharField(max_length=100, blank=True, null=True)
     datanascimento = models.DateField(db_column='dataNascimento', blank=True, null=True)
@@ -203,6 +203,10 @@ class Usuario(models.Model):
         managed = False
         db_table = 'usuario'
 
+# ===================================================================
+# MODELO DE PERFIL ESTENDIDO (MANAGED=TRUE)
+# ===================================================================
+
 TIPO_USUARIO_CHOICES = [
     ('Cliente', 'Cliente'),
     ('Administrador', 'Administrador'),
@@ -211,7 +215,7 @@ TIPO_USUARIO_CHOICES = [
 class PerfilUsuario(models.Model):
     """
     Modelo de Perfil Estendido para o Usuário Padrão do Django.
-    Adiciona a coluna 'tipoUsuario' ao banco de dados MySQL.
+    Adiciona a coluna 'tipoUsuario'.
     """
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil')
     
@@ -236,7 +240,6 @@ def criar_ou_atualizar_perfil_usuario(sender, instance, created, **kwargs):
     if created:
         PerfilUsuario.objects.create(user=instance)
     # Se o perfil já existe, apenas salva, garantindo a sincronia.
-    # Usamos try/except para evitar erros em migrações
     try:
         instance.perfil.save()
     except PerfilUsuario.DoesNotExist:
@@ -247,7 +250,6 @@ def criar_ou_atualizar_perfil_usuario(sender, instance, created, **kwargs):
 def sincronizar_admin_status(sender, instance, **kwargs):
     """
     Sincroniza automaticamente o tipoUsuario com o status de superusuário do Django.
-    Isso é vital para evitar inconsistências.
     """
     if hasattr(instance, 'perfil'):
         is_admin_flag = instance.is_superuser or instance.is_staff
@@ -259,248 +261,6 @@ def sincronizar_admin_status(sender, instance, **kwargs):
             instance.perfil.save()
         # Se NÃO for superuser/staff, mas estiver como Administrador no perfil
         elif not is_admin_flag and tipo_atual == 'Administrador':
-             # Rebaixa para Cliente
+            # Rebaixa para Cliente
             instance.perfil.tipoUsuario = 'Cliente'
             instance.perfil.save()
-
-
-# ===================================================================
-# MODELOS DA APLICAÇÃO app_LyfeSync (Managed = True)
-# ===================================================================
-
-# -------------------------------------------------------------------
-# 1. HÁBITOS
-# -------------------------------------------------------------------
-class Habito(models.Model):
-    id = models.BigAutoField(primary_key=True) 
-    
-    nome = models.CharField(max_length=200)
-    data_inicio = models.DateField(default=timezone.now)
-    data_fim = models.DateField(blank=True, null=True)
-    
-    quantidade = models.IntegerField(default=1) 
-    
-    frequencia = models.CharField(max_length=10) # Ex: Diário, Semanal
-    alvo = models.CharField(max_length=200, blank=True)
-    descricao = models.TextField(blank=True)
-    
-    # FK para o modelo de usuário do Django com CASCADE
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE) 
-
-    def __str__(self):
-        return self.nome
-        
-    class Meta:
-        db_table = 'app_lyfesync_habito' 
-        verbose_name = "Hábito"
-        verbose_name_plural = "Hábitos"
-
-
-# -------------------------------------------------------------------
-# 2. STATUS DIÁRIO
-# -------------------------------------------------------------------
-class StatusDiario(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    data = models.DateField()
-    # Assume que o campo no DB é INTEGER (0 ou 1) e mapeia para Boolean
-    concluido = models.BooleanField() 
-    
-    # FK para o modelo Habito com CASCADE
-    habito = models.ForeignKey(Habito, on_delete=models.CASCADE) 
-
-    def __str__(self):
-        status = "Concluído" if self.concluido else "Pendente"
-        return f"{self.habito.nome} em {self.data}: {status}"
-        
-    class Meta:
-        db_table = 'app_lyfesync_statusdiario' 
-        unique_together = (('habito', 'data'),)
-        verbose_name = "Status Diário"
-        verbose_name_plural = "Status Diários"
-
-
-# -------------------------------------------------------------------
-# 3. AFIRMAÇÕES
-# -------------------------------------------------------------------
-class Afirmacao(models.Model):
-    idafirmacao = models.AutoField(db_column='idAfirmacao', primary_key=True)
-    data = models.DateField(blank=True, null=True)
-    nomeafirmacao = models.CharField(db_column='nomeAfirmacao', max_length=100, blank=True, null=True)
-    descricaoafirmacao = models.TextField(db_column='descricaoAfirmacao', blank=True, null=True)
-    
-    # FK corrigida para User (get_user_model()) com CASCADE
-    idusuario = models.ForeignKey(User, models.CASCADE, db_column='idUsuario', blank=True, null=True) 
-
-    def __str__(self):
-        return self.nomeafirmacao or f"Afirmação {self.idafirmacao}"
-
-    class Meta:
-        db_table = 'afirmacao'
-        verbose_name = "Afirmação"
-        verbose_name_plural = "Afirmações"
-
-
-# -------------------------------------------------------------------
-# 4. GRATIDÃO
-# -------------------------------------------------------------------
-class Gratidao(models.Model):
-    idgratidao = models.AutoField(db_column='idGratidao', primary_key=True)
-    data = models.DateField(blank=True, null=True)
-    nomegratidao = models.CharField(db_column='nomeGratidao', max_length=100, blank=True, null=True)
-    descricaogratidao = models.TextField(db_column='descricaoGratidao', blank=True, null=True)
-    
-    # FK que aponta para o usuário do Django (auth_user.id)
-    idusuario = models.ForeignKey(User, models.CASCADE, db_column='idUsuario', blank=True, null=True) 
-
-    def __str__(self):
-        return self.nomegratidao or f"Gratidão {self.idgratidao}"
-
-    class Meta:
-        db_table = 'gratidao'
-        verbose_name = "Gratidão"
-        verbose_name_plural = "Gratidões"
-
-
-# -------------------------------------------------------------------
-# 5. HUMOR
-# -------------------------------------------------------------------
-class Humor(models.Model):
-    idhumor = models.AutoField(db_column='idHumor', primary_key=True)
-    
-    idusuario = models.ForeignKey(
-        User, 
-        models.CASCADE, 
-        db_column='idUsuario',
-        verbose_name='Usuário'
-    )
-    
-    ESTADOS_HUMOR = [
-        ('', 'Selecione🔽'),# O valor vazio ('') é o default
-        ('Feliz', 'Feliz'),
-        ('Calmo', 'Calmo'),
-        ('Ansioso', 'Ansioso'),
-        ('Triste', 'Triste'),
-        ('Irritado', 'Irritado'),
-    ]
-    
-    data = models.DateField(
-        verbose_name='Data do Registro', 
-        help_text='A data em que o humor foi registrado.'
-    )
-    
-    estado = models.CharField(
-        max_length=10, # Alterei para 10, o suficiente para os choices acima (o seu estava 100)
-        choices=ESTADOS_HUMOR,
-        verbose_name='Estado de Humor'
-    )
-    
-    descricaohumor = models.TextField(
-        db_column='descricaoHumor', 
-        max_length=500,
-        blank=True,
-        null=True,
-        verbose_name='Descrição do Humor',
-        help_text='Opcional: Descreva o que motivou este humor.'
-    )
-    
-    data_registro = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Momento do Registro'
-    )
-
-    class Meta:
-        db_table = 'humor'
-        verbose_name = 'Registro de Humor'
-        verbose_name_plural = 'Registros de Humor'
-        ordering = ['-data']
-        unique_together = ('idusuario', 'data',) 
-
-    def __str__(self):
-        user_info = self.idusuario.username if self.idusuario else "Usuário Desconhecido"
-        return f"{user_info} - {self.data} - {self.estado}"
-
-# -------------------------------------------------------------------
-# 6. DICAS
-# -------------------------------------------------------------------
-
-HUMOR_CHOICES = [
-    ('Feliz', 'Feliz'),
-    ('Calmo', 'Calmo'),
-    ('Ansioso', 'Ansioso'),
-    ('Triste', 'Triste'),
-    ('Irritado', 'Irritado'),
-]
-
-class Dicas(models.Model):
-    # CHAVE PRIMÁRIA
-    # Deve corresponder exatamente ao nome da coluna PK no banco: idDica
-    idDica = models.AutoField(
-        primary_key=True,
-        verbose_name="ID da Dica"
-    )
-
-    # Corrigido: 'estado' para 'TipoHumor' para corresponder ao DB
-    TipoHumor = models.CharField(
-        max_length=50,
-        choices=HUMOR_CHOICES,
-        default='Feliz',
-        verbose_name="Humor Relacionado"
-    )
-    
-    # Corrigido: 'nome_dica' para 'nomeDica' para corresponder ao DB
-    nomeDica = models.CharField(
-        max_length=200,
-        verbose_name="Nome da Dica"
-    )
-    
-    # Corrigido: 'descricao' para 'descricaoDica' para corresponder ao DB
-    descricaoDica = models.TextField(
-        verbose_name="Descrição da Dica",
-        help_text="O conteúdo completo da dica, podendo incluir listas ou parágrafos."
-    )
-
-    # Campo para rastrear quem criou (opcional, mas boa prática)
-    criado_por = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        verbose_name="Criado Por"
-    )
-    
-    data_criacao = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Data de Criação"
-    )
-
-    class Meta:
-        # Permanece False, pois a tabela já existe
-        managed = False
-        # Nome exato da tabela no banco
-        db_table = 'dicas'
-        verbose_name = "Dica de Humor"
-        verbose_name_plural = "Dicas de Humor"
-        
-    def __str__(self):
-        # Mudando self.estado para self.TipoHumor e self.nome_dica para self.nomeDica
-        return f"Dica para {self.TipoHumor}: {self.nomeDica}"
-
-# -------------------------------------------------------------------
-# 7. RELATÓRIOS
-# -------------------------------------------------------------------
-class Relatorio(models.Model):
-    idrelatorio = models.AutoField(db_column='idRelatorio', primary_key=True)
-    tiporelatorio = models.CharField(db_column='tipoRelatorio', max_length=50, blank=True, null=True)
-    dados = models.TextField(blank=True, null=True)
-    caminhoarquivo = models.TextField(db_column='caminhoArquivo', blank=True, null=True)
-    
-    # FK corrigida para User (get_user_model()) com CASCADE
-    idusuario = models.ForeignKey(User, models.CASCADE, db_column='idUsuario', blank=True, null=True)
-
-    def __str__(self):
-        return f"Relatório de {self.tiporelatorio or 'Tipo Desconhecido'} ({self.idrelatorio})"
-
-    class Meta:
-        db_table = 'relatorio'
-        verbose_name = "Relatório"
-        verbose_name_plural = "Relatórios"

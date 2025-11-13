@@ -1,4 +1,6 @@
+{# alterarHumor.html #}
 {% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
+
 {% load static %}
 {% load custom_filters %}
 {% load app_LyfeSync_extras %}
@@ -11,17 +13,24 @@
   {# Se este arquivo CSS não existir em static/css/ o botão continuará branco. #}
   <link rel="stylesheet" href="{% static 'css/homeLifesync.css' %}" />
 
-  <div id="django-messages-container">
-    {% if messages %}
+  {# CORREÇÃO: Sistema de Mensagens Toast-like (Substitui o alert() proibido) #}
+  <div id="django-messages-container" class="fixed-top p-3" style="z-index: 1050; pointer-events: none;">
       {% for message in messages %}
-        {% if 'success' in message.tags %}
-          <span data-message-type="success" data-message-text="✅ {{ message }}"></span>
-        {% elif 'error' in message.tags or 'warning' in message.tags %}
-          <span data-message-type="error" data-message-text="❌ {{ message }}"></span>
-        {% endif %}
+          {% with tags=message.tags %}
+          {% comment %} Determina cores para as mensagens de feedback sem depender de classes específicas do Bootstrap que talvez não estejam no masterpage. {% endcomment %}
+          <div id="message-{{ forloop.counter }}" 
+               class="alert rounded-3 shadow-lg my-2 mx-auto d-flex align-items-center" 
+               style="max-width: 90%; width: fit-content; pointer-events: all; padding: 1rem;
+                      {% if 'success' in tags %}background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc;{% elif 'error' in tags or 'warning' in tags %}background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7;{% else %}background-color: #cfe2ff; color: #084298; border: 1px solid #b9d1f5;{% endif %}">
+              <span class="me-2 fw-bold">
+                  {% if 'success' in tags %}✅{% elif 'error' in tags or 'warning' in tags %}❌{% else %}ℹ️{% endif %}
+              </span>
+              <span>{{ message }}</span>
+          </div>
+          {% endwith %}
       {% endfor %}
-    {% endif %}
   </div>
+
 
   <div class="container p-4 p-md-5 mt-5">
     <div class="row g-4 justify-content-center">
@@ -146,7 +155,7 @@
         formElement.action = ALTERAR_URL_TEMPLATE.replace('999999999', data.id)
         btnSalvar.textContent = 'SALVAR ALTERAÇÕES'
     
-        // 🚨 Seleciona o ícone de humor existente
+        // Seleciona o ícone de humor existente
         const selectedElement = document.querySelector(`[data-humor-value="${data.estado}"]`)
         if (selectedElement) {
           selectHumor(data.estado, selectedElement)
@@ -206,9 +215,45 @@
           btnSalvar.style.display = 'none'
         })
     }
+
+    /**
+     * Função para mostrar e desvanecer as mensagens do Django (Substitui o alert())
+     */
+    function showAndFadeMessages() {
+        const messageContainer = document.getElementById('django-messages-container');
+        if (messageContainer) {
+            const messages = messageContainer.querySelectorAll('.alert');
+            messages.forEach(message => {
+                // Após 5 segundos, inicia o desvanecimento
+                setTimeout(() => {
+                    message.style.transition = 'opacity 1s ease-out';
+                    message.style.opacity = '0';
+                }, 5000);
+
+                // Remove do DOM após a transição
+                setTimeout(() => {
+                    message.remove();
+                }, 6000);
+            });
+
+            // Limpa o histórico da URL se houver mensagens (para prevenir reenvio do form)
+            if (messages.length > 0 && window.history.replaceState) {
+                try {
+                    window.history.replaceState(null, null, window.location.pathname);
+                } catch (e) {
+                    // Captura o SecurityError que ocorre em alguns ambientes (ex: iframes com URLs blob:)
+                    console.error("Erro ao limpar o estado do histórico (pode ser devido a restrições de segurança do iframe):", e.message);
+                }
+            }
+        }
+    }
     
     // Inicialização no carregamento da página
     document.addEventListener('DOMContentLoaded', function () {
+      // 1. Inicia o sistema de mensagens (substituindo o antigo bloco extra_js)
+      showAndFadeMessages();
+
+      // 2. Carrega os dados do humor para a data inicial
       const initialDate = dateInput.value
     
       if (!initialDate) {
@@ -220,24 +265,6 @@
       } else {
         // Carrega os dados para a data inicial (útil para POST com erro)
         loadHumorData(initialDate)
-      }
-    })
-  </script>
-{% endblock %}
-
-{% block extra_js %}
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const messageElements = document.querySelectorAll('#django-messages-container [data-message-type]')
-      messageElements.forEach(function (el) {
-        const messageText = el.getAttribute('data-message-text')
-        if (messageText) {
-          alert(messageText)
-        }
-      })
-      // Limpar a URL após o alerta (boa prática)
-      if (messageElements.length > 0 && window.history.replaceState) {
-        window.history.replaceState(null, null, window.location.pathname)
       }
     })
   </script>
