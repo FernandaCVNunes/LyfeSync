@@ -43,7 +43,7 @@ def is_staff_user(user):
 def autocuidado(request):
     """Página de Autocuidado, que pode listar Afirmações, Gratidão e Humor. Requer login."""
     # Busca 5 afirmações aleatórias do usuário
-    afirmacoes = Afirmacao.objects.filter(idusuario=request.user).order_by('?')[:5]
+    afirmacoes = Afirmacao.objects.filter(usuario =request.user).order_by('?')[:5]
     
     context = {'afirmacoes': afirmacoes}
     # CAMINHO CORRETO: app_LyfeSync/autocuidado/autocuidado.html
@@ -64,7 +64,7 @@ def humor(request):
     try:
         # CORREÇÃO: Usamos select_related('estado') para buscar o objeto HumorTipo
         humor_do_dia = Humor.objects.select_related('estado').get( 
-            idusuario=request.user, 
+            usuario =request.user, 
             data=data_hoje
         )
         # CORREÇÃO: O caminho do ícone é acessado via 'estado.icone'
@@ -77,7 +77,7 @@ def humor(request):
     
     # CORREÇÃO: Usamos select_related('estado') para otimizar a busca do objeto HumorTipo
     humores_recentes_qs = Humor.objects.select_related('estado').filter(
-        idusuario=request.user, 
+        usuario =request.user, 
         data__gte=data_duas_semanas_atras
     ).exclude(
         data=data_hoje 
@@ -113,7 +113,7 @@ def registrar_humor(request):
         form = HumorForm(request.POST)
         if form.is_valid():
             humor_obj = form.save(commit=False)
-            humor_obj.idusuario = request.user 
+            humor_obj.usuario  = request.user 
             
             if not humor_obj.data:
                 humor_obj.data = timezone.localdate()
@@ -142,7 +142,7 @@ def alterar_humor(request, humor_id):
     """Permite alterar um Humor existente. Requer login e ID do Humor."""
     
     # CORREÇÃO: Busca o registro de Humor usando select_related('estado')
-    instance = get_object_or_404(Humor.objects.select_related('estado'), pk=humor_id, idusuario=request.user)
+    instance = get_object_or_404(Humor.objects.select_related('estado'), pk=humor_id, usuario =request.user)
     
     # Obtém todos os tipos de humor para o template
     humores_disponiveis = HumorTipo.objects.all()
@@ -175,7 +175,7 @@ def delete_humor(request, humor_id):
     """Exclui um registro de Humor específico (via AJAX)."""
     try:
         # Busca o objeto pela Primary Key (pk)
-        humor_instance = get_object_or_404(Humor, pk=humor_id, idusuario=request.user)
+        humor_instance = get_object_or_404(Humor, pk=humor_id, usuario =request.user)
         humor_instance.delete()
         return JsonResponse({'status': 'success', 'message': f'Humor ID {humor_id} excluído.'})
     except Exception as e:
@@ -201,7 +201,7 @@ def load_humor_by_date(request):
             
     try:
         # CORREÇÃO: Usando select_related('estado') para buscar o tipo de humor junto
-        humor_registro = Humor.objects.select_related('estado').get(idusuario=request.user, data=selected_date)
+        humor_registro = Humor.objects.select_related('estado').get(usuario =request.user, data=selected_date)
         
         data = {
             'exists': True,
@@ -266,7 +266,7 @@ def gratidao(request):
     primeiro_dia_mes = data_hoje.replace(day=1)
     
     gratidoes_do_mes = Gratidao.objects.filter(
-        idusuario=request.user, 
+        usuario =request.user, 
         data__gte=primeiro_dia_mes
     ).order_by('-data') 
     
@@ -290,7 +290,7 @@ def registrar_gratidao(request):
         form = GratidaoForm(request.POST)
         if form.is_valid():
             gratidao_obj = form.save(commit=False)
-            gratidao_obj.idusuario = request.user 
+            gratidao_obj.usuario  = request.user 
             
             if not gratidao_obj.data:
                 gratidao_obj.data = timezone.localdate()
@@ -313,7 +313,7 @@ def alterar_gratidao(request, gratidao_id):
     """Permite alterar uma Gratidao existente. Requer login e ID da Gratidão."""
     
     # Busca o objeto pela Primary Key (pk)
-    gratidao_instance = get_object_or_404(Gratidao, pk=gratidao_id, idusuario=request.user) 
+    gratidao_instance = get_object_or_404(Gratidao, pk=gratidao_id, usuario =request.user) 
     
     if request.method == 'POST':
         form = GratidaoForm(request.POST, instance=gratidao_instance)
@@ -337,7 +337,7 @@ def delete_gratidao(request, gratidao_id):
     """Exclui um registro de Gratidão específico (via AJAX)."""
     try:
         # Busca o objeto pela Primary Key (pk)
-        gratidao_instance = get_object_or_404(Gratidao, pk=gratidao_id, idusuario=request.user)
+        gratidao_instance = get_object_or_404(Gratidao, pk=gratidao_id, usuario =request.user)
         gratidao_instance.delete()
         return JsonResponse({'status': 'success', 'message': f'Gratidão ID {gratidao_id} excluída.'})
     except Exception as e:
@@ -352,7 +352,7 @@ def delete_gratidao(request, gratidao_id):
 def afirmacao(request):
     
     ultimas_afirmacoes = Afirmacao.objects.filter(
-        idusuario=request.user
+        usuario =request.user
     ).order_by('-data')[:15]
     
     context = {
@@ -370,7 +370,7 @@ def registrar_afirmacao(request):
         form = AfirmacaoForm(request.POST)
         if form.is_valid():
             afirmacao_obj = form.save(commit=False)
-            afirmacao_obj.idusuario = request.user
+            afirmacao_obj.usuario  = request.user
             
             if not afirmacao_obj.data:
                 afirmacao_obj.data = timezone.localdate()
@@ -393,7 +393,7 @@ def alterar_afirmacao(request, afirmacao_id):
     """Permite alterar uma Afirmação existente. Requer login e ID da Afirmação."""
     
     # Busca o objeto pela Primary Key (pk)
-    afirmacao_instance = get_object_or_404(Afirmacao, pk=afirmacao_id, idusuario=request.user) 
+    afirmacao_instance = get_object_or_404(Afirmacao, pk=afirmacao_id, usuario =request.user) 
     
     if request.method == 'POST':
         form = AfirmacaoForm(request.POST, instance=afirmacao_instance)
@@ -417,7 +417,7 @@ def delete_afirmacao(request, afirmacao_id):
     """Exclui um registro de Afirmação específico (via AJAX)."""
     try:
         # Busca o objeto pela Primary Key (pk)
-        afirmacao_instance = get_object_or_404(Afirmacao, pk=afirmacao_id, idusuario=request.user)
+        afirmacao_instance = get_object_or_404(Afirmacao, pk=afirmacao_id, usuario =request.user)
         afirmacao_instance.delete()
         return JsonResponse({'status': 'success', 'message': f'Afirmação ID {afirmacao_id} excluída.'})
     except Exception as e:

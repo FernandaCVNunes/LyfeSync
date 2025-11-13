@@ -14,9 +14,7 @@ from django.db import transaction
 # -------------------------------------------------------------------
 
 class HabitoForm(forms.ModelForm):
-   """
-   Formulário para a criação e edição de hábitos.
-   """
+
    class Meta:
       model = Habito
       fields = ['nome', 'data_inicio', 'data_fim', 'quantidade', 'frequencia', 'alvo', 'descricao']
@@ -32,7 +30,6 @@ class HabitoForm(forms.ModelForm):
             format='%Y-%m-%d'
          ),
          'quantidade': NumberInput(attrs={'placeholder': 'Ex: 8 copos, 10 minutos', 'min': 1, 'class': 'form-control'}),
-         # Esta linha exige que Habito.FREQUENCIA_CHOICES exista no modelo
          'frequencia': Select(
             choices=Habito.FREQUENCIA_CHOICES, 
             attrs={'class': 'form-select'} 
@@ -101,13 +98,10 @@ class HumorForm(forms.ModelForm):
    """
    Formulário para a criação/edição de registros de Humor.
    
-   IMPORTANTE: O campo 'idusuario' foi removido de fields, pois é preenchido
-   programaticamente na view e não deve ser validado pelo POST.
    """
    class Meta:
       model = Humor
       
-      # CORREÇÃO: Removido 'idusuario' desta lista
       fields = ('estado', 'descricaohumor', 'data') 
       
       widgets = {
@@ -124,14 +118,12 @@ class HumorForm(forms.ModelForm):
             'class': 'form-control',
             'type': 'date'
          }),
-         # 'idusuario' removido
       }
       
       labels = {
          'estado': 'Qual o seu humor?',
          'descricaohumor': 'Detalhes/Motivação',
          'data': 'Data do Registro',
-         # 'idusuario' label removido
       }
 
       error_messages = {

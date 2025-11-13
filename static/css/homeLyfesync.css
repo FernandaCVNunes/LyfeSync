@@ -529,3 +529,42 @@
 .loading-message.error {
     color: var(--lyfesync-red-salvar);
 }
+
+/* ========================================================= */
+/* --- ESTILOS HABITO --- */
+/* ========================================================= */
+
+/* Estilo para a linha selecionada */
+.habit-row {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.habit-row:hover {
+    background-color: #f8f9fa;
+    /* cor mais clara no hover */
+}
+
+.habit-row.selected {
+    background-color: #e9ecef;
+    /* Cor cinza claro para indicar seleção */
+    border-left: 5px solid #0d6efd;
+    /* Linha de destaque azul do Bootstrap Primary */
+}
+
+/* Ajuste para o header elevado, usando classes Bootstrap */
+.card-header-elevated {
+    padding: 0 !important;
+    position: relative;
+    /* Replicando o efeito de mt-n4, mas com margem superior real */
+    margin-top: -1.5rem !important;
+    margin-left: 1rem !important;
+    margin-right: 1rem !important;
+    z-index: 2;
+}
+
+/* Pequeno ajuste para texto na tabela */
+.table-header-sm {
+    font-size: 0.65rem;
+    /* Menor que text-xs */
+}

@@ -5,7 +5,7 @@ from django.urls import path, include
 # A partir de agora, use 'views.' seguido do nome da função (ex: views.home)
 from .views import (
     home, sobre_nos, contatos,home_lyfesync, habito, registrar_habito, 
-    alterar_habito, toggle_habito_day, delete_habit,
+    alterar_habito, toggle_habito_day, delete_habit, get_habit_data,
     autocuidado, humor, registrar_humor, alterar_humor, load_humor_by_date,
     gratidao, registrar_gratidao, alterar_gratidao,
     afirmacao, registrar_afirmacao, alterar_afirmacao,
@@ -36,6 +36,7 @@ urlpatterns = [
     path('habito/', habito, name='habito'),
     path('habitos/registrar/', registrar_habito, name='registrar_habito'),
     path('habitos/alterar/<int:habito_id>/', alterar_habito, name='alterar_habito'), 
+    path('habitos/get-data/<int:habit_id>/', get_habit_data, name='get_habit_data'), 
     path('habitos/toggle_day/<int:habit_id>/<str:day>/', toggle_habito_day, name='toggle_habit_day'),
     path('habitos/excluir/<int:habit_id>/', delete_habit, name='delete_habit'),
 

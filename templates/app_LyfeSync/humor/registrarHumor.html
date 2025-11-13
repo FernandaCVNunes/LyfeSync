@@ -51,10 +51,7 @@ Registrar Humor
                     {% url 'registrarHumor' %}
                 {% endif %}">
                 {% csrf_token %}
-
-                {# Campo Oculto de Usuário (idusuario) - Se necessário, a view deve lidar com ele #}
-                {# Se a view não preencher este campo, mas ele for obrigatório, use: {{ form.idusuario }} #}
-                
+              
                 {# Campo de Data #}
                 <div class="mb-4">
                     <label for="{{ form.data.id_for_label }}" class="form-label h5 fw-semibold text-secondary mb-2">{{ form.data.label }}:</label>

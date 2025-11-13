@@ -28,7 +28,7 @@ class Habito(models.Model):
     
     # 3. Definição dos campos
     id = models.BigAutoField(primary_key=True) 
-    idusuario = models.ForeignKey(User, on_delete=models.CASCADE) # Assumindo um FK para o usuário
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE) # Assumindo um FK para o usuário
     nome = models.CharField(max_length=200, verbose_name="Nome do Hábito")
     data_inicio = models.DateField(verbose_name="Data de Início")
     data_fim = models.DateField(verbose_name="Data de Fim", null=True, blank=True)
@@ -57,7 +57,7 @@ class Habito(models.Model):
         return self.nome
         
     class Meta:
-        db_table = 'app_lyfesync_habito' 
+        db_table = 'habitos' 
         verbose_name = "Hábito"
         verbose_name_plural = "Hábitos"
 
@@ -85,7 +85,7 @@ class StatusDiario(models.Model):
         return f"{self.habito.nome} em {self.data}: {status}"
         
     class Meta:
-        db_table = 'app_lyfesync_statusdiario' 
+        db_table = 'statusdiario' 
         # Garante que um hábito só pode ter um status por dia
         unique_together = (('habito', 'data'),)
         verbose_name = "Status Diário"
@@ -103,10 +103,10 @@ class Afirmacao(models.Model):
     descricaoafirmacao = models.TextField(db_column='descricaoAfirmacao', blank=True, null=True, verbose_name="Conteúdo")
     
     # Chave Estrangeira para o modelo de usuário
-    idusuario = models.ForeignKey(
+    usuario = models.ForeignKey(
         User, 
         models.CASCADE, 
-        db_column='idUsuario', 
+        db_column='usuario', 
         blank=True, 
         null=True, 
         verbose_name="Usuário"
@@ -132,10 +132,10 @@ class Gratidao(models.Model):
     descricaogratidao = models.TextField(db_column='descricaoGratidao', blank=True, null=True, verbose_name="Descrição")
     
     # Chave Estrangeira para o modelo de usuário
-    idusuario = models.ForeignKey(
+    usuario = models.ForeignKey(
         User, 
         models.CASCADE, 
-        db_column='idUsuario', 
+        db_column='usuario', 
         blank=True, 
         null=True, 
         verbose_name="Usuário"
@@ -193,10 +193,10 @@ class Humor(models.Model):
     """Registro diário do estado de humor de um usuário."""
     idhumor = models.AutoField(db_column='idHumor', primary_key=True)
     
-    idusuario = models.ForeignKey(
+    usuario = models.ForeignKey(
         User, 
         models.CASCADE, 
-        db_column='idUsuario',
+        db_column='usuario',
         verbose_name='Usuário',
         related_name='registros_humor'
     )
@@ -236,10 +236,10 @@ class Humor(models.Model):
         verbose_name_plural = 'Registros de Humor'
         ordering = ['-data']
         # Garante que o usuário só pode registrar 1 humor por dia
-        unique_together = ('idusuario', 'data',) 
+        unique_together = ('usuario', 'data',) 
 
     def __str__(self):
-        user_info = self.idusuario.username if self.idusuario else "Usuário Desconhecido"
+        user_info = self.usuario.username if self.usuario else "Usuário Desconhecido"
         # Acessa o nome do estado pelo FK
         return f"{user_info} - {self.data} - {self.estado.estado}"
 
@@ -309,10 +309,10 @@ class Relatorio(models.Model):
     caminhoarquivo = models.TextField(db_column='caminhoArquivo', blank=True, null=True, verbose_name="Caminho do Arquivo (URL/Path)")
     
     # Chave Estrangeira para o modelo de usuário
-    idusuario = models.ForeignKey(
+    usuario = models.ForeignKey(
         User, 
         models.CASCADE, 
-        db_column='idUsuario', 
+        db_column='usuario', 
         blank=True, 
         null=True,
         verbose_name="Usuário"

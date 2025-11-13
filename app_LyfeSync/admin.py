@@ -1,56 +1,90 @@
 # app_LyfeSync/admin.py
 from django.contrib import admin
-from .models import Humor, HumorTipo 
-# Se tiver outros modelos do selfcare_models.py, importe-os aqui também:
-# from .models import Habito, StatusDiario, Afirmacao, Gratidao, Dicas, Relatorio
+# Importando todos os modelos do selfcare_models.py para registro no Admin
+from .models import Humor, HumorTipo, Gratidao, Afirmacao, Dicas, Habito
 
 
-# REGISTRO PARA O MODELO HUMORTIPO
+# ===================================================================
+# REGISTRO: HUMORTIPO
+# ===================================================================
+
 @admin.register(HumorTipo)
 class HumorTipoAdmin(admin.ModelAdmin):
     """
     Configuração do painel Admin para o modelo HumorTipo.
     """
-    # Adicionando 'icone' para facilitar a visualização no Admin
-    list_display = ('id_tipo_humor', 'estado', 'icone')
+    # Usando 'pk' para a chave primária
+    list_display = ('pk', 'estado', 'icone')
     search_fields = ('estado',)
 
-# REGISTRO PARA O MODELO HUMOR (Corrigido com 'estado')
+# ===================================================================
+# REGISTRO: HUMOR
+# ===================================================================
+
 @admin.register(Humor)
 class HumorAdmin(admin.ModelAdmin):
-    """
-    CORRIGIDO: O campo 'idHumor' foi substituído pelo nome correto do campo no 
-    modelo Humor, que é 'estado'.
-    """
     
     # Campos exibidos na tela de listagem de registros
-    # O campo 'estado' agora refere-se corretamente à ForeignKey para HumorTipo
-    list_display = ('idusuario', 'data', 'estado', 'descricaohumor', 'data_registro')
+    list_display = ('usuario', 'data', 'estado', 'descricaohumor', 'data_registro')
     
     # Campos que permitem a filtragem lateral
     list_filter = ('estado', 'data')
     
     # Permite pesquisar por descrição do humor e pelo username do usuário
-    search_fields = ('descricaohumor', 'idusuario__username') 
+    search_fields = ('descricaohumor', 'usuario__username') 
     
     # Garante que o usuário seja apenas preenchido ou visualizado, mas não editado
-    readonly_fields = ('idusuario', 'data_registro')
+    readonly_fields = ('usuario', 'data_registro')
     
     # Define os campos no formulário de edição do Admin
     fieldsets = (
-        (None, {'fields': ('idusuario', 'data', 'estado')}), # 'estado' aqui
+        (None, {'fields': ('usuario', 'data', 'estado')}),
         ('Detalhes', {'fields': ('descricaohumor', 'data_registro')}),
     )
 
-# Se desejar registrar os outros modelos do seu models.py, você pode adicionar:
-# @admin.register(Habito)
-# class HabitoAdmin(admin.ModelAdmin):
-#     list_display = ('nome', 'usuario', 'data_inicio', 'frequencia', 'quantidade')
-#     list_filter = ('frequencia',)
-#     search_fields = ('nome', 'usuario__username')
+# ===================================================================
+# REGISTRO: GRATIDÃO
+# ===================================================================
 
-# @admin.register(Dicas)
-# class DicasAdmin(admin.ModelAdmin):
-#     list_display = ('nomeDica', 'humor_relacionado', 'data_criacao', 'criado_por')
-#     list_filter = ('humor_relacionado',)
-#     search_fields = ('nomeDica', 'descricaoDica')
+@admin.register(Gratidao)
+class GratidaoAdmin(admin.ModelAdmin):
+    # CORREÇÃO DEFINITIVA: Usando 'descricaogratidao' (tudo minúsculo) e 'data' (não existe data_registro)
+    list_display = ('idgratidao', 'usuario', 'data', 'nomegratidao', 'descricaogratidao')
+    list_filter = ('data',)
+    # Usando 'descricaogratidao' na busca.
+    search_fields = ('descricaogratidao', 'usuario__username') 
+
+# ===================================================================
+# REGISTRO: AFIRMAÇÃO
+# ===================================================================
+
+@admin.register(Afirmacao)
+class AfirmacaoAdmin(admin.ModelAdmin):
+    # CORREÇÃO DEFINITIVA: Usando 'descricaoafirmacao' e 'data' (não existe data_registro)
+    list_display = ('idafirmacao', 'usuario', 'data', 'nomeafirmacao', 'descricaoafirmacao')
+    list_filter = ('data',)
+    # Usando 'descricaoafirmacao' na busca.
+    search_fields = ('descricaoafirmacao', 'usuario__username')
+
+# ===================================================================
+# REGISTRO: HÁBITO
+# ===================================================================
+
+@admin.register(Habito)
+class HabitoAdmin(admin.ModelAdmin):
+    # Assumindo que o campo do usuário agora se chama 'usuario'
+    list_display = ('nome', 'usuario', 'data_inicio', 'frequencia', 'quantidade')
+    list_filter = ('frequencia',)
+    search_fields = ('nome', 'usuario__username')
+
+# ===================================================================
+# REGISTRO: DICAS
+# ===================================================================
+
+@admin.register(Dicas)
+class DicasAdmin(admin.ModelAdmin):
+    # Usando os campos fornecidos. Mantendo data_criacao, que existe no modelo Dicas.
+    list_display = ('idDica', 'nomeDica', 'humor_relacionado', 'data_criacao', 'criado_por')
+    list_filter = ('humor_relacionado',)
+    # Usando 'descricaoDica' como campo de busca.
+    search_fields = ('nomeDica', 'descricaoDica', 'criado_por__username')

@@ -6,382 +6,441 @@
 
 {% block title %}Meus Hábitos{% endblock %}
 
-{% block content %}
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="card my-4">
-                <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
-                    <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
-                        <h6 class="text-white text-capitalize ps-3">Minha Tabela de Hábitos</h6>
-                    </div>
-                </div>
-                <div class="card-body px-0 pb-2">
-
-                    {# BOTÕES DE AÇÃO #}
-                    <div class="d-flex justify-content-end p-3">
-                        <button type="button" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#registrarHabitoModal">Novo Hábito</button>
-                        <button type="button" class="btn btn-warning me-2" onclick="abrirModalAlterar()">Alterar Selecionado</button>
-                        <button type="button" class="btn btn-danger" onclick="excluirHabitosSelecionados()">Excluir Selecionado</button>
-                    </div>
-
-                    <div class="table-responsive p-0">
-                        <table class="table align-items-center mb-0">
-                            <thead>
-                                <tr>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Hábito</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Frequência</th>
-
-                                    {# Cabeçalho dos 7 dias #}
-                                    {% for date, day_name in last_7_days_dict.items %}
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                        {{ day_name }}
-                                        {% if date|date:"Y-m-d" == today_date|date:"Y-m-d" %}<span class="badge bg-primary">Hoje</span>{% endif %}
-                                    </th>
-                                    {% endfor %}
-                                    <th class="text-secondary opacity-7"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for habit in habitos %}
-                                <tr class="habit-row" onclick="selectHabitRow(event, {{ habit.id }})" data-habit-id="{{ habit.id }}">
-                                    <td>
-                                        <div class="d-flex px-2 py-1">
-                                            <div class="d-flex flex-column justify-content-center">
-                                                <h6 class="mb-0 text-sm">{{ habit.nome }}</h6>
-                                                <p class="text-xs text-secondary mb-0">{{ habit.descricao|default:"Sem descrição." }}</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <p class="text-xs font-weight-bold mb-0">{{ habit.frequencia }}</p>
-                                    </td>
-
-                                    {# Células de Status Diário #}
-                                    {% for date, day_name in last_7_days_dict.items %}
-                                    {# data-date é crucial para a função toggleHabitDay no JavaScript #}
-                                    <td class="align-middle text-center text-sm" data-date="{{ date|date:'Y-m-d' }}" onclick="toggleHabitDay({{ habit.id }}, '{{ date|date:"Y-m-d" }}', event)">
-
-                                        {% with status_key=date|date:"Y-m-d" %}
-                                            {# Acesso ao status de conclusão usando o filtro customizado get_item #}
-                                            {% if habit.completion_status|get_item:status_key %}
-                                                <div class="check-box checked"></div>
-                                            {% else %}
-                                                <div class="check-box"></div>
-                                            {% endif %}
-                                        {% endwith %}
-
-                                    </td>
-                                    {% endfor %}
-
-                                    <td class="align-middle">
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="9" class="text-center text-secondary text-sm">Nenhum hábito registrado. Clique em 'Novo Hábito' para começar.</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% include 'app_LyfeSync/habitos/registrarHabitoModal.html' %}
-{% include 'app_LyfeSync/habitos/alterarHabitoModal.html' %}
-
-
-{# MODAL CUSTOMIZADO PARA CONFIRMAÇÃO DE EXCLUSÃO (Substitui window.confirm) #}
-<div class="modal fade" id="confirmacaoExclusaoModal" tabindex="-1" aria-labelledby="confirmacaoExclusaoModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="confirmacaoExclusaoModalLabel">Confirmar Exclusão</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                Tem certeza de que deseja excluir permanentemente o hábito selecionado? Esta ação não pode ser desfeita.
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-danger" id="confirmarExclusaoBtn">Excluir Hábito</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-{% endblock content %}
-
-{% block extra_css %}
+{% block content_logado %}
 <style>
-    /* Estilos básicos para o checkbox e a linha selecionada */
-    .check-box {
-        width: 18px;
-        height: 18px;
-        margin: auto;
-        border: 2px solid #adb5bd;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: background-color 0.15s, border-color 0.15s;
-    }
-    .check-box.checked {
-        background-color: #4CAF50; /* Verde */
-        border-color: #4CAF50;
-    }
-    .check-box.checked::after {
-        content: '✓';
-        color: white;
-        font-size: 14px;
-        line-height: 14px;
-        text-align: center;
-        display: block;
-    }
-    .habit-row:hover {
-        background-color: #f8f9fa;
-        cursor: pointer;
-    }
-    .habit-row.selected {
-        background-color: #e9ecef;
-        border-left: 5px solid #007bff;
-    }
+    /* Estilo para a linha de hábito selecionada */
+    .habit-row.selected {
+        background-color: #e6f7ff !important; /* Azul claro para seleção */
+        box-shadow: 0 1px 6px rgba(0, 123, 255, 0.1);
+        transition: background-color 0.2s ease;
+    }
+    .habit-row:hover {
+        background-color: #f7f7f7;
+        cursor: pointer;
+    }
 </style>
-{% endblock extra_css %}
+
+<div class="container-fluid py-4">
+    {# Bloco para exibir mensagens do Django #}
+    {% if messages %}
+        <div class="messages mb-3">
+            {% for message in messages %}
+                {# Adicionando classes padrão Bootstrap para alerta e fechamento #}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card my-4 shadow-lg rounded-3">
+                {# NOVO HEADER #}
+                <div class="card-header-elevated">
+                    <div class="bg-primary shadow-sm rounded-3 py-3 px-3">
+                        <h6 class="text-white text-capitalize ps-2 mb-0">Minha Tabela de Hábitos</h6>
+                    </div>
+                </div>
+                
+                <div class="card-body px-0 pb-2 pt-4">
+
+                    {# BOTÕES DE AÇÃO #}
+                    <div class="d-flex justify-content-end p-3">
+                        <button type="button" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#registrarHabitoModal">Novo Hábito</button>
+                        <button type="button" class="btn btn-warning me-2" id="btnAlterarHabito" onclick="abrirModalAlterar()" disabled>Alterar Selecionado</button>
+                        <button type="button" class="btn btn-danger" id="btnExcluirHabito" onclick="excluirHabitosSelecionados()" disabled>Excluir Selecionado</button>
+                    </div>
+
+                    <div class="table-responsive p-0">
+                        <table class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-uppercase text-secondary table-header-sm fw-bold opacity-7 ps-3">Hábito (Nome, Descrição e Frequência)</th>
+                                    
+                                    {# Exibe o dia da semana e a data (d/m) #}
+                                    {% for day_info in last_7_days_list %}
+                                    <th class="text-center text-secondary table-header-sm fw-bold opacity-7" 
+                                        data-date="{{ day_info.date_iso }}"> 
+                                        <div class="fw-bold">{{ day_info.day_name }}</div> 
+                                        <div class="small text-muted">{{ day_info.date_formatted }}</div> 
+                                        {% if day_info.is_today %}
+                                            <span class="badge bg-primary ms-1">Hoje</span>
+                                        {% endif %}
+                                    </th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for habit in habitos %} {# Início do loop #}
+                                <tr class="habit-row" onclick="selectHabitRow(event, {{ habit.id }})" data-habit-id="{{ habit.id }}">
+                                    <td>
+                                        <div class="d-flex px-2 py-1 align-items-center">
+                                            {# Checkbox de Seleção #}
+                                            <input type="checkbox" class="form-check-input me-3" id="select-{{ habit.id }}" 
+                                                onclick="event.stopPropagation();">
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 small">
+                                                    {{ habit.nome }}
+                                                    {# Frequência #}
+                                                    <span class="badge bg-info text-dark ms-2">{{ habit.frequencia }}</span>
+                                                </h6>
+                                                {# Descrição: Mapeado de text-xs para small text-muted #}
+                                                <p class="small text-muted mb-0">{{ habit.descricao|default:"Sem descrição." }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    {# Células de Status Diário #}
+                                    {% for day_info in last_7_days_list %}
+                                    <td class="align-middle text-center small" 
+                                        data-date="{{ day_info.date_iso }}" 
+                                        {# SINTAXE CORRIGIDA: Garante que {{ habit.id }} seja renderizado antes da vírgula #}
+                                        onclick="toggleHabitDay({{ habit.id }}, '{{ day_info.date_iso }}', event)"> 
+
+                                        {% with status_key=day_info.date_iso %}
+                                            <input type="checkbox" class="form-check-input" {% if habit.completion_status|get_item:status_key %}checked{% endif %}>
+                                        {% endwith %}
+
+                                    </td>
+                                    {% endfor %}
+                                </tr>
+                                {% empty %}
+                                <tr id="empty-table-row">
+                                    {# colspan ajustado para ser dinâmico (total de colunas: 1 + dias) #}
+                                    <td colspan="{{ last_7_days_list|length | add:1 }}" class="text-center text-muted small py-4">Nenhum hábito registrado. Clique em 'Novo Hábito' para começar.</td>
+                                </tr>
+                                {% endfor %} {# Fim do loop #}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'app_LyfeSync/habitos/registrarHabito.html' %}
+{% include 'app_LyfeSync/habitos/alterarHabito.html' %} 
+
+{# MODAL CUSTOMIZADO PARA CONFIRMAÇÃO DE EXCLUSÃO (Já é Bootstrap) #}
+<div class="modal fade" id="confirmacaoExclusaoModal" tabindex="-1" aria-labelledby="confirmacaoExclusaoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmacaoExclusaoModalLabel">Confirmar Exclusão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Tem certeza de que deseja excluir permanentemente o hábito selecionado? Esta ação não pode ser desfeita.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmarExclusaoBtn">Excluir Hábito</button>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<!-- NOVO: Container para Toasts (mensagens flutuantes) -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1080;" id="liveToastPlaceholder">
+    <!-- Toasts serão anexados aqui -->
+</div>
+
+{% endblock content_logado %}
 
 {% block extra_js %}
 <script>
-    // Variável global para armazenar o ID do hábito selecionado
-    let selectedHabitId = null;
+    let selectedHabitId = null;
 
-    /**
-     * Alterna a seleção da linha do hábito.
-     * @param {Event} event - O evento de clique.
-     * @param {number} habitId - O ID do hábito.
-     */
-    function selectHabitRow(event, habitId) {
-        // Impede que o clique na célula do status de conclusão acione esta função
-        if (event.target.closest('td[data-date]')) {
-            return;
-        }
+    function selectHabitRow(event, habitId) {
+        
+        // Se o clique for em uma célula de data (checkbox) ou no checkbox de seleção da linha, ignora a seleção de linha.
+        if (event.target.closest('td[data-date]') || event.target.closest('input[type="checkbox"]')) {
+            return;
+        }
 
-        const row = event.currentTarget;
-        const allRows = document.querySelectorAll('.habit-row');
+        const row = event.currentTarget;
+        const selectCheckbox = row.querySelector(`#select-${habitId}`);
+        const allRows = document.querySelectorAll('.habit-row');
+        // Seleciona todos os checkboxes de seleção (que têm id 'select-')
+        const allSelectCheckboxes = document.querySelectorAll('.habit-row input[id^="select-"]'); 
+        const btnAlterar = document.getElementById('btnAlterarHabito'); 
+        const btnExcluir = document.getElementById('btnExcluirHabito'); 
 
-        if (row.classList.contains('selected')) {
-            // Desseleciona a linha se já estiver selecionada
-            row.classList.remove('selected');
-            selectedHabitId = null;
-        } else {
-            // Desseleciona todas as outras linhas
-            allRows.forEach(r => r.classList.remove('selected'));
-            // Seleciona a linha clicada
-            row.classList.add('selected');
-            selectedHabitId = habitId;
-        }
+        // Lógica de seleção
+        if (row.classList.contains('selected')) {
+            // Desseleciona
+            row.classList.remove('selected');
+            if (selectCheckbox) selectCheckbox.checked = false;
+            selectedHabitId = null;
+        } else {
+            // Seleciona o novo, deseleciona os outros
+            allRows.forEach(r => r.classList.remove('selected'));
+            // CORREÇÃO: Desmarca todos os checkboxes de seleção para garantir que apenas um esteja ativo
+            allSelectCheckboxes.forEach(cb => {
+                if(cb.id !== `select-${habitId}`) {
+                    cb.checked = false;
+                }
+            }); 
 
-        // Você pode adicionar lógica aqui para habilitar/desabilitar botões
-        const btnAlterar = document.querySelector('.btn-warning');
-        const btnExcluir = document.querySelector('.btn-danger');
+            row.classList.add('selected');
+            if (selectCheckbox) selectCheckbox.checked = true;
+            selectedHabitId = habitId;
+        }
 
-        if (selectedHabitId !== null) {
-            if (btnAlterar) btnAlterar.disabled = false;
-            if (btnExcluir) btnExcluir.disabled = false;
-        } else {
-            if (btnAlterar) btnAlterar.disabled = true;
-            if (btnExcluir) btnExcluir.disabled = true;
-        }
-    }
+        // Habilitar/desabilitar botões
+        const isDisabled = selectedHabitId === null;
+        if (btnAlterar) btnAlterar.disabled = isDisabled;
+        if (btnExcluir) btnExcluir.disabled = isDisabled;
+    }
 
-    /**
-     * Alterna o status de conclusão de um dia para um hábito específico.
-     * @param {number} habitId - O ID do hábito.
-     * @param {string} dateString - A data no formato 'YYYY-MM-DD'.
-     * @param {Event} event - O evento de clique (para impedir que a linha seja selecionada).
-     */
-    function toggleHabitDay(habitId, dateString, event) {
-        // Impede que a seleção da linha seja ativada
-        event.stopPropagation();
-        
-        const cell = event.currentTarget;
-        const checkBox = cell.querySelector('.check-box');
-        
-        // Determina se será um registro (true) ou exclusão (false)
-        const isChecked = !checkBox.classList.contains('checked');
-        
-        // Requisição AJAX para o endpoint de alternância
-        fetch(`/habitos/toggle_day/${habitId}/${dateString}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ is_checked: isChecked })
-        })
-        .then(response => {
-            if (!response.ok) {
-                // Se a resposta não for OK, lança um erro para o bloco catch
-                throw new Error('Erro ao alternar o status do hábito. Status: ' + response.status);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                // Atualiza a UI se a requisição for bem-sucedida
-                if (isChecked) {
-                    checkBox.classList.add('checked');
-                } else {
-                    checkBox.classList.remove('checked');
-                }
-                // Exibe feedback
-                showToast(data.message, 'success');
-            } else {
-                // Exibe mensagem de erro do backend
-                showToast(data.message || 'Falha na operação.', 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Erro na requisição:', error);
-            showToast('Ocorreu um erro de rede ou servidor. Tente novamente.', 'error');
-        });
-    }
+      function toggleHabitDay(habitId, dateString, event) {
+        // Interrompe a propagação para evitar que a seleção da linha (selectHabitRow) seja acionada
+        event.stopPropagation();
+        
+        const cell = event.currentTarget;
+        const checkBox = cell.querySelector('input[type="checkbox"]');
+        
+        // 1. LÊ O ESTADO ATUAL E MUDA O VISUAL IMEDIATAMENTE (Atualização Otimista)
+        const isCheckedBeforeClick = checkBox.checked; 
+        
+        // ATUALIZAÇÃO VISUAL OTIMISTA: Inverte o estado imediatamente.
+        checkBox.checked = !isCheckedBeforeClick; 
+        console.log(`Tentando alternar Hábito ${habitId} para a data ${dateString}. Estado otimista: ${checkBox.checked}`);
 
+        // Faz a requisição AJAX para o Django
+        fetch(`/habitos/toggle_day/${habitId}/${dateString}/`, { 
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                // CORREÇÃO: Removendo Content-Type para evitar Bad Request 400 relacionado ao CSRF em requisições sem corpo JSON.
+            },
+            // Sem body
+        })
+        .then(response => {
+            if (!response.ok) {
+                // Se o servidor retornar erro (ex: 400 Bad Request), desfaz a mudança visual
+                checkBox.checked = isCheckedBeforeClick; // Volta ao estado antes do clique
+                console.error(`Falha do Servidor: Status ${response.status}`);
+                throw new Error(`Erro ao alternar o status do hábito. Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Se for bem-sucedido, usa a resposta do servidor como fonte da verdade.
+                // Isso garante que o estado visual esteja correto mesmo que a atualização otimista tenha falhado por algum motivo.
+                checkBox.checked = data.concluido; 
+                showToast(data.message || `Hábito atualizado para ${data.concluido ? 'Concluído' : 'Não Concluído'}!`, 'success');
+            } else {
+                // Se falhar (e retornou 200 com success=false), desfaz a mudança visual e mostra o erro
+                checkBox.checked = isCheckedBeforeClick; // Volta ao estado antes do clique
+                showToast(data.message || 'Falha na operação.', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Erro na requisição AJAX (Toggle):', error);
+            // Garante que o estado visual é desfeito em caso de erro de rede ou servidor
+            checkBox.checked = isCheckedBeforeClick; // Volta ao estado antes do clique
+            showToast('Ocorreu um erro de rede ou servidor. Tente novamente.', 'error');
+        });
+    }
 
-    /**
-     * Função auxiliar para obter o token CSRF.
-     */
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
+    function getCookie(name) {
+        // Função utilitária para obter o token CSRF
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
 
-    /**
-     * Abre o modal de alteração preenchendo os dados do hábito selecionado.
-     */
-    function abrirModalAlterar() {
-        if (selectedHabitId === null) {
-            showToast('Selecione um hábito para alterar.', 'warning');
-            return;
-        }
+    function abrirModalAlterar() {
+        const habitId = selectedHabitId;
+        if (!habitId) {
+            showToast('Selecione um hábito para alterar.', 'warning');
+            return;
+        }
 
-        fetch(`/habitos/get_data/${selectedHabitId}/`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.id) {
-                document.getElementById('alterar_habito_id').value = data.id;
-                document.getElementById('alterar_nome').value = data.nome;
-                document.getElementById('alterar_descricao').value = data.descricao;
-                document.getElementById('alterar_frequencia').value = data.frequencia;
+        const alterarModal = new bootstrap.Modal(document.getElementById('alterarHabitoModal'));
+        const form = document.getElementById('formAlterarHabito');
+        
+        // Requisição para buscar os dados do hábito
+        // URL: /habitos/get-data/{habitId}/ (CORRETA)
+        fetch(`/habitos/get-data/${habitId}/`)
+        .then(response => {
+            if (!response.ok) {
+                // TRATAMENTO DE ERRO MELHORADO: O erro 500 do log está aqui.
+                throw new Error('Falha ao buscar dados do hábito. (Status: ' + response.status + '). Verifique os logs do servidor Django para o traceback do 500.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.id) {
+                // Define o atributo 'action' do formulário.
+                // URL: /habitos/alterar/{data.id}/ (CORRETA)
+                form.setAttribute('action', `/habitos/alterar/${data.id}/`);
+                
+                // Preenche campos
+                form.querySelector('input[name="nome"]').value = data.nome || '';
+                form.querySelector('textarea[name="descricao"]').value = data.descricao || '';
+                // Garante que o campo de data seja tratado como string
+                form.querySelector('input[name="data_inicio"]').value = data.data_inicio || ''; 
+                form.querySelector('input[name="data_fim"]').value = data.data_fim || '';
+                // Assume que 'quantidade' deve ser numérico, mas é lido como string
+                form.querySelector('input[name="quantidade"]').value = data.quantidade || 0;
+                form.querySelector('input[name="alvo"]').value = data.alvo || '';
+                // CORREÇÃO: Adicionando o preenchimento do campo 'unidade'
+                form.querySelector('input[name="unidade"]').value = data.unidade || '';
 
-                // Abre o modal
-                const alterarModal = new bootstrap.Modal(document.getElementById('alterarHabitoModal'));
-                alterarModal.show();
-            } else {
-                showToast('Não foi possível carregar os dados do hábito.', 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Erro ao carregar dados para alteração:', error);
-            showToast('Erro ao carregar dados para alteração.', 'error');
-        });
-    }
+                const frequenciaSelect = form.querySelector('select[name="frequencia"]');
+                if (frequenciaSelect) {
+                    frequenciaSelect.value = data.frequencia;
+                }
+                
+                // Chama o modal
+                alterarModal.show();
+            } else {
+                showToast('Não foi possível carregar os dados do hábito.', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Erro no AJAX (Alterar):', error);
+            showToast('Erro ao carregar dados para alteração. ' + error.message, 'error'); 
+        });
+    }
 
-    /**
-     * Exclui o hábito selecionado. Usa modal customizado em vez de window.confirm.
-     */
-    function excluirHabitosSelecionados() {
-        if (selectedHabitId === null) {
-            showToast('Selecione um hábito para excluir.', 'warning');
-            return;
-        }
+    function excluirHabitosSelecionados() {
+        if (selectedHabitId === null) {
+            showToast('Selecione um hábito para excluir.', 'warning');
+            return;
+        }
 
-        // Abre o modal de confirmação customizado
-        const confirmModal = new bootstrap.Modal(document.getElementById('confirmacaoExclusaoModal'));
-        confirmModal.show();
-        
-        // Remove event listeners anteriores (se houver) e configura o clique para a exclusão
-        const confirmarBtn = document.getElementById('confirmarExclusaoBtn');
-        confirmarBtn.onclick = null; // Remove listeners anteriores
-        
-        confirmarBtn.onclick = function() {
-            confirmModal.hide(); // Fecha o modal após a confirmação
-            
-            fetch(`/habitos/excluir/${selectedHabitId}/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken')
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showToast('Hábito excluído com sucesso!', 'success');
-                    // Remove a linha da tabela (melhor UX)
-                    const rowToRemove = document.querySelector(`.habit-row[data-habit-id="${selectedHabitId}"]`);
-                    if (rowToRemove) {
-                        rowToRemove.remove();
-                    }
-                    selectedHabitId = null; // Limpa a seleção
-                    
-                    // Re-desabilita os botões de ação
-                    const btnAlterar = document.querySelector('.btn-warning');
-                    const btnExcluir = document.querySelector('.btn-danger');
-                    if (btnAlterar) btnAlterar.disabled = true;
-                    if (btnExcluir) btnExcluir.disabled = true;
-                    
-                } else {
-                    showToast(data.message || 'Falha ao excluir o hábito.', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Erro na requisição de exclusão:', error);
-                showToast('Erro ao tentar excluir o hábito.', 'error');
-            });
-        };
-    }
+        // Inicializa e mostra o modal de confirmação
+        const confirmModal = new bootstrap.Modal(document.getElementById('confirmacaoExclusaoModal'));
+        confirmModal.show();
+        
+        const confirmarBtn = document.getElementById('confirmarExclusaoBtn');
+        confirmarBtn.onclick = null; // Limpa eventos anteriores (importante para modais)
+        
+        confirmarBtn.onclick = function() {
+            confirmModal.hide(); 
+            
+            // Requisição de Exclusão
+            fetch(`/habitos/excluir/${selectedHabitId}/`, { 
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message || 'Hábito excluído com sucesso!', 'success');
+                    
+                    // LÓGICA DE REMOÇÃO DA LINHA CORRIGIDA/DEBUGADA
+                    const rowToRemove = document.querySelector(`.habit-row[data-habit-id="${selectedHabitId}"]`);
+                    if (rowToRemove) {
+                        console.log(`[Exclusão Sucesso]: Removendo a linha do hábito ID: ${selectedHabitId}`);
+                        
+                        rowToRemove.remove(); // Remove visualmente a linha
+                        
+                        // Verifica se a tabela ficou vazia (BÔNUS)
+                        const tbody = rowToRemove.closest('tbody');
+                        if (tbody && tbody.querySelectorAll('tr').length === 0) {
+                            // Se não houver linhas, adiciona a mensagem de 'vazio'
+                            const tableHeaderCount = document.querySelectorAll('thead th').length;
+                            const emptyRowHtml = `
+                                <tr id="empty-table-row">
+                                    <td colspan="${tableHeaderCount}" class="text-center text-muted small py-4">Nenhum hábito registrado. Clique em 'Novo Hábito' para começar.</td>
+                                </tr>
+                            `;
+                            tbody.innerHTML = emptyRowHtml;
+                        }
 
-    /**
-     * Exibe notificações (necessita de implementação de um Toast/Snackbar na masterpage)
-     */
-    function showToast(message, type) {
-        // Esta função é um placeholder. Você deve implementá-la em sua masterpage.
-        console.log(`[Toast - ${type.toUpperCase()}]: ${message}`);
-        
-        // Exemplo simples de uso de um componente Toast/Alert do Bootstrap (necessário configurar no masterpage)
-        const alertPlaceholder = document.getElementById('toastPlaceholder') || document.body;
-        const alertHtml = `
-            <div class="alert alert-${type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'danger'} alert-dismissible fade show position-fixed top-0 end-0 m-3 z-index-25" role="alert" style="min-width: 300px;">
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        `;
-        
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = alertHtml;
-        const alertElement = tempDiv.firstChild;
-        
-        alertPlaceholder.appendChild(alertElement);
-        setTimeout(() => alertElement.remove(), 5000); // Remove após 5 segundos
-    }
+                    } else {
+                        console.error(`[Exclusão Falha UX]: Não foi possível encontrar a linha (data-habit-id="${selectedHabitId}") para remover.`);
+                    }
+                    
+                    // Limpa o estado de seleção
+                    selectedHabitId = null; 
+                    
+                    // Desabilita botões e remove a classe de seleção de todas as linhas
+                    document.querySelectorAll('.habit-row').forEach(r => r.classList.remove('selected'));
+                    const btnAlterar = document.getElementById('btnAlterarHabito');
+                    const btnExcluir = document.getElementById('btnExcluirHabito');
+                    if (btnAlterar) btnAlterar.disabled = true;
+                    if (btnExcluir) btnExcluir.disabled = true;
+                    
+                } else {
+                    showToast(data.message || 'Falha ao excluir o hábito.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Erro na requisição de exclusão:', error);
+                showToast('Erro ao tentar excluir o hábito.', 'error');
+            });
+        };
+    }
 
-    // Inicializa a desabilitação dos botões
-    document.addEventListener('DOMContentLoaded', () => {
-        const btnAlterar = document.querySelector('.btn-warning');
-        const btnExcluir = document.querySelector('.btn-danger');
-        if (btnAlterar) btnAlterar.disabled = true;
-        if (btnExcluir) btnExcluir.disabled = true;
-    });
+    // NOVO: Função showToast usando o componente Bootstrap Toast nativo
+    function showToast(message, type) {
+        // Encontra o container
+        const toastPlaceholder = document.getElementById('liveToastPlaceholder');
+        if (!toastPlaceholder) {
+             console.log(`[Toast Fallback]: ${message}`);
+             return; // Sai se o container não estiver presente
+        }
+
+        // Define as classes de cor com base no tipo
+        const alertClass = type === 'success' ? 'bg-success' : type === 'warning' ? 'bg-warning' : 'bg-danger';
+        
+        // Cria a estrutura HTML do Toast Bootstrap
+        const toastHtml = `
+            <div class="toast align-items-center text-white ${alertClass} border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+                <div class="d-flex">
+                    <div class="toast-body fw-bold">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        `;
+
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = toastHtml;
+        const toastElement = tempDiv.firstChild;
+        
+        toastPlaceholder.appendChild(toastElement);
+
+        // Inicializa e mostra o Toast do Bootstrap
+        const bsToast = new bootstrap.Toast(toastElement);
+        bsToast.show();
+
+        // Limpa o DOM quando o toast estiver oculto
+        toastElement.addEventListener('hidden.bs.toast', () => {
+            toastElement.remove();
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Garante que os botões de Ações estejam desabilitados ao carregar
+        const btnAlterar = document.getElementById('btnAlterarHabito'); 
+        const btnExcluir = document.getElementById('btnExcluirHabito'); 
+
+        if (btnAlterar) btnAlterar.disabled = true;
+        if (btnExcluir) btnExcluir.disabled = true;
+    });
 
 </script>
 {% endblock extra_js %}
