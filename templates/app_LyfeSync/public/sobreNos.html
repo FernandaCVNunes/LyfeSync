@@ -3,54 +3,54 @@
 {% load static %}
 
 {% block title %}
-  Sobre Nós - LyfeSync
+	Sobre Nós - LyfeSync
 {% endblock %}
 
 {% block content %}
-  <div class="about-content-wrapper">
-    <section class="container py-5">
-      <div class="row align-items-center">
-        <div class="col-lg-6 mb-4 mb-lg-0">
-          <h1 class="display-4 fw-bold mb-4 text-red">A Jornada do LyfeSync</h1>
-          <p class="lead text-muted">Nascemos da crença de que a organização é o alicerce para uma vida plena e feliz. O LyfeSync é mais do que um organizador; é um parceiro no seu caminho para o autocuidado e bem-estar.</p>
-          <p class="text-secondary">Nossa missão é simples: fornecer ferramentas intuitivas e motivadoras que transformam tarefas diárias em hábitos duradouros. Acreditamos que, ao sincronizar seus objetivos e rotina (o "Life Sync"), você alcança sua melhor versão.</p>
-        </div>
-        <div class="col-lg-6">
-          <img src="{% static 'img/imagens/rotina2.webp' %}" alt="Pessoas em equilíbrio simbolizando a missão do LyfeSync" class="img-fluid rounded-4 shadow-lg" />
-        </div>
-      </div>
-    </section>
+	<div class="about-content-wrapper">
+		<section class="container py-5">
+			<div class="row align-items-center">
+				<div class="col-lg-6 mb-4 mb-lg-0">
+					<h1 class="display-4 fw-bold mb-4 text-red">A Jornada do LyfeSync</h1>
+					<p class="lead text-muted">Nascemos da crença de que a organização é o alicerce para uma vida plena e feliz. O LyfeSync é mais do que um organizador; é um parceiro no seu caminho para o autocuidado e bem-estar.</p>
+					<p class="text-secondary">Nossa missão é simples: fornecer ferramentas intuitivas e motivadoras que transformam tarefas diárias em hábitos duradouros. Acreditamos que, ao sincronizar seus objetivos e rotina (o "Life Sync"), você alcança sua melhor versão.</p>
+				</div>
+				<div class="col-lg-6">
+					<img src="{% static 'img/imagens/rotina2.webp' %}" alt="Pessoas em equilíbrio simbolizando a missão do LyfeSync" class="img-fluid rounded-4 shadow-lg" />
+				</div>
+			</div>
+		</section>
 
-    <hr class="my-5" />
+		<hr class="my-5" />
 
-    <section class="container text-center py-5 bg-light-section">
-      <h2 class="fw-bold mb-5">Nossa Visão e Valores</h2>
-      <div class="row g-4">
-        <div class="col-md-4">
-          <i class="fas fa-calendar-check fa-3x text-red mb-3"></i>
-          <h3 class="h5 fw-bold">Organização Intuitiva</h3>
-          <p class="text-muted">Simplificar o planejamento diário, tornando a organização uma atividade prazerosa, não uma obrigação.</p>
-        </div>
+		<section class="container text-center py-5 bg-light-section">
+			<h2 class="fw-bold mb-5">Nossa Visão e Valores</h2>
+			<div class="row g-4">
+				<div class="col-md-4">
+					<i class="fas fa-calendar-check fa-3x text-red mb-3"></i>
+					<h3 class="h5 fw-bold">Organização Intuitiva</h3>
+					<p class="text-muted">Simplificar o planejamento diário, tornando a organização uma atividade prazerosa, não uma obrigação.</p>
+				</div>
 
-        <div class="col-md-4">
-          <i class="fas fa-heartbeat fa-3x text-red mb-3"></i>
-          <h3 class="h5 fw-bold">Bem-Estar em Primeiro Lugar</h3>
-          <p class="text-muted">Priorizar hábitos que promovem a saúde mental e física, como gratidão, sono e exercícios.</p>
-        </div>
+				<div class="col-md-4">
+					<i class="fas fa-heartbeat fa-3x text-red mb-3"></i>
+					<h3 class="h5 fw-bold">Bem-Estar em Primeiro Lugar</h3>
+					<p class="text-muted">Priorizar hábitos que promovem a saúde mental e física, como gratidão, sono e exercícios.</p>
+				</div>
 
-        <div class="col-md-4">
-          <i class="fas fa-seedling fa-3x text-red mb-3"></i>
-          <h3 class="h5 fw-bold">Crescimento Contínuo</h3>
-          <p class="text-muted">Incentivar a reflexão e o desenvolvimento pessoal para que nossos usuários atinjam todo o seu potencial.</p>
-        </div>
-      </div>
-    </section>
+				<div class="col-md-4">
+					<i class="fas fa-seedling fa-3x text-red mb-3"></i>
+					<h3 class="h5 fw-bold">Crescimento Contínuo</h3>
+					<p class="text-muted">Incentivar a reflexão e o desenvolvimento pessoal para que nossos usuários atinjam todo o seu potencial.</p>
+				</div>
+			</div>
+		</section>
 
-    <section class="container py-5 text-center">
-      <h2 class="fw-bold mb-4">Pronto para Sincronizar Sua Vida?</h2>
+		<section class="container py-5 text-center">
+			<h2 class="fw-bold mb-4">Pronto para Sincronizar Sua Vida?</h2>
 
-      <a href="{% url 'account_login' %}" class="btn btn-lg btn-red-primary rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#loginModal">Comece sua Jornada Agora!</a>
-    </section>
-  </div>
+			<a href="{% url 'account_login' %}" class="btn btn-lg btn-red-primary rounded-pill shadow-sm">Comece sua Jornada Agora!</a>
+		</section>
+	</div>
 
 {% endblock %}
