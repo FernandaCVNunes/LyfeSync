@@ -1,13 +1,35 @@
-{% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
-{% load static %}
-
-{% block title %}Alterar Gratidão{% endblock %}
-
-{% block content_logado %}
-    <div class="container-fluid">
-        <h1 class="mb-4">Alterar Item de Gratidão</h1>
-        <div class="alert alert-warning mt-4" role="alert">
-            Formulário para editar um item de gratidão existente.
-        </div>
+{# alterarGratidao.html #}
+<form method="POST" id="form-alterar-gratidao" data-gratidao-id="{{ gratidao_id }}">
+    {% csrf_token %}
+    
+    <div class="mb-3">
+        <label for="{{ form.data.id_for_label }}" class="form-label fw-semibold">Data</label>
+        {{ form.data }}
+        {% if form.data.errors %}
+            <div class="text-danger small mt-1">{{ form.data.errors.0 }}</div>
+        {% endif %}
     </div>
-{% endblock %}
+
+    <div class="mb-4">
+        <label for="{{ form.conteudo.id_for_label }}" class="form-label fw-semibold">Minha Gratidão</label>
+        {{ form.conteudo }}
+        {% if form.conteudo.errors %}
+            <div class="text-danger small mt-1">{{ form.conteudo.errors.0 }}</div>
+        {% endif %}
+    </div>
+    
+    {# Botões de Ação #}
+    <div class="d-flex justify-content-between pt-2">
+        {# Botão de Excluir #}
+        <button type="button" class="btn btn-danger btn-sm" onclick="deletarGratidao({{ gratidao_id }})">
+            <svg class="gratidao-icon-size me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            Excluir
+        </button>
+        
+        {# Botão de Salvar (Alterar) #}
+        <button type="submit" class="btn btn-warning text-white fw-bold">
+            Salvar Alteração
+        </button>
+    </div>
+
+</form>

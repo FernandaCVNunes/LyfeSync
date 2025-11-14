@@ -4,7 +4,7 @@
 /* VARIÁVEIS DE TEMA */
 :root {
     --lyfesync-red-salvar: #E5534B;
-    --lyfesync-green: #48BB78;
+    --lyfesync-green: #4CAF50;
     --lyfesync-text-emerald: #10B981;
     --lyfesync-gray-input: #E9ECEF;
     --lyfesync-text-gray: #4A5568;
@@ -175,6 +175,8 @@
     }
 }
 
+/* ... código anterior ... */
+
 /* ========================================================= */
 /* --- ESTILOS PÁGINA REGISTRAR GRATIDÃO / AFIRMAÇÃO --- */
 /* ========================================================= */
@@ -192,10 +194,13 @@
     font-size: 1.15rem !important;
     resize: none !important;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    /* NOVO: Ajusta a altura mínima para se parecer com a caixa da imagem */
+    min-height: 180px !important;
 }
 
 .gratidao-date-container {
-    margin-bottom: 5rem !important;
+    /* Removido o margin-bottom alto */
+    margin-bottom: 0rem !important;
 }
 
 .gratidao-date-label {
@@ -205,21 +210,91 @@
 .gratidao-date-input {
     width: 150px;
     border-radius: 0.5rem;
+    /* Ajuste de estilo para parecer um bloco cinza como na imagem */
+    background-color: #E9ECEF !important;
+    /* Cor mais cinza */
+    border: 1px solid #E9ECEF !important;
+    box-shadow: none !important;
 }
 
 .gratidao-title-color {
+    /* CORRIGIDO: Deve ser a cor do título na primeira imagem (Vermelho/Laranja) */
     color: var(--lyfesync-red-salvar, #E5534B);
 }
 
 .gratidao-question-color {
+    /* CORRIGIDO: Cor da pergunta na primeira imagem (Verde) */
     color: var(--lyfesync-green, #48BB78);
 }
 
 .gratidao-field-bg {
-    background-color: #C6F6D5;
-    border: none !important;
+    /* Cor de fundo para as caixas de texto (Verde Claro, como a imagem 1) */
+    background-color: #C6F6D5 !important;
+    border: 1px solid #C6F6D5 !important;
+    /* Borda para evitar colisão visual */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06) !important;
+    padding: 1.5rem !important;
+    border-radius: 0.5rem !important;
+}
+
+/* ========================================================= */
+/* --- ESTILOS PÁGINA REGISTRAR GRATIDÃO / AFIRMAÇÃO --- */
+/* ========================================================= */
+
+/* Gratidão */
+.gratidao-page-container {
+    min-height: 100vh;
+}
+
+.gratidao-main-title {
+    font-size: 2.25rem;
+}
+
+.gratidao-textarea {
+    font-size: 1.15rem !important;
+    resize: none !important;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    /* NOVO: Ajusta a altura mínima para se parecer com a caixa da imagem */
+    min-height: 180px !important;
+}
+
+.gratidao-date-container {
+    /* Removido o margin-bottom alto */
+    margin-bottom: 0rem !important;
+}
+
+.gratidao-date-label {
+    font-size: 1.125rem;
+}
+
+.gratidao-date-input {
+    width: 150px;
+    border-radius: 0.5rem;
+    /* Ajuste de estilo para parecer um bloco cinza como na imagem */
+    background-color: #E9ECEF !important;
+    /* Cor mais cinza */
+    border: 1px solid #E9ECEF !important;
     box-shadow: none !important;
-    min-height: 120px;
+}
+
+.gratidao-title-color {
+    /* CORRIGIDO: Deve ser a cor do título na primeira imagem (Vermelho/Laranja) */
+    color: var(--lyfesync-red-salvar, #E5534B);
+}
+
+.gratidao-question-color {
+    /* CORRIGIDO: Cor da pergunta na primeira imagem (Verde) */
+    color: var(--lyfesync-green, #48BB78);
+}
+
+.gratidao-field-bg {
+    /* Cor de fundo para as caixas de texto (Verde Claro, como a imagem 1) */
+    background-color: #C6F6D5 !important;
+    border: 1px solid #C6F6D5 !important;
+    /* Borda para evitar colisão visual */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06) !important;
+    padding: 1.5rem !important;
+    border-radius: 0.5rem !important;
 }
 
 /* Afirmação */
@@ -296,7 +371,7 @@
 
 /* Botão Adicionar (Geral, Vermelho) */
 .rs-btn-adicionar {
-    background-color: var(--lyfesync-red-salvar, #E5534B);
+    background-color: #4CAF50 !important;
     color: #FFFFFF;
     width: 100%;
     max-width: 250px;
@@ -310,16 +385,26 @@
     transition: background-color 0.2s ease;
 }
 
+.gratidao-title-color {
+    color: #4CAF50;
+    /* Exemplo de verde */
+}
+
+.gratidao-question-color {
+    color: #2E8B57;
+}
+
 .rs-btn-adicionar:hover {
     background-color: #C5443C;
 }
 
-/* Botões de Salvar (Vermelho - Gratidão/Afirmação) */
+/* Botões de Salvar (Verde - Gratidão/Afirmação) */
 .btn-salvar-gratidao,
 .btn-salvar-form-afirmacao-new,
 .btn-salvar-humor-red {
-    background-color: var(--lyfesync-red-salvar, #E5534B) !important;
-    color: #FFFFFF;
+    background-color: var(--lyfesync-green) !important;
+    border-color: var(--lyfesync-green) !important;
+    color: white !important;
     width: 250px;
     padding: 1rem 2rem;
     font-weight: 800;
@@ -334,7 +419,7 @@
 .btn-salvar-gratidao:hover,
 .btn-salvar-form-afirmacao-new:hover,
 .btn-salvar-humor-red:hover {
-    background-color: #E24F34 !important;
+    background-color: #388E3C !important;
 }
 
 /* Botão de Salvar (Verde - Registrar Humor) */

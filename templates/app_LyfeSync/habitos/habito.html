@@ -177,24 +177,26 @@
             if (selectCheckbox) selectCheckbox.checked = false;
             selectedHabitId = null;
         } else {
-            // Seleciona o novo, deseleciona os outros
+            // Deseleciona todos os outros
             allRows.forEach(r => r.classList.remove('selected'));
-            // CORREÇÃO: Desmarca todos os checkboxes de seleção para garantir que apenas um esteja ativo
             allSelectCheckboxes.forEach(cb => {
                 if(cb.id !== `select-${habitId}`) {
                     cb.checked = false;
                 }
             }); 
 
+            // Seleciona o atual
             row.classList.add('selected');
             if (selectCheckbox) selectCheckbox.checked = true;
             selectedHabitId = habitId;
         }
 
         // Habilitar/desabilitar botões
-        const isDisabled = selectedHabitId === null;
-        if (btnAlterar) btnAlterar.disabled = isDisabled;
-        if (btnExcluir) btnExcluir.disabled = isDisabled;
+        // Verifica se existe alguma linha marcada como 'selected'
+        const isAnyRowSelected = document.querySelector('.habit-row.selected') !== null;
+        
+        if (btnAlterar) btnAlterar.disabled = !isAnyRowSelected;
+        if (btnExcluir) btnExcluir.disabled = !isAnyRowSelected;
     }
 
       function toggleHabitDay(habitId, dateString, event) {
@@ -265,42 +267,50 @@
         return cookieValue;
     }
 
+    // Função com melhorias de UX (loading e tratamento de erro)
     function abrirModalAlterar() {
         const habitId = selectedHabitId;
+        const btnAlterar = document.getElementById('btnAlterarHabito'); 
+        
         if (!habitId) {
             showToast('Selecione um hábito para alterar.', 'warning');
             return;
         }
 
+        // 1. Feedback de Carregamento e Desabilita o botão
+        btnAlterar.disabled = true;
+        btnAlterar.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Carregando...';
+
         const alterarModal = new bootstrap.Modal(document.getElementById('alterarHabitoModal'));
         const form = document.getElementById('formAlterarHabito');
         
-        // Requisição para buscar os dados do hábito
-        // URL: /habitos/get-data/{habitId}/ (CORRETA)
+        // 2. Requisição para buscar os dados do hábito
         fetch(`/habitos/get-data/${habitId}/`)
         .then(response => {
             if (!response.ok) {
-                // TRATAMENTO DE ERRO MELHORADO: O erro 500 do log está aqui.
-                throw new Error('Falha ao buscar dados do hábito. (Status: ' + response.status + '). Verifique os logs do servidor Django para o traceback do 500.');
+                // Restaura o botão em caso de falha de status HTTP (incluindo 500)
+                btnAlterar.disabled = false;
+                btnAlterar.innerHTML = 'Alterar Selecionado';
+                showToast('Falha ao buscar dados do hábito. Verifique os logs do servidor.', 'error');
+                
+                // Lança um erro para cair no .catch final
+                throw new Error('Falha ao buscar dados do hábito. (Status: ' + response.status + ')');
             }
             return response.json();
         })
         .then(data => {
+            // 3. Preenche e exibe se for bem-sucedido
             if (data.id) {
                 // Define o atributo 'action' do formulário.
-                // URL: /habitos/alterar/{data.id}/ (CORRETA)
                 form.setAttribute('action', `/habitos/alterar/${data.id}/`);
                 
                 // Preenche campos
                 form.querySelector('input[name="nome"]').value = data.nome || '';
                 form.querySelector('textarea[name="descricao"]').value = data.descricao || '';
-                // Garante que o campo de data seja tratado como string
                 form.querySelector('input[name="data_inicio"]').value = data.data_inicio || ''; 
                 form.querySelector('input[name="data_fim"]').value = data.data_fim || '';
-                // Assume que 'quantidade' deve ser numérico, mas é lido como string
                 form.querySelector('input[name="quantidade"]').value = data.quantidade || 0;
                 form.querySelector('input[name="alvo"]').value = data.alvo || '';
-                // CORREÇÃO: Adicionando o preenchimento do campo 'unidade'
                 form.querySelector('input[name="unidade"]').value = data.unidade || '';
 
                 const frequenciaSelect = form.querySelector('select[name="frequencia"]');
@@ -308,15 +318,21 @@
                     frequenciaSelect.value = data.frequencia;
                 }
                 
-                // Chama o modal
+                // Reabilita o botão e remove o spinner, e mostra o modal
+                btnAlterar.disabled = false;
+                btnAlterar.innerHTML = 'Alterar Selecionado';
+                
                 alterarModal.show();
             } else {
-                showToast('Não foi possível carregar os dados do hábito.', 'error');
+                showToast('Não foi possível carregar os dados do hábito (dados incompletos).', 'error');
             }
         })
         .catch(error => {
+            // 4. Restaura o botão em caso de erro de rede ou processamento
             console.error('Erro no AJAX (Alterar):', error);
-            showToast('Erro ao carregar dados para alteração. ' + error.message, 'error'); 
+            btnAlterar.disabled = false;
+            btnAlterar.innerHTML = 'Alterar Selecionado';
+            showToast('Erro ao tentar carregar dados para alteração.', 'error'); 
         });
     }
 
@@ -357,7 +373,7 @@
                         
                         // Verifica se a tabela ficou vazia (BÔNUS)
                         const tbody = rowToRemove.closest('tbody');
-                        if (tbody && tbody.querySelectorAll('tr').length === 0) {
+                        if (tbody && tbody.querySelectorAll('.habit-row').length === 0) { // CORRIGIDO: usa .habit-row
                             // Se não houver linhas, adiciona a mensagem de 'vazio'
                             const tableHeaderCount = document.querySelectorAll('thead th').length;
                             const emptyRowHtml = `
@@ -376,7 +392,12 @@
                     selectedHabitId = null; 
                     
                     // Desabilita botões e remove a classe de seleção de todas as linhas
-                    document.querySelectorAll('.habit-row').forEach(r => r.classList.remove('selected'));
+                    document.querySelectorAll('.habit-row').forEach(r => {
+                        r.classList.remove('selected');
+                        const checkbox = r.querySelector('input[id^="select-"]');
+                        if (checkbox) checkbox.checked = false; // Garante que o checkbox também desmarque
+                    });
+                    
                     const btnAlterar = document.getElementById('btnAlterarHabito');
                     const btnExcluir = document.getElementById('btnExcluirHabito');
                     if (btnAlterar) btnAlterar.disabled = true;

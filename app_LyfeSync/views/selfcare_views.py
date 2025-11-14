@@ -8,10 +8,9 @@ from datetime import timedelta
 import locale
 import json
 from django.views.decorators.http import require_POST
-from ..forms import GratidaoForm, AfirmacaoForm, HumorForm, DicasForm
+from ..forms import GratidaoForm, AfirmacaoForm, HumorForm, DicasForm, GratidaoFormSet
 from ..models import Gratidao, Afirmacao, Humor, HumorTipo, Dicas 
-# Importando a função utilitária do arquivo auxiliar
-from ._aux_logic import get_humor_map # <-- NOVO IMPORT
+from ._aux_logic import get_humor_map
 
 # Configuração de locale para formatação de data/mês em português
 try:
@@ -30,10 +29,7 @@ def is_staff_user(user):
     """Função de teste para o decorador @user_passes_test.
     Verifica se o usuário é staff/administrador (e ativo).
     """
-    # Certifique-se de que o usuário é ativo e tem permissão de staff
     return user.is_active and user.is_staff
-
-# REMOVIDO: A função get_humor_map foi movida para _aux_logic.py
 
 # -------------------------------------------------------------------
 # VIEW PRINCIPAL
@@ -42,11 +38,11 @@ def is_staff_user(user):
 @login_required(login_url='login')
 def autocuidado(request):
     """Página de Autocuidado, que pode listar Afirmações, Gratidão e Humor. Requer login."""
-    # Busca 5 afirmações aleatórias do usuário
+    
     afirmacoes = Afirmacao.objects.filter(usuario =request.user).order_by('?')[:5]
     
     context = {'afirmacoes': afirmacoes}
-    # CAMINHO CORRETO: app_LyfeSync/autocuidado/autocuidado.html
+    
     return render(request, 'app_LyfeSync/autocuidado/autocuidado.html', context)
 
 
@@ -62,12 +58,12 @@ def humor(request):
     
     # 1. Busca o Humor de Hoje
     try:
-        # CORREÇÃO: Usamos select_related('estado') para buscar o objeto HumorTipo
+        
         humor_do_dia = Humor.objects.select_related('estado').get( 
             usuario =request.user, 
             data=data_hoje
         )
-        # CORREÇÃO: O caminho do ícone é acessado via 'estado.icone'
+        
         humor_do_dia.image_path = humor_do_dia.estado.icone
     except Humor.DoesNotExist:
         humor_do_dia = None
@@ -75,7 +71,6 @@ def humor(request):
     # 2. Lógica do Histórico (Últimas 2 Semanas)
     data_duas_semanas_atras = data_hoje - timedelta(days=14)
     
-    # CORREÇÃO: Usamos select_related('estado') para otimizar a busca do objeto HumorTipo
     humores_recentes_qs = Humor.objects.select_related('estado').filter(
         usuario =request.user, 
         data__gte=data_duas_semanas_atras
@@ -86,7 +81,6 @@ def humor(request):
     # 3. Adicionar o caminho da imagem aos registros do histórico
     humores_recentes_list = []
     for registro in humores_recentes_qs:
-        # CORREÇÃO: Acessa diretamente o icone do objeto relacionado via 'estado.icone'
         registro.image_path = registro.estado.icone 
         humores_recentes_list.append(registro)
         
@@ -98,7 +92,6 @@ def humor(request):
         'humores_recentes': humores_recentes_list, 
         'tipos_de_humor': tipos_de_humor,
     }
-    # CAMINHO CORRETO: app_LyfeSync/humor/humor.html
     return render(request, 'app_LyfeSync/humor/humor.html', context)
 
     
@@ -106,7 +99,6 @@ def humor(request):
 def registrar_humor(request):
     """Permite registrar um novo Humor. Requer login."""
     
-    # Obtém todos os tipos de humor disponíveis para o formulário/template (usando o icone)
     humores_disponiveis = HumorTipo.objects.all()
     
     if request.method == 'POST':
@@ -122,26 +114,23 @@ def registrar_humor(request):
                 humor_obj.save()
                 messages.success(request, 'Seu humor foi registrado com sucesso! 😊')
                 return redirect('humor')
-            except Exception: # Captura exceção de duplicidade (unique_together) ou outras falhas
+            except Exception:
                 messages.error(request, f'Erro ao salvar: Você já registrou um humor para esta data, ou houve um erro de validação.')
         else:
             messages.error(request, 'Houve um erro ao registrar o humor. Verifique os campos.')
     else:
-        # Inicializa o formulário com a data de hoje
         form = HumorForm(initial={'data': timezone.localdate()})
         
     context = {
         'form': form,
         'humores_disponiveis': humores_disponiveis 
     }
-    # CAMINHO CORRETO: app_LyfeSync/humor/registrarHumor.html
     return render(request, 'app_LyfeSync/humor/registrarHumor.html', context)
 
 @login_required(login_url='login')
 def alterar_humor(request, humor_id): 
     """Permite alterar um Humor existente. Requer login e ID do Humor."""
     
-    # CORREÇÃO: Busca o registro de Humor usando select_related('estado')
     instance = get_object_or_404(Humor.objects.select_related('estado'), pk=humor_id, usuario =request.user)
     
     # Obtém todos os tipos de humor para o template
@@ -166,7 +155,6 @@ def alterar_humor(request, humor_id):
         'humor_atual': instance, # Passa a instância para exibir o estado atual
     }
     
-    # CAMINHO CORRETO: app_LyfeSync/humor/alterarHumor.html
     return render(request, 'app_LyfeSync/humor/alterarHumor.html', context)
 
 @require_POST
@@ -200,13 +188,11 @@ def load_humor_by_date(request):
         return JsonResponse({'exists': False, 'error': f'Formato de data inválido. Esperado YYYY-MM-DD.'}, status=400) 
             
     try:
-        # CORREÇÃO: Usando select_related('estado') para buscar o tipo de humor junto
         humor_registro = Humor.objects.select_related('estado').get(usuario =request.user, data=selected_date)
         
         data = {
             'exists': True,
             'id': humor_registro.pk, 
-            # CORREÇÃO: Acessar nome e ícone via 'estado.estado' e 'estado.icone'
             'nome_humor': humor_registro.estado.estado, 
             'icone_path': humor_registro.estado.icone, 
             'descricaohumor': humor_registro.descricaohumor,
@@ -222,7 +208,7 @@ def load_humor_by_date(request):
 
 
 @login_required(login_url='login')
-@user_passes_test(is_staff_user, login_url='/') # ALTERAÇÃO: Restringe o acesso a usuários Staff/Admin.
+@user_passes_test(is_staff_user, login_url='/') 
 def registrar_dica(request):
     """Permite registrar uma nova dica (Admin/Staff ou usuário autorizado)."""
     
@@ -230,7 +216,7 @@ def registrar_dica(request):
         form = DicasForm(request.POST)
         if form.is_valid():
             dica_obj = form.save(commit=False)
-            dica_obj.criado_por = request.user # Adicionado: Preenche o campo 'criado_por'
+            dica_obj.criado_por = request.user 
             dica_obj.save() # Salva a dica no banco de dados
             messages.success(request, "Dica de autocuidado cadastrada com sucesso!")
             return redirect('registrar_dica') # Redireciona para a mesma página
@@ -263,86 +249,127 @@ def registrar_dica(request):
 def gratidao(request):
     
     data_hoje = timezone.localdate()
-    primeiro_dia_mes = data_hoje.replace(day=1)
+    # Calcular o início da semana (segunda-feira)
+    # weekday() retorna 0 para segunda e 6 para domingo.
+    dias_para_segunda = data_hoje.weekday()
+    inicio_semana = data_hoje - timedelta(days=dias_para_segunda)
     
-    gratidoes_do_mes = Gratidao.objects.filter(
-        usuario =request.user, 
-        data__gte=primeiro_dia_mes
-    ).order_by('-data') 
-    
-    # Formatação do nome do mês em português
+    # Listar registros da semana (limitado a 21, conforme solicitado, embora o limite padrão seja semanal)
+    gratidoes_da_semana = Gratidao.objects.filter(
+        usuario=request.user, 
+        data__gte=inicio_semana
+    ).order_by('-data')[:21] # Limite de 21 gratidões
+
+    # Formatação do nome do mês em português (para o título do mês atual)
     mes_atual_extenso = data_hoje.strftime('%B').capitalize()
 
     context = {
-        'gratidoes_do_mes': gratidoes_do_mes,
+        'gratidoes_da_semana': gratidoes_da_semana, 
         'mes_atual': mes_atual_extenso,
         'ano_atual': data_hoje.year,
+        'data_hoje': data_hoje, # Útil para o modal de alteração
     }
 
-    # CAMINHO CORRETO: app_LyfeSync/gratidao/gratidao.html
     return render(request, 'app_LyfeSync/gratidao/gratidao.html', context)
 
 
 @login_required(login_url='login') 
 def registrar_gratidao(request):
-    """Permite registrar uma nova Gratidão. Requer login."""
+    """Permite registrar até 3 Gratidões de uma vez usando FormSet."""
+    
+    data_hoje = timezone.localdate()
+    # Filtro da semana para exibição
+    dias_para_segunda = data_hoje.weekday()
+    inicio_semana = data_hoje - timedelta(days=dias_para_segunda)
+    
+    # Busca gratidões existentes do usuário para o FormSet (se quisermos permitir alteração)
+    # Mas, para registrar NOVAS 3 gratidões, inicializamos o queryset vazio.
+    queryset = Gratidao.objects.none() 
+
     if request.method == 'POST':
-        form = GratidaoForm(request.POST)
-        if form.is_valid():
-            gratidao_obj = form.save(commit=False)
-            gratidao_obj.usuario  = request.user 
+        # Instancia o FormSet com os dados do POST
+        formset = GratidaoFormSet(request.POST, queryset=queryset)
+        
+        if formset.is_valid():
+            # Lista para armazenar gratidões salvas
+            gratidoes_salvas = []
             
-            if not gratidao_obj.data:
-                gratidao_obj.data = timezone.localdate()
+            # Itera sobre os formulários no FormSet
+            for form in formset:
+                if form.has_changed() and form.cleaned_data.get('conteudo'): # Verifica se o form foi preenchido
+                    gratidao_obj = form.save(commit=False)
+                    gratidao_obj.usuario = request.user 
+                    gratidao_obj.data = form.cleaned_data.get('data') # Garante que a data correta seja usada
+                    
+                    # O save do form já transfere 'conteudo' para 'descricaogratidao' (conforme implementado no form)
+                    
+                    gratidoes_salvas.append(gratidao_obj)
+            
+            # Salva todos os objetos de uma vez no banco de dados
+            if gratidoes_salvas:
+                Gratidao.objects.bulk_create(gratidoes_salvas) # Salva múltiplos objetos de forma eficiente
+                messages.success(request, f'{len(gratidoes_salvas)} gratidão(ões) registrada(s) com sucesso! 😊')
+                return redirect('gratidao') 
+            else:
+                # Caso o formulário seja válido mas nenhum campo tenha sido preenchido
+                messages.error(request, 'Nenhuma gratidão preenchida para salvar.')
                 
-            gratidao_obj.save()
-            messages.success(request, 'Sua gratidão foi registrada com sucesso! 😊')
-            return redirect('gratidao')
         else:
             messages.error(request, 'Houve um erro ao registrar sua gratidão. Verifique os campos.')
     else:
-        form = GratidaoForm(initial={'data': timezone.localdate()})
+        # Se não for POST, inicializa o FormSet vazio
+        formset = GratidaoFormSet(queryset=queryset, initial=[{'data': data_hoje}] * 3) 
         
-    context = {'form': form}
-    # CAMINHO CORRETO: app_LyfeSync/gratidao/registrarGratidao.html
-    return render(request, 'app_LyfeSync/gratidao/registrarGratidao.html', context)
+    # Listagem das gratidões da semana para mostrar abaixo do formulário
+    gratidoes_da_semana = Gratidao.objects.filter(
+        usuario=request.user, 
+        data__gte=inicio_semana
+    ).order_by('-data')[:21]
 
+    mes_atual_extenso = data_hoje.strftime('%B').capitalize()
+        
+    context = {
+        'formset': formset, # Agora passamos o formset
+        'mes_atual': mes_atual_extenso,
+        'ano_atual': data_hoje.year,
+        'gratidoes_da_semana': gratidoes_da_semana,
+    }
+    
+    return render(request, 'app_LyfeSync/gratidao/registrarGratidao.html', context)
 
 @login_required(login_url='login')
 def alterar_gratidao(request, gratidao_id): 
-    """Permite alterar uma Gratidao existente. Requer login e ID da Gratidão."""
+    """Retorna o formulário de alteração (usado para o conteúdo do modal)."""
     
-    # Busca o objeto pela Primary Key (pk)
-    gratidao_instance = get_object_or_404(Gratidao, pk=gratidao_id, usuario =request.user) 
+    gratidao_instance = get_object_or_404(Gratidao, pk=gratidao_id, usuario=request.user) 
     
     if request.method == 'POST':
         form = GratidaoForm(request.POST, instance=gratidao_instance)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Gratidão alterada com sucesso! 💖')
-            return redirect('gratidao') 
+            return JsonResponse({'status': 'success', 'message': 'Gratidão alterada com sucesso! 💖'}) 
         else:
-            messages.error(request, 'Erro na validação do formulário. Verifique os campos.')
+            form_html = render(request, 'app_LyfeSync/gratidao/alterarGratidao.html', {'form': form, 'gratidao_id': gratidao_id}).content.decode('utf-8')
+            return JsonResponse({'status': 'error', 'message': 'Erro na validação do formulário.', 'form_html': form_html}, status=400)
     else:
         form = GratidaoForm(instance=gratidao_instance)
         
     context = {'form': form, 'gratidao_id': gratidao_id}
-    # CAMINHO CORRETO: app_LyfeSync/gratidao/alterarGratidao.html
-    return render(request, 'app_LyfeSync/gratidao/alterarGratidao.html', context)
 
+    # Esta template deve ser um fragmento HTML (o formulário) para o modal.
+    return render(request, 'app_LyfeSync/gratidao/alterarGratidao.html', context)
 
 @require_POST
 @login_required(login_url='login')
 def delete_gratidao(request, gratidao_id):
-    """Exclui um registro de Gratidão específico (via AJAX)."""
     try:
-        # Busca o objeto pela Primary Key (pk)
-        gratidao_instance = get_object_or_404(Gratidao, pk=gratidao_id, usuario =request.user)
+        gratidao_instance = get_object_or_404(Gratidao, pk=gratidao_id, usuario=request.user)
         gratidao_instance.delete()
-        return JsonResponse({'status': 'success', 'message': f'Gratidão ID {gratidao_id} excluída.'})
+        messages.success(request, 'Gratidão excluída com sucesso!') 
+        return redirect('gratidao') # <<-- REDIRECIONA PARA A PÁGINA PRINCIPAL
     except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-
+        messages.error(request, f'Erro ao excluir a gratidão: {str(e)}')
+        return redirect('gratidao')
 
 # -------------------------------------------------------------------
 # VIEWS DE AFIRMAÇÃO
@@ -359,7 +386,6 @@ def afirmacao(request):
         'ultimas_afirmacoes': ultimas_afirmacoes,
     }
 
-    # CAMINHO CORRETO: app_LyfeSync/afirmacao/afirmacao.html
     return render(request, 'app_LyfeSync/afirmacao/afirmacao.html', context)
 
 
@@ -384,7 +410,7 @@ def registrar_afirmacao(request):
         form = AfirmacaoForm(initial={'data': timezone.localdate()})
         
     context = {'form': form}
-    # CAMINHO CORRETO: app_LyfeSync/afirmacao/registrarAfirmacao.html
+
     return render(request, 'app_LyfeSync/afirmacao/registrarAfirmacao.html', context)
 
 
@@ -407,7 +433,7 @@ def alterar_afirmacao(request, afirmacao_id):
         form = AfirmacaoForm(instance=afirmacao_instance)
         
     context = {'form': form, 'afirmacao_id': afirmacao_id}
-    # CAMINHO CORRETO: app_LyfeSync/afirmacao/alterarAfirmacao.html
+
     return render(request, 'app_LyfeSync/afirmacao/alterarAfirmacao.html', context)
 
 

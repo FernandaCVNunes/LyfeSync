@@ -2,7 +2,7 @@
 from django import forms
 from .models import Habito, Gratidao, Afirmacao, Humor, Dicas, PerfilUsuario, HumorTipo
 from django.utils import timezone
-from django.forms import TextInput, DateInput, NumberInput, Select, Textarea, RadioSelect, HiddenInput
+from django.forms import TextInput, DateInput, NumberInput, Select, Textarea, RadioSelect, HiddenInput, modelformset_factory
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.models import User
@@ -49,29 +49,73 @@ class HabitoForm(forms.ModelForm):
       }
       
 # -------------------------------------------------------------------
-# 2. FORMULÁRIOS PARA AUTOCUIDADO
+# 2. FORMULÁRIOS PARA GRATIDAO
 # -------------------------------------------------------------------
 
 class GratidaoForm(forms.ModelForm):
-   """
-   Formulário para a criação de registros de Gratidão.
-   """
-   class Meta:
-      model = Gratidao
-      fields = ['nomegratidao', 'descricaogratidao', 'data']
-      widgets = {
-         'nomegratidao': TextInput(attrs={'placeholder': 'Ex: Pelo Sol de hoje', 'class': 'form-control'}),
-         'descricaogratidao': Textarea(attrs={'placeholder': 'Escreva sobre o que você é grato.', 'rows': 4, 'class': 'form-control'}),
-         'data': DateInput(
-            attrs={'type': 'date', 'class': 'form-control', 'value': timezone.localdate().strftime('%Y-%m-%d')},
-            format='%Y-%m-%d'
-         ),
-      }
-      labels = {
-         'nomegratidao': 'O que te fez grato?',
-         'descricaogratidao': 'Detalhes',
-         'data': 'Data',
-      }
+    """
+    Formulário para a criação de registros de Gratidão.
+    """
+    conteudo = forms.CharField(
+        label='Minha Gratidão',
+        # Ajustei a classe do widget para ser a mesma usada no FormSet/Template para consistência
+        widget=forms.Textarea(attrs={'rows': 6, 'placeholder': 'Escreva aqui sua gratidão...', 'class': 'gratidao-field-bg form-control p-4 text-dark shadow-sm gratidao-textarea'}),
+        max_length=500, # Limite razoável para a descrição
+        required=True
+    )
+    
+    data = forms.DateField(
+        label='Data',
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control gratidao-date-input'}),
+        initial=timezone.localdate(),
+        required=True
+    )
+       
+    class Meta:
+        model = Gratidao
+        fields = ['conteudo', 'data'] 
+        
+    def __init__(self, *args, **kwargs):
+        # ... (código __init__ aqui) ...
+        instance = kwargs.get('instance')
+        if instance and instance.descricaogratidao:
+            initial = kwargs.get('initial', {})
+            initial['conteudo'] = instance.descricaogratidao
+            kwargs['initial'] = initial
+            
+        super().__init__(*args, **kwargs)
+        
+    def save(self, commit=True):
+        # ... (código save aqui) ...
+        gratidao = super().save(commit=False)
+        gratidao.descricaogratidao = self.cleaned_data.get('conteudo')
+        
+        if not gratidao.nomegratidao:
+            gratidao.nomegratidao = gratidao.descricaogratidao[:100]
+            
+        if commit:
+            gratidao.save()
+        return gratidao
+pass
+
+# 2. Definição do FormSet (Corrigido para o nível do módulo)
+GratidaoFormSet = modelformset_factory(
+   Gratidao, 
+   form=GratidaoForm, 
+   extra=3,
+   max_num=3,
+   # É redundante definir 'fields' e 'widgets' aqui, pois o FormSet usa o GratidaoForm
+   # Se você quiser garantir que o widget do FormSet é o que você deseja, mantenha a definição
+   fields=['conteudo', 'data'],
+   widgets={
+      'conteudo': forms.Textarea(attrs={'rows': 6, 'placeholder': 'Escreva aqui sua gratidão...', 'class': 'gratidao-field-bg form-control p-4 text-dark shadow-sm gratidao-textarea'}),
+      'data': forms.DateInput(attrs={'type': 'date', 'class': 'form-control gratidao-date-input'}),
+   }
+)
+   
+# -------------------------------------------------------------------
+# 1. FORMULÁRIO DE AFIRMAÇÃO
+# -------------------------------------------------------------------
 
 class AfirmacaoForm(forms.ModelForm):
    """
@@ -93,6 +137,10 @@ class AfirmacaoForm(forms.ModelForm):
          'descricaoafirmacao': 'Detalhes/Intenção',
          'data': 'Data',
       }
+
+# -------------------------------------------------------------------
+# 1. FORMULÁRIO DE HUMOR
+# -------------------------------------------------------------------
 
 class HumorForm(forms.ModelForm):
    """

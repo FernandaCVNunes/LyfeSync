@@ -19,7 +19,7 @@ from .habit_views import (
 # Views de Autocuidado (selfcare_views.py)
 from .selfcare_views import (
     autocuidado, humor, registrar_humor, alterar_humor, load_humor_by_date, delete_humor,
-    gratidao, registrar_gratidao, alterar_gratidao, delete_gratidao,
+    gratidao, registrar_gratidao, alterar_gratidao, delete_gratidao, GratidaoFormSet, GratidaoForm,
     afirmacao, registrar_afirmacao, delete_afirmacao, alterar_afirmacao
 )
 

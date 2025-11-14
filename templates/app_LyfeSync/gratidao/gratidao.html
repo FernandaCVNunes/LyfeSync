@@ -1,65 +1,206 @@
+{# gratidao.html #}
 {% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
 {% load static %}
 
 {% block title %}
-  Minha Gratidão
+    Minha Gratidão
 {% endblock %}
 
 {% block content_logado %}
-  {# max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 -> container p-4 p-md-5 #}
-  <div class="container p-4 p-md-5">
-    {# bg-white p-6 rounded-xl shadow-lg border-t-4 border-lyfesync-green -> card p-4 p-md-5 rounded-4 shadow-lg border-0 #}
-    <div class="card p-4 p-md-5 rounded-4 shadow-lg border-0 gratidao-card-container">
-      {# text-3xl font-bold text-gray-700 mb-2 -> h2 fw-bold text-secondary mb-2 #}
-      <h2 class="fw-bold text-secondary mb-2">Diário de Gratidão</h2>
-      {# text-lg text-gray-500 mb-6 -> lead text-muted mb-4 #}
-      <p class="lead text-muted mb-4">Pelo que você é grato hoje?</p>
+    <div class="container p-4 p-md-5">
+        <div class="card p-4 p-md-5 rounded-4 shadow-lg border-0 gratidao-card-container">
+            {# Título e Subtítulo #}
+            <h2 class="fw-bold text-secondary mb-2">Diário de Gratidão</h2>
+            <p class="lead text-muted mb-4">Pelo que você é grato hoje?</p>
+            
+            {# Mensagens de Sucesso/Erro (Funcionará agora com o redirect da view de exclusão) #}
+            {% if messages %}
+                <div class="my-3">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
 
-      {# mb-10 -> mb-5 #}
-      <div class="mb-5">
-        {# btn-adicionar-gratidao inline-flex items-center py-3 px-6 font-bold rounded-full shadow-lg transition duration-200 hover:shadow-xl -> btn-adicionar-gratidao btn btn-lg btn-success rounded-pill fw-bold shadow-sm d-inline-flex align-items-center #}
-        <a href="{% url 'registrar_gratidao' %}" class="btn-adicionar-gratidao btn btn-lg btn-success rounded-pill fw-bold shadow-sm d-inline-flex align-items-center gratidao-btn-add">
-          <svg class="me-2 gratidao-icon-size" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-          </svg>Adicionar Gratidão
-        </a>
-      </div>
-
-      {# text-2xl font-semibold text-gray-700 mb-6 border-b pb-2 -> h4 fw-semibold text-secondary border-bottom pb-2 mb-4 #}
-      <h4 class="fw-semibold text-secondary border-bottom pb-2 mb-4">Registros de {{ mes_atual }} / {{ ano_atual }}</h4>
-
-      {% if gratidoes_do_mes %}
-        {# space-y-6 -> usando mb-3 nos itens internos #}
-        <div class="d-grid gap-3">
-          {% for gratidao in gratidoes_do_mes %}
-            {# p-5 bg-yellow-50 rounded-xl shadow border-l-4 border-yellow-400 hover:shadow-md transition duration-150 -> card p-4 rounded-3 shadow-sm border-start border-4 mb-3 #}
-            <div class="card p-4 rounded-3 shadow-sm border-start border-4 h-100 gratidao-item-card">
-              {# flex justify-between items-center mb-2 -> d-flex justify-content-between align-items-center mb-2 #}
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                {# text-sm font-semibold text-gray-600 -> small fw-semibold text-muted #}
-                <p class="small fw-semibold text-muted mb-0">{{ gratidao.data|date:'d/m/Y' }}</p>
-                {# text-yellow-600 hover:text-yellow-700 text-sm font-medium -> text-warning small fw-medium #}
-                <a href="{% url 'alterar_gratidao' gratidao.pk %}" class="text-warning small fw-medium text-decoration-none gratidao-edit-link">
-                  <svg class="gratidao-icon-size" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                  </svg>
+            {# Botão Adicionar Gratidão #}
+            <div class="mb-5">
+                <a href="{% url 'registrar_gratidao' %}" class="btn-adicionar-gratidao btn btn-lg text-white rounded-pill fw-bold shadow-sm d-inline-flex align-items-center" style="background-color: var(--lyfesync-green);">
+                    <svg class="me-2" width="30" height="30" fill="white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Adicionar Gratidão
                 </a>
-              </div>
-
-              {# text-gray-800 text-lg italic -> text-dark fst-italic #}
-              <p class="text-dark fst-italic mb-0 gratidao-text-content">"{{ gratidao.conteudo }}"</p>
             </div>
-          {% endfor %}
+
+            {# Título da Listagem #}
+            <h4 class="fw-semibold text-secondary border-bottom pb-2 mb-4">Registros da Semana Atual</h4>
+            
+            {# Listagem das gratidões da semana #}
+            {% if gratidoes_da_semana %}
+                <div class="d-grid gap-3">
+                    {% for gratidao_item in gratidoes_da_semana %}
+                       <div class="card p-4 rounded-3 shadow-sm border-start border-4 border-warning h-100 gratidao-item-card" 
+                            data-gratidao-id="{{ gratidao_item.pk }}" 
+                            onclick="abrirModalAlteracao({{ gratidao_item.pk }})">
+                            
+                            {# LINHA DO TOPO: Data e Ícones #}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                
+                                {# CORREÇÃO: Data do Registro #}
+                                <p class="small fw-semibold text-muted mb-0">{{ gratidao_item.data|date:'d/m/Y' }}</p>
+                                
+                                {# CONTAINER PARA OS ÍCONES DE AÇÃO #}
+                                <div class="d-flex align-items-center">
+                                    
+                                    {# Ícone de ALTERAR (Mantido, para abrir o modal AJAX) #}
+                                    <a href="javascript:void(0);" class="text-warning small fw-medium text-decoration-none me-3" 
+                                       onclick="event.stopPropagation(); abrirModalAlteracao({{ gratidao_item.pk }})">
+                                        {# SVG do Lápis #}
+                                        <svg class="gratidao-icon-size" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                        </svg>
+                                    </a>
+
+                                    {# CORREÇÃO: FORMULÁRIO POST para Exclusão (Funciona com redirect na view) #}
+                                    <form action="{% url 'delete_gratidao' gratidao_item.pk %}" method="POST" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-link p-0 border-0 text-danger" 
+                                                onclick="return confirm('Tem certeza que deseja excluir esta gratidão?'); event.stopPropagation();">
+                                            {# Ícone de Lixeira #}
+                                            <svg class="gratidao-icon-size" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            {# CONTEÚDO DA GRATIDÃO #}
+                            <p class="text-dark fst-italic mb-0 gratidao-text-content">"{{ gratidao_item.descricaogratidao }}"</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                {# Mensagem de Nenhum Registro Encontrado #}
+                <div class="text-center p-5 border rounded-3 border-dashed gratidao-no-records">
+                    <p class="lead text-muted mb-1">Nenhum registro de gratidão encontrado para esta semana.</p>
+                    <p class="small text-secondary mt-1">Clique em "Adicionar Gratidão" e comece a praticar a gratidão!</p>
+                </div>
+            {% endif %}
         </div>
-      {% else %}
-        {# text-center p-10 bg-gray-50 rounded-xl border border-dashed border-gray-300 -> text-center p-5 border rounded-3 border-dashed #}
-        <div class="text-center p-5 border rounded-3 border-dashed gratidao-no-records">
-          {# text-lg text-gray-500 -> lead text-muted #}
-          <p class="lead text-muted mb-1">Nenhum registro de gratidão encontrado para este mês.</p>
-          {# text-sm text-gray-400 mt-2 -> small text-secondary mt-1 #}
-          <p class="small text-secondary mt-1">Clique em "Adicionar Gratidão" e comece a praticar a gratidão!</p>
-        </div>
-      {% endif %}
     </div>
-  </div>
+    
+    {# --- MODAL DE ALTERAÇÃO DE GRATIDÃO --- #}
+    {# O JS para o modal de alteração é mantido, pois ele usa AJAX para carregar o form #}
+    <div class="modal fade" id="modalAlterarGratidao" tabindex="-1" aria-labelledby="modalAlterarGratidaoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rs-modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalAlterarGratidaoLabel">Alterar Gratidão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                {# O conteúdo do form será carregado aqui via AJAX #}
+                <div class="modal-body" id="modal-form-content">
+                    {# Conteúdo será carregado dinamicamente... #}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        // CORREÇÃO: Envolver o código no 'DOMContentLoaded' para garantir que o Bootstrap esteja definido.
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializa o modal do Bootstrap
+            const modalAlterarGratidao = new bootstrap.Modal(document.getElementById('modalAlterarGratidao'));
+
+            // Função para carregar o formulário de alteração via AJAX e abrir o modal
+            function abrirModalAlteracao(gratidaoId) {
+                const url = `{% url 'alterar_gratidao' 0 %}`.replace('0', gratidaoId);
+                const modalBody = document.getElementById('modal-form-content');
+                
+                // Exibe o spinner de carregamento
+                modalBody.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-success" role="status"><span class="visually-hidden">Carregando...</span></div></div>';
+
+                fetch(url)
+                    .then(response => response.text())
+                    .then(html => {
+                        modalBody.innerHTML = html;
+                        // Anexa o evento de submit ao formulário recém-carregado
+                        const form = document.getElementById('form-alterar-gratidao');
+                        if (form) {
+                            form.addEventListener('submit', function(e) {
+                                e.preventDefault();
+                                submeterAlteracao(gratidaoId);
+                            });
+                        }
+                        modalAlterarGratidao.show();
+                    })
+                    .catch(error => {
+                        console.error('Erro ao carregar o formulário:', error);
+                        modalBody.innerHTML = '<div class="alert alert-danger">Erro ao carregar a gratidão.</div>';
+                    });
+            }
+            
+            // Função para submeter a alteração via AJAX
+            function submeterAlteracao(gratidaoId) {
+                const form = document.getElementById('form-alterar-gratidao');
+                const formData = new FormData(form);
+                // Assume que 'alterar_gratidao' está configurada para aceitar POST via AJAX e retornar JSON
+                const url = `{% url 'alterar_gratidao' 0 %}`.replace('0', gratidaoId);
+
+                fetch(url, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok && response.headers.get('Content-Type').includes('application/json')) {
+                        return response.json();
+                    } else if (response.ok) {
+                        // Isso deve lidar com respostas não-JSON ok, embora seja incomum para alteração AJAX
+                        return response.text().then(text => JSON.parse(text));
+                    } else if (response.status === 400) {
+                        // Erro de validação: esperamos que a view retorne JSON com o HTML do formulário
+                        return response.json();
+                    } else {
+                        throw new Error('Erro inesperado no servidor.');
+                    }
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        modalAlterarGratidao.hide();
+                        // Exibe mensagem de sucesso e recarrega a página
+                        alert(data.message); 
+                        window.location.reload(); 
+                    } else if (data.status === 'error' && data.form_html) {
+                        // Erro de validação: re-renderiza o form com erros
+                        document.getElementById('modal-form-content').innerHTML = data.form_html;
+                        // Re-anexa o listener de submit ao novo form para continuar o ciclo de alteração
+                        const newForm = document.getElementById('form-alterar-gratidao');
+                        if (newForm) {
+                            newForm.addEventListener('submit', function(e) {
+                                e.preventDefault();
+                                submeterAlteracao(gratidaoId);
+                            });
+                        }
+                    } else {
+                        // Outro erro
+                        alert(data.message || 'Erro ao processar a alteração.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro de rede ou processamento:', error);
+                    alert('Erro na comunicação com o servidor. Tente novamente.');
+                });
+            }
+            
+            // Torna a função 'abrirModalAlteracao' acessível globalmente, pois é chamada no onclick do HTML
+            window.abrirModalAlteracao = abrirModalAlteracao;
+        });
+    </script>
 {% endblock %}

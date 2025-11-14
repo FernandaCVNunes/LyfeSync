@@ -7,8 +7,8 @@ from .views import (
     home, sobre_nos, contatos,home_lyfesync, habito, registrar_habito, 
     alterar_habito, toggle_habito_day, delete_habit, get_habit_data,
     autocuidado, humor, registrar_humor, alterar_humor, load_humor_by_date,
-    gratidao, registrar_gratidao, alterar_gratidao,
-    afirmacao, registrar_afirmacao, alterar_afirmacao,
+    gratidao, registrar_gratidao, alterar_gratidao,delete_gratidao,
+    afirmacao, registrar_afirmacao, alterar_afirmacao, delete_afirmacao,
     relatorios, relatorio_habito, relatorio_humor, relatorio_gratidao, relatorio_afirmacao,
     conta, configuracoes_conta, registrar_dica
 )
@@ -54,7 +54,8 @@ urlpatterns = [
     # GRATIDÃO
     path('gratidao/', gratidao, name='gratidao'),
     path('gratidao/registrar/', registrar_gratidao, name='registrar_gratidao'),
-    path('gratidao/alterar/<int:gratidao_id>/', alterar_gratidao, name='alterar_gratidao'), 
+    path('gratidao/alterar/<int:gratidao_id>/', alterar_gratidao, name='alterar_gratidao'),
+    path('gratidao/excluir/<int:gratidao_id>/', delete_gratidao, name='delete_gratidao'), 
     
     # AFIRMAÇÃO
     path('afirmacao/', afirmacao, name='afirmacao'),
