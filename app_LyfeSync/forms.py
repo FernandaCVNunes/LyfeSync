@@ -118,25 +118,38 @@ GratidaoFormSet = modelformset_factory(
 # -------------------------------------------------------------------
 
 class AfirmacaoForm(forms.ModelForm):
-   """
-   Formulário para a criação de registros de Afirmação.
-   """
-   class Meta:
-      model = Afirmacao
-      fields = ['nomeafirmacao', 'descricaoafirmacao', 'data']
-      widgets = {
-         'nomeafirmacao': TextInput(attrs={'placeholder': 'Ex: Sou capaz de superar desafios', 'class': 'form-control'}),
-         'descricaoafirmacao': Textarea(attrs={'placeholder': 'Detalhe como esta afirmação te impacta.', 'rows': 4, 'class': 'form-control'}),
-         'data': DateInput(
-            attrs={'type': 'date', 'class': 'form-control', 'value': timezone.localdate().strftime('%Y-%m-%d')},
-            format='%Y-%m-%d'
-         ),
-      }
-      labels = {
-         'nomeafirmacao': 'Afirmação Principal',
-         'descricaoafirmacao': 'Detalhes/Intenção',
-         'data': 'Data',
-      }
+    """
+    Formulário para a criação de registros de Afirmação.
+    """
+    
+    class Meta:
+        model = Afirmacao
+        fields = ['descricaoafirmacao'] # Mantemos apenas o campo principal para o Formset
+        widgets = {
+             # Removido o TextInput para o nome (título), focando no conteúdo
+            'descricaoafirmacao': Textarea(attrs={
+                'placeholder': 'Sua afirmação deve caber neste espaço...', 
+                'rows': 8, 
+                'class': 'form-control afirmacao-textarea bg-transparent border-0 text-dark p-4',
+                'required': 'true'
+            }),
+             # 'data' e 'nomeafirmacao' serão definidos por fora ou no Formset para simplificar a UX
+        }
+        labels = {
+            'descricaoafirmacao': 'Afirmação',
+        }
+
+# 2. FORMSET DE AFIRMAÇÕES
+# -------------------------------------------------------------------
+
+AfirmacaoFormSet = modelformset_factory(
+    Afirmacao, 
+    form=AfirmacaoForm, 
+    fields=('descricaoafirmacao',), # Apenas o campo de conteúdo para o registro
+    extra=3, # Define que o formulário terá 3 instâncias
+    max_num=3,
+    can_delete=False # Desabilitamos a exclusão aqui, pois é para registro
+)
 
 # -------------------------------------------------------------------
 # 1. FORMULÁRIO DE HUMOR

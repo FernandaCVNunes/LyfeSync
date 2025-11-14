@@ -60,7 +60,8 @@ urlpatterns = [
     # AFIRMAÇÃO
     path('afirmacao/', afirmacao, name='afirmacao'),
     path('afirmacao/registrar/', registrar_afirmacao, name='registrar_afirmacao'),
-    path('afirmacao/alterar/<int:afirmacao_id>/', alterar_afirmacao, name='alterar_afirmacao'), 
+    path('afirmacao/alterar/<int:afirmacao_id>/', alterar_afirmacao, name='alterar_afirmacao'),
+    path('afirmacao/excluir/<int:afirmacao_id>/', delete_afirmacao, name='delete_afirmacao'),  
 
     # -------------------------------------------------------------------
     # RELATÓRIOS

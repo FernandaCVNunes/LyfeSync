@@ -1,4 +1,4 @@
-/* homeLyfesync.css - Estilos Customizados para Bootstrap 5 */
+/* homeLyfesync.css */
 /* ------------------------------------------------------------------- */
 
 /* VARIÁVEIS DE TEMA */
@@ -175,10 +175,8 @@
     }
 }
 
-/* ... código anterior ... */
-
 /* ========================================================= */
-/* --- ESTILOS PÁGINA REGISTRAR GRATIDÃO / AFIRMAÇÃO --- */
+/* --- ESTILOS PÁGINA REGISTRAR GRATIDÃO --- */
 /* ========================================================= */
 
 /* Gratidão */
@@ -194,7 +192,7 @@
     font-size: 1.15rem !important;
     resize: none !important;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    /* NOVO: Ajusta a altura mínima para se parecer com a caixa da imagem */
+    /* Ajusta a altura mínima para se parecer com a caixa da imagem */
     min-height: 180px !important;
 }
 
@@ -228,7 +226,7 @@
 }
 
 .gratidao-field-bg {
-    /* Cor de fundo para as caixas de texto (Verde Claro, como a imagem 1) */
+    /* Cor de fundo para as caixas de texto (Verde Claro) */
     background-color: #C6F6D5 !important;
     border: 1px solid #C6F6D5 !important;
     /* Borda para evitar colisão visual */
@@ -238,64 +236,8 @@
 }
 
 /* ========================================================= */
-/* --- ESTILOS PÁGINA REGISTRAR GRATIDÃO / AFIRMAÇÃO --- */
+/* --- ESTILOS PÁGINA REGISTRAR AFIRMAÇÃO --- */
 /* ========================================================= */
-
-/* Gratidão */
-.gratidao-page-container {
-    min-height: 100vh;
-}
-
-.gratidao-main-title {
-    font-size: 2.25rem;
-}
-
-.gratidao-textarea {
-    font-size: 1.15rem !important;
-    resize: none !important;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    /* NOVO: Ajusta a altura mínima para se parecer com a caixa da imagem */
-    min-height: 180px !important;
-}
-
-.gratidao-date-container {
-    /* Removido o margin-bottom alto */
-    margin-bottom: 0rem !important;
-}
-
-.gratidao-date-label {
-    font-size: 1.125rem;
-}
-
-.gratidao-date-input {
-    width: 150px;
-    border-radius: 0.5rem;
-    /* Ajuste de estilo para parecer um bloco cinza como na imagem */
-    background-color: #E9ECEF !important;
-    /* Cor mais cinza */
-    border: 1px solid #E9ECEF !important;
-    box-shadow: none !important;
-}
-
-.gratidao-title-color {
-    /* CORRIGIDO: Deve ser a cor do título na primeira imagem (Vermelho/Laranja) */
-    color: var(--lyfesync-red-salvar, #E5534B);
-}
-
-.gratidao-question-color {
-    /* CORRIGIDO: Cor da pergunta na primeira imagem (Verde) */
-    color: var(--lyfesync-green, #48BB78);
-}
-
-.gratidao-field-bg {
-    /* Cor de fundo para as caixas de texto (Verde Claro, como a imagem 1) */
-    background-color: #C6F6D5 !important;
-    border: 1px solid #C6F6D5 !important;
-    /* Borda para evitar colisão visual */
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06) !important;
-    padding: 1.5rem !important;
-    border-radius: 0.5rem !important;
-}
 
 /* Afirmação */
 .afirmacao-page-container {
@@ -326,36 +268,60 @@
     margin-bottom: 5rem !important;
 }
 
-.afirmacao-circle {
+/* Definição do formato circular */
+.affirmation-circle {
     width: 250px;
     height: 250px;
     border-radius: 50%;
+    /* Sombra mais suave para destaque */
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: transform 0.3s ease;
 }
 
+.affirmation-circle:hover {
+    transform: translateY(-5px);
+}
+
+/* Cores específicas para os círculos (CLASSES MAIS SIMPLES ADOTADAS) */
 .circle-blue {
     background-color: #C0CFF7;
+    /* Azul suave */
 }
 
 .circle-pink {
     background-color: #F7C0C0;
+    /* Rosa suave */
 }
 
 .circle-green {
     background-color: #C0F7C9;
+    /* Verde suave */
 }
 
+/* Estilo para garantir que o textarea dentro do círculo se ajuste */
 .afirmacao-textarea {
-    resize: none;
-    font-size: 1.25rem;
-    font-style: italic;
-    box-shadow: none !important;
     background: transparent;
     border: none;
+    padding: 1rem;
+    resize: none;
+    width: 100%;
+    height: 100%;
+    font-size: 1.25rem;
+    font-style: italic;
+    color: #333;
+    box-shadow: none !important;
     text-align: center;
+    transition: all 0.3s ease;
+}
+
+/* Responsividade: garantir que os círculos fiquem em coluna em telas muito pequenas */
+@media (max-width: 768px) {
+    .affirmation-circles-wrapper {
+        flex-direction: column;
+    }
 }
 
 .afirmacao-error-message {
@@ -369,9 +335,9 @@
 /* --- ESTILOS DE BOTÃO (Salvar/Adicionar) --- */
 /* ========================================================= */
 
-/* Botão Adicionar (Geral, Vermelho) */
+/* Botão Adicionar (Geral, Verde - CORRIGIDO) */
 .rs-btn-adicionar {
-    background-color: #4CAF50 !important;
+    background-color: var(--lyfesync-green) !important;
     color: #FFFFFF;
     width: 100%;
     max-width: 250px;
@@ -385,20 +351,13 @@
     transition: background-color 0.2s ease;
 }
 
-.gratidao-title-color {
-    color: #4CAF50;
-    /* Exemplo de verde */
-}
-
-.gratidao-question-color {
-    color: #2E8B57;
-}
-
+/* CORREÇÃO: Hover consistente com a cor verde */
 .rs-btn-adicionar:hover {
-    background-color: #C5443C;
+    background-color: #388E3C !important;
+    /* Um verde mais escuro */
 }
 
-/* Botões de Salvar (Verde - Gratidão/Afirmação) */
+/* Botões de Salvar (Verde Padrão - Gratidão/Afirmação/Humor - CORRIGIDO O HOVER) */
 .btn-salvar-gratidao,
 .btn-salvar-form-afirmacao-new,
 .btn-salvar-humor-red {
@@ -422,7 +381,7 @@
     background-color: #388E3C !important;
 }
 
-/* Botão de Salvar (Verde - Registrar Humor) */
+/* Botão de Salvar (Verde Esmeralda - Registrar Humor) */
 .btn-salvar-form {
     background-color: var(--lyfesync-text-emerald, #10B981);
     border: none;
@@ -584,9 +543,10 @@
     }
 }
 
-/* Novo estilo para o item de histórico de humor ao passar o mouse */
+/* Novo estilo para o item de histórico de humor ao passar o mouse (CORRIGIDO) */
 .humor-list-item-hover:hover {
     background-color: #e9ecef !important;
+    /* Usando a cor cinza do input para hover */
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 

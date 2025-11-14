@@ -1,56 +1,258 @@
+{# afirmacao.html #}
 {% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}Minhas Afirmações{% endblock %}
 
 {% block content_logado %}
-<script src="https://cdn.tailwindcss.com"></script>
-<div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-    <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-lyfesync-green">
-        
-        <h1 class="text-3xl font-bold text-gray-700 mb-2">
-            Afirmações Positivas
-        </h1>
-        <p class="text-lg text-gray-500 mb-6">Mantenha sua mente focada no positivo.</p>
 
-        <div class="mb-10">
-            <a href="{% url 'registrar_afirmacao' %}" class="btn-adicionar-afirmacao inline-flex items-center py-3 px-6 font-bold rounded-full shadow-lg transition duration-200 hover:shadow-xl">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                Criar Nova Afirmação
-            </a>
-        </div>
-        
-        <h2 class="text-2xl font-semibold text-gray-700 mb-6 border-b pb-2">
-            Últimas Afirmações Cadastradas
-        </h2>
+<div class="modal fade" id="alterarAfirmacaoModal" tabindex="-1" aria-labelledby="alterarAfirmacaoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rs-modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="alterarAfirmacaoModalLabel">Alterar Afirmação</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formAlterarAfirmacao" method="POST" action="">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="hidden" id="afirmacaoIdInput" name="afirmacao_id">
+                    
+                    <div class="mb-3">
+                        <label for="id_nomeafirmacao" class="form-label">Título (Opcional)</label>
+                        <input type="text" class="form-control rs-form-control" id="id_nomeafirmacao" name="nomeafirmacao" placeholder="Um título para sua afirmação">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_descricaoafirmacao" class="form-label">Afirmação Principal</label>
+                        <textarea class="form-control rs-form-control custom-textarea" id="id_descricaoafirmacao" name="descricaoafirmacao" rows="4" required></textarea>
+                    </div>
 
-        {% if ultimas_afirmacoes %}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for afirmacao in ultimas_afirmacoes %}
-                <div class="p-4 afirmacao-card rounded-xl shadow-md border-l-4 hover:shadow-lg transition duration-150">
-                    <div class="flex justify-between items-start mb-2">
-                        <p class="text-xs font-semibold text-gray-500">
-                            {{ afirmacao.data|date:"d/m/Y" }}
-                        </p>
-                        <a href="{% url 'alterar_afirmacao' afirmacao.pk %}" class="text-blue-500 hover:text-blue-700 text-sm font-medium">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                        </a>
-                    </div>
-                    
-                    <p class="text-gray-800 font-medium italic">
-                        "{{ afirmacao.conteudo }}"
-                    </p>
-                </div>
-                {% endfor %}
-            </div>
-
-        {% else %}
-            <div class="text-center p-10 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                <p class="text-lg text-gray-500">Você ainda não criou nenhuma afirmação.</p>
-                <p class="text-sm text-gray-400 mt-2">Clique em "Criar Nova Afirmação" para começar a transformar seus pensamentos!</p>
-            </div>
-        {% endif %}
-
-    </div>
+                    <div class="mb-3">
+                        <label for="id_data" class="form-label">Data</label>
+                        <input type="date" class="form-control rs-form-control" id="id_data" name="data" required>
+                    </div>
+                    
+                    <div id="modalErrors" class="text-danger small mt-2"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="submit" class="btn btn-warning fw-bold">SALVAR ALTERAÇÃO</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
+
+<div class="container p-4 p-md-5">
+        <div class="card p-4 p-lg-5 rounded-3 shadow-lg border-start border-5 border-success">
+        
+                <h1 class="h1 fw-bold text-dark mb-2">
+            Afirmações Positivas
+        </h1>
+                <p class="lead text-secondary mb-4">Mantenha sua mente focada no positivo. Crie 3 afirmações por dia!</p>
+
+                <div class="mb-5">
+                        <a href="{% url 'registrar_afirmacao' %}" class="btn rs-btn-adicionar btn-success d-inline-flex align-items-center py-2 px-4 rounded-pill shadow-sm">
+                <svg class="me-2" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                Criar Nova Afirmação
+            </a>
+        </div>
+        
+                <h2 class="h4 fw-semibold text-dark mb-4 border-bottom pb-2">
+            Histórico de Afirmações Cadastradas
+        </h2>
+
+        {% if ultimas_afirmacoes %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                                                        <th scope="col" class="small text-muted fw-semibold">Data</th>
+                            <th scope="col" class="small text-muted fw-semibold">Afirmação</th>
+                            <th scope="col" class="small text-muted fw-semibold text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for afirmacao in ultimas_afirmacoes %}
+                        <tr id="afirmacao-row-{{ afirmacao.pk }}" class="habit-row">
+                                                        <td class="small text-secondary fw-medium" style="width: 150px;">
+                                {{ afirmacao.data|date:"d/m/Y" }}
+                            </td>
+                                                        <td class="text-dark fst-italic">
+                                "{{ afirmacao.descricaoafirmacao|default:afirmacao.nomeafirmacao }}"
+                            </td>
+                            <td class="text-center" style="width: 150px;">
+                                                                <button type="button" 
+                                        class="btn btn-sm btn-warning me-2 btn-alterar" 
+                                        data-id="{{ afirmacao.pk }}" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#alterarAfirmacaoModal"
+                                        title="Alterar Afirmação">
+                                                                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                </button>
+                                
+                                                                <button type="button" 
+                                        class="btn btn-sm btn-danger btn-excluir" 
+                                        data-id="{{ afirmacao.pk }}" 
+                                        title="Excluir Afirmação">
+                                                                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        {% else %}
+                        <div class="text-center p-5 bg-light rounded-3 border border-dashed border-secondary">
+                <p class="lead text-secondary">Você ainda não criou nenhuma afirmação.</p>
+                <p class="small text-muted mt-2">Clique em "Criar Nova Afirmação" para começar a transformar seus pensamentos!</p>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const modal = document.getElementById('alterarAfirmacaoModal');
+        const formAlterar = document.getElementById('formAlterarAfirmacao');
+        const modalErrors = document.getElementById('modalErrors');
+
+        // Função para mostrar mensagem de sucesso/erro
+        function showMessage(type, message) {
+            // Utiliza a função alert para notificação
+            alert(message); 
+            window.location.reload(); 
+        }
+
+        // 1. Script para Exclusão (Botões .btn-excluir)
+        document.querySelectorAll('.btn-excluir').forEach(button => {
+            button.addEventListener('click', function() {
+                const afirmacaoId = this.dataset.id;
+                const confirmExclusao = confirm(`Tem certeza que deseja excluir a afirmação ID ${afirmacaoId}? Esta ação é irreversível.`);
+                
+                if (confirmExclusao) {
+                    fetch(`{% url 'delete_afirmacao' 0 %}`.replace('0', afirmacaoId), {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                            'Content-Type': 'application/json'
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            // Melhorando o UX: remove a linha e mostra a mensagem de sucesso
+                            const row = document.getElementById(`afirmacao-row-${afirmacaoId}`);
+                            if (row) {
+                                row.remove();
+                            }
+                            alert(data.message); 
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro na exclusão:', error);
+                        alert('Ocorreu um erro de rede ao excluir.');
+                    });
+                }
+            });
+        });
+
+        // 2. Script para Abrir o Modal de Alteração (.btn-alterar)
+        modal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget; 
+            const afirmacaoId = button.dataset.id;
+            
+            // Limpa mensagens de erro anteriores
+            modalErrors.innerHTML = '';
+            
+            // Define a URL do formulário para a action de alteração
+            formAlterar.action = `{% url 'alterar_afirmacao' 0 %}`.replace('0', afirmacaoId);
+            document.getElementById('afirmacaoIdInput').value = afirmacaoId;
+
+            // Faz uma requisição GET para obter os dados atuais
+            fetch(formAlterar.action, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Preenche os campos do modal com os dados retornados
+                document.getElementById('id_nomeafirmacao').value = data.nomeafirmacao || '';
+                document.getElementById('id_descricaoafirmacao').value = data.descricaoafirmacao;
+                document.getElementById('id_data').value = data.data; 
+            })
+            .catch(error => {
+                console.error('Erro ao buscar dados:', error);
+                modalErrors.innerHTML = 'Não foi possível carregar os dados da afirmação.';
+            });
+        });
+
+        // 3. Script para Submeter o Modal de Alteração (POST com AJAX)
+        formAlterar.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            modalErrors.innerHTML = ''; 
+            const formData = new FormData(formAlterar);
+            const data = new URLSearchParams(formData);
+
+            fetch(formAlterar.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: data
+            })
+            .then(response => response.json().then(json => ({
+                status: response.status,
+                ok: response.ok,
+                body: json
+            })))
+            .then(({ status, ok, body }) => {
+                if (ok) {
+                    // Sucesso: Fecha o modal e mostra mensagem
+                    const bootstrapModal = bootstrap.Modal.getInstance(modal);
+                    bootstrapModal.hide();
+                    
+                    // Atualiza o item da lista (melhor UX)
+                    const row = document.getElementById(`afirmacao-row-${body.id}`);
+                    if (row) {
+                        // Atualiza as colunas da linha
+                        row.querySelector('td:nth-child(2)').textContent = `"${formData.get('descricaoafirmacao')}"`;
+                        // Se necessário, atualizar outras colunas, como a data
+                    }
+                    alert(body.message); // Usa alert para a mensagem de sucesso
+
+                } else {
+                    // Erro: Exibe erros do formulário no modal
+                    let errorHtml = 'Houve um erro: ';
+                    if (body.errors) {
+                        for (const field in body.errors) {
+                            errorHtml += `<br><strong>${field}:</strong> ${body.errors[field][0]}`; 
+                        }
+                    } else {
+                        errorHtml += body.message;
+                    }
+                    modalErrors.innerHTML = errorHtml;
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao alterar:', error);
+                modalErrors.innerHTML = 'Ocorreu um erro de rede ao tentar alterar a afirmação.';
+            });
+        });
+    });
+</script>
+
 {% endblock %}

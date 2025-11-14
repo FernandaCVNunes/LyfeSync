@@ -1,14 +1,14 @@
 # app_LyfeSync/views/selfcare_views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.utils import timezone
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.utils import timezone
 from datetime import timedelta
 import locale
 import json
 from django.views.decorators.http import require_POST
-from ..forms import GratidaoForm, AfirmacaoForm, HumorForm, DicasForm, GratidaoFormSet
+from ..forms import GratidaoForm, AfirmacaoForm, HumorForm, DicasForm, GratidaoFormSet, AfirmacaoFormSet, AfirmacaoForm
 from ..models import Gratidao, Afirmacao, Humor, HumorTipo, Dicas 
 from ._aux_logic import get_humor_map
 
@@ -377,13 +377,16 @@ def delete_gratidao(request, gratidao_id):
 
 @login_required(login_url='login')
 def afirmacao(request):
+    """Exibe o histórico de afirmações com botões de ação e o link para registro."""
     
+    # Busca todas as afirmações do usuário, ordenadas da mais recente
     ultimas_afirmacoes = Afirmacao.objects.filter(
-        usuario =request.user
-    ).order_by('-data')[:15]
+        usuario=request.user
+    ).order_by('-data', '-idafirmacao') # Adicione idafirmacao para garantir ordem
     
     context = {
         'ultimas_afirmacoes': ultimas_afirmacoes,
+        'form': AfirmacaoForm() # Passa um formulário vazio para o modal de alteração
     }
 
     return render(request, 'app_LyfeSync/afirmacao/afirmacao.html', context)
@@ -391,60 +394,90 @@ def afirmacao(request):
 
 @login_required(login_url='login')
 def registrar_afirmacao(request):
-    """Permite registrar uma nova Afirmação e redireciona para a listagem."""
+    """Permite registrar 3 novas Afirmações para a mesma data, usando um Formset."""
+    
+    data_atual = timezone.localdate()
+    
     if request.method == 'POST':
-        form = AfirmacaoForm(request.POST)
-        if form.is_valid():
-            afirmacao_obj = form.save(commit=False)
-            afirmacao_obj.usuario  = request.user
+        # Instancia o Formset com os dados do POST
+        formset = AfirmacaoFormSet(request.POST, 
+                                   queryset=Afirmacao.objects.none(), # Formset para novas entradas
+                                   prefix='afirmacao')
+        
+        if formset.is_valid():
             
-            if not afirmacao_obj.data:
-                afirmacao_obj.data = timezone.localdate()
-                
-            afirmacao_obj.save()
-            messages.success(request, 'Afirmação registrada com sucesso! ✨')
+            # Percorre cada formulário no formset
+            for form in formset:
+                if form.cleaned_data.get('descricaoafirmacao'): # Garante que o campo não está vazio
+                    afirmacao_obj = form.save(commit=False)
+                    afirmacao_obj.usuario = request.user
+                    afirmacao_obj.data = data_atual # Define a data atual para todos
+                    afirmacao_obj.save()
+                    
+            messages.success(request, '3 Afirmações registradas com sucesso! ✨')
+            # Redireciona para a listagem
             return redirect('afirmacao') 
         else:
-            messages.error(request, 'Houve um erro ao registrar a afirmação. Verifique os campos.')
+            # Em caso de erro, re-renderiza a página com o formset preenchido e erros
+            messages.error(request, 'Houve um erro ao registrar as afirmações. Verifique os campos.')
     else:
-        form = AfirmacaoForm(initial={'data': timezone.localdate()})
-        
-    context = {'form': form}
+        # GET: Instancia um Formset vazio (com 3 formulários extras)
+        formset = AfirmacaoFormSet(queryset=Afirmacao.objects.none(), prefix='afirmacao')
+    
+    context = {
+        'formset': formset,
+        'data_atual': data_atual.strftime('%d/%m/%Y'), # Formato para exibição
+        'data_input': data_atual.strftime('%Y-%m-%d') # Formato para input type="date"
+    }
 
     return render(request, 'app_LyfeSync/afirmacao/registrarAfirmacao.html', context)
 
 
 @login_required(login_url='login')
 def alterar_afirmacao(request, afirmacao_id):
-    """Permite alterar uma Afirmação existente. Requer login e ID da Afirmação."""
+    """
+    Permite alterar uma Afirmação existente. 
+    Esta view será chamada via AJAX (POST) pelo modal.
+    """
     
-    # Busca o objeto pela Primary Key (pk)
-    afirmacao_instance = get_object_or_404(Afirmacao, pk=afirmacao_id, usuario =request.user) 
+    afirmacao_instance = get_object_or_404(Afirmacao, pk=afirmacao_id, usuario=request.user) 
     
     if request.method == 'POST':
         form = AfirmacaoForm(request.POST, instance=afirmacao_instance)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Afirmação alterada com sucesso! ✨')
-            return redirect('afirmacao') # Redireciona para a lista
-        else:
-            messages.error(request, 'Erro na validação do formulário. Verifique os campos.')
-    else:
-        form = AfirmacaoForm(instance=afirmacao_instance)
         
-    context = {'form': form, 'afirmacao_id': afirmacao_id}
-
-    return render(request, 'app_LyfeSync/afirmacao/alterarAfirmacao.html', context)
+        if form.is_valid():
+            # O Formset do registro não tem o campo 'data', 
+            # mas o formulário de alteração (AfirmacaoForm) precisa para salvar se você adicioná-lo.
+            # Se você usar o AfirmacaoForm sem 'data', o valor antigo será mantido.
+            form.save()
+            # Retorna um JSON para o script do modal
+            return JsonResponse({'status': 'success', 'message': 'Afirmação alterada com sucesso! ✨', 'id': afirmacao_id})
+        else:
+            # Retorna JSON com erros para o modal
+            errors = dict(form.errors.items())
+            return JsonResponse({'status': 'error', 'message': 'Erro na validação.', 'errors': errors}, status=400)
+    else:
+        # GET: Esta parte não deve ser renderizada, 
+        # mas se for acessada, retorna os dados para preencher o modal
+        data = {
+            'idafirmacao': afirmacao_instance.idafirmacao,
+            'data': afirmacao_instance.data.strftime('%Y-%m-%d') if afirmacao_instance.data else '',
+            'descricaoafirmacao': afirmacao_instance.descricaoafirmacao,
+            'nomeafirmacao': afirmacao_instance.nomeafirmacao or ''
+        }
+        return JsonResponse(data)
 
 
 @require_POST
 @login_required(login_url='login')
 def delete_afirmacao(request, afirmacao_id):
-    """Exclui um registro de Afirmação específico (via AJAX)."""
+    """Exclui um registro de Afirmação específico (via POST/AJAX)."""
     try:
         # Busca o objeto pela Primary Key (pk)
-        afirmacao_instance = get_object_or_404(Afirmacao, pk=afirmacao_id, usuario =request.user)
+        afirmacao_instance = get_object_or_404(Afirmacao, pk=afirmacao_id, usuario=request.user)
         afirmacao_instance.delete()
-        return JsonResponse({'status': 'success', 'message': f'Afirmação ID {afirmacao_id} excluída.'})
+        # Retorna sucesso para o script JS no afirmacao.html
+        return JsonResponse({'status': 'success', 'message': 'Afirmação excluída com sucesso! 🗑️'})
     except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+        # Retorna erro em caso de falha
+        return JsonResponse({'status': 'error', 'message': f'Erro ao excluir: {str(e)}'}, status=500)

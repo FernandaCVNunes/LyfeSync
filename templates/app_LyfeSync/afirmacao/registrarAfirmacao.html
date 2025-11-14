@@ -1,49 +1,87 @@
+{# registrarAfirmacao.html #}
 {% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
-{% load static %}
+{% load widget_tweaks %}
+{% load static %} 
 
 {% block title %}
-  Registrar Afirmação
+  Registrar Afirmação
 {% endblock %}
 
 {% block content_logado %}
-  <div class="container-fluid p-4 p-md-5 bg-white afirmacao-page-container">
-    <form method="POST">
-      {% csrf_token %}
+  <div class="container-fluid p-4 p-md-5 bg-white shadow-sm">
+    {% if messages %}
+        <div class="messages mb-4">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
-      <div class="d-flex justify-content-between align-items-start mb-5">
-        <h1 class="h1 fw-semibold afirmacao-title-color-new afirmacao-main-title">Afirmações Positivas</h1>
+    <form method="POST">
+      {% csrf_token %}
+      {{ formset.management_form }} 
 
-        <div class="d-flex align-items-center gap-2">
-          <label class="text-secondary fw-medium afirmacao-date-label">Data:</label>
+      <div class="d-flex justify-content-between align-items-start mb-5">
+                <!-- Mantive a classe gratidao-title-color (que define a cor) para consistência com o CSS existente -->
+                <h1 class="h1 fw-semibold gratidao-title-color">Afirmações Positivas</h1>
 
-          {% with is_disabled=form.data.value|yesno:'disabled,' %}
-            <input type="date" name="{{ form.data.name|default:'data' }}" value="{{ form.data.value|default:'' }}" class="date-input-placeholder form-control p-2 text-center afirmacao-date-input" {{ is_disabled }} />
-          {% endwith %}
-        </div>
-      </div>
+        <div class="d-flex align-items-center">
+          <label class="text-secondary fw-medium me-2 afirmacao-date-label">Data:</label>
 
-      <div class="text-center mx-auto mb-5 afirmacao-text-container">
-        <p class="h4 fw-medium afirmacao-text-color">Transforme seu dia com uma afirmação positiva.</p>
-        <p class="h5 fw-bold afirmacao-text-color mt-1">Escreva Aqui.</p>
-      </div>
+                    <!-- Usando a classe afirmacao-date-input para estilo no CSS -->
+                    <input type="text" value="{{ data_atual }}" class="form-control p-2 text-center afirmacao-date-input" disabled />
+        </div>
+      </div>
 
-      <div class="d-flex justify-content-center align-items-center gap-5 afirmacao-circle-group">
-        <div class="afirmacao-circle circle-blue"></div>
+      <div class="text-center mx-auto mb-5 afirmacao-text-container">
+        <p class="h4 fw-medium text-dark">Transforme seu dia com uma afirmação positiva.</p>
+        <p class="h5 fw-bold text-dark mt-1">Escreva Aqui (3 Afirmações).</p>
+      </div>
 
-        <div class="afirmacao-circle circle-pink position-relative p-4">
-          <textarea name="{{ form.conteudo.name|default:'conteudo' }}" id="{{ form.conteudo.id_for_label|default:'id_conteudo' }}" rows="8" class="form-control h-100 p-4 bg-transparent border-0 text-dark afirmacao-textarea" placeholder="Sua afirmação deve caber neste espaço..." required>{{ form.conteudo.value|default:'' }}</textarea>
+            <div class="d-flex flex-wrap justify-content-center align-items-center gap-4 py-3 affirmation-circles-wrapper afirmacao-circle-group">
+        
+                <div class="affirmation-circle affirmation-circle-blue position-relative p-4">
+                    <!-- O filtro |add_class agora funciona -->
+                    <div class="p-3 w-100 h-100 d-flex align-items-center">
+                        {{ formset.0.descricaoafirmacao|add_class:"form-control afirmacao-textarea" }}
+                    </div>
+          {% if formset.0.descricaoafirmacao.errors %}
+            <p class="position-absolute bottom-0 start-50 translate-middle-x text-danger small bg-white p-1 rounded shadow-sm text-nowrap afirmacao-error-message">
+                {{ formset.0.descricaoafirmacao.errors.0 }}
+            </p>
+          {% endif %}
+        </div>
 
-          {% if form.conteudo.errors %}
-            <p class="position-absolute bottom-0 text-danger small bg-white p-1 rounded afirmacao-error-message">{{ form.conteudo.errors.0 }}</p>
-          {% endif %}
-        </div>
+                <div class="affirmation-circle affirmation-circle-pink position-relative p-4">
+                    <div class="p-3 w-100 h-100 d-flex align-items-center">
+                        {{ formset.1.descricaoafirmacao|add_class:"form-control afirmacao-textarea" }}
+                    </div>
+          {% if formset.1.descricaoafirmacao.errors %}
+            <p class="position-absolute bottom-0 start-50 translate-middle-x text-danger small bg-white p-1 rounded shadow-sm text-nowrap afirmacao-error-message">
+                {{ formset.1.descricaoafirmacao.errors.0 }}
+            </p>
+          {% endif %}
+        </div>
 
-        <div class="afirmacao-circle circle-green"></div>
-      </div>
+                <div class="affirmation-circle affirmation-circle-green position-relative p-4">
+                    <div class="p-3 w-100 h-100 d-flex align-items-center">
+                        {{ formset.2.descricaoafirmacao|add_class:"form-control afirmacao-textarea" }}
+                    </div>
+          {% if formset.2.descricaoafirmacao.errors %}
+            <p class="position-absolute bottom-0 start-50 translate-middle-x text-danger small bg-white p-1 rounded shadow-sm text-nowrap afirmacao-error-message">
+                {{ formset.2.descricaoafirmacao.errors.0 }}
+            </p>
+          {% endif %}
+        </div>
+      </div>
 
-      <div class="d-flex justify-content-end pt-4 pe-5">
-        <button type="submit" class="btn-salvar-form-afirmacao-new btn btn-lg text-white fw-bold">SALVAR</button>
-      </div>
-    </form>
-  </div>
+      <div class="d-flex justify-content-end pt-4 pe-5">
+                <!-- Usando a classe btn-salvar-form-afirmacao-new para estilo no CSS -->
+                <button type="submit" class="btn-salvar-form-afirmacao-new btn btn-lg text-white fw-bold shadow" style="background-color: var(--lyfesync-red-salvar); border-color: var(--lyfesync-red-salvar);">SALVAR</button>
+      </div>
+    </form>
+  </div>
 {% endblock %}

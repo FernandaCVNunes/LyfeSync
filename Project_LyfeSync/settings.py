@@ -27,8 +27,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
-    'app_LyfeSync.apps.ApplyfesyncConfig',
+    'django_filters',
+
+    'django.contrib.humanize',
+    'widget_tweaks',
 
     'django.contrib.sites',
     'allauth',
@@ -36,7 +38,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     #'allauth.socialaccount.providers.facebook', não utilizarei por enquanto
-    'django_filters',
+    
+    'app_LyfeSync.apps.ApplyfesyncConfig',
 ]
 
 SITE_ID = 1
