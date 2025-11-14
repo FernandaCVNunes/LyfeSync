@@ -2,19 +2,20 @@
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta, date, datetime
 import csv
+import calendar
 from django.template.loader import render_to_string
 
 # Importando os Models reais necessários para as views de exportação
-from ..models import Gratidao, Afirmacao
+from ..models import Gratidao, Afirmacao, Humor, HumorTipo
 from ..forms import GratidaoForm, AfirmacaoForm, HumorForm, DicasForm
 
 # Importando a lógica auxiliar e os Mocks necessários
 from ._aux_logic import (
     _get_report_date_range, 
     get_habitos_e_acompanhamento,
-    Humor_mock # Usando o mock para simular o ORM de Humor
+    _get_humor_cor_classe,
 )
 
 # -----------------------------------------------------------
@@ -49,11 +50,11 @@ def exportar_habito_csv(request):
     response.write(u'\ufeff'.encode('utf8'))
 
     # Usa ponto e vírgula como delimitador para melhor compatibilidade com o Excel pt-BR
-    writer = csv.writer(response, delimiter=';') 
+    writer = csv.writer(response, delimiter=';')
 
     # 3. Escreve o cabeçalho: 'Hábito' + todas as datas formatadas
-    header_dates = [d.strftime('%d/%m/%Y') for d in dias_periodo]
-    writer.writerow(['ID Hábito', 'Nome do Hábito'] + header_dates)
+    #header_dates = [d.strftime('%d/%m/%Y') for d in dias_periodo]
+    writer.writerow(['ID', 'Data', 'Descrição'])
 
     # 4. Escreve os dados
     for habito in habitos_processados:
@@ -95,10 +96,17 @@ def exportar_habito_pdf(request):
     # Converte a lista de dicionários para uma estrutura mais simples para o template
     habitos_para_template = []
     for h in habitos_processados:
+        acompanhamento_map = h['acompanhamento']
+        
+        # NOVO: Cria uma lista de status ordenados para o template
+        status_ordenado = []
+        for dia in dias_periodo:
+            status = acompanhamento_map.get(dia)
+            status_ordenado.append(status)
+
         habitos_para_template.append({
             'nome': h['nome'],
-            # O template precisa de um método para buscar o item pela chave 'dia'
-            'acompanhamento': h['acompanhamento'] 
+            'status_diario': status_ordenado, # NOVO CAMPO: Lista ordenada
         })
         
     # Determinação da string do período
@@ -305,46 +313,37 @@ def exportar_afirmacao_pdf(request):
 
 @login_required(login_url='login')
 def exportar_humor_csv(request):
-    """Exporta os registros de humor do período selecionado para um arquivo CSV.
-    
-    NOTA: Usa Humor_mock (do _aux_logic) para simular a busca no ORM.
-    """
+    """Exporta os registros de humor (detalhados) para um arquivo CSV."""
     hoje = timezone.localdate()
-    # Usa a função auxiliar para definir o intervalo de datas
     data_inicio, data_fim, data_referencia, periodo, mes_param, ano_param = _get_report_date_range(request, hoje)
 
-    # 1. Busca os Registros de Humor (Usando MOCK)
-    registros_humor = Humor_mock.filter(
+    # 1. Busca os Registros de Humor (Usando ORM Real)
+    registros_humor = Humor.objects.select_related('estado').filter(
         usuario=request.user,
         data__gte=data_inicio,
         data__lte=data_fim
-    )
+    ).order_by('data_registro')
 
     # 2. Configura a resposta HTTP para CSV
-    filename = f"humor_{periodo}_{data_inicio.strftime('%Y%m%d')}_{data_fim.strftime('%Y%m%d')}.csv"
+    filename = f"humor_{data_inicio.strftime('%Y%m%d')}_{data_fim.strftime('%Y%m%d')}.csv"
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     
-    # Adiciona o BOM para garantir que caracteres especiais funcionem no Excel
     response.write(u'\ufeff'.encode('utf8'))
-
-    # Usa ponto e vírgula como delimitador para melhor compatibilidade com o Excel pt-BR
     writer = csv.writer(response, delimiter=';') 
 
     # 3. Escreve o cabeçalho
-    writer.writerow(['ID', 'Data', 'Nota do Humor (1-5)', 'Descrição', 'Fatores/Gatilhos', 'Data de Registro Completa'])
+    writer.writerow([
+        'ID', 'Data', 'Estado do Humor', 'Descrição', 'Data de Registro Completa'
+    ])
 
     # 4. Escreve os dados
     for r in registros_humor:
-        # Formata a nota para garantir que use vírgula no Excel (para pt-BR)
-        nota_formatada = f"{r.notahumor}".replace('.', ',')
-        
         writer.writerow([
             r.idhumor,
             r.data.strftime('%d/%m/%Y'),
-            nota_formatada, 
-            r.descricaohumor or '', # Garante string vazia se for None
-            r.fatores or '',
+            r.estado.estado if r.estado else 'N/A', 
+            r.descricaohumor or '',
             timezone.localtime(r.data_registro).strftime('%d/%m/%Y %H:%M:%S')
         ])
 
@@ -353,55 +352,82 @@ def exportar_humor_csv(request):
 
 @login_required(login_url='login')
 def exportar_humor_pdf(request):
-    """
-    Gera um relatório PDF (simulado via HTML formatado para impressão)
-    dos registros de humor do período selecionado.
-    
-    NOTA: Usa Humor_mock (do _aux_logic) para simular a busca no ORM.
-    """
+    """Gera um relatório PDF (via HTML) do Mood Tracker (tabela)."""
     hoje = timezone.localdate()
-    data_inicio, data_fim, data_referencia, periodo, mes_param, ano_param = _get_report_date_range(request, hoje)
-
-    # 1. Busca os Registros de Humor (Usando MOCK)
-    registros_humor = Humor_mock.filter(
+    # Força o período mensal para o relatório Mood Tracker
+    data_inicio, data_fim, data_referencia, periodo, mes_param, ano_param = _get_report_date_range(request, hoje, default_periodo='mensal')
+    
+    humor_tipos = HumorTipo.objects.all().order_by('id_tipo_humor')
+    
+    registros_humor = Humor.objects.select_related('estado').filter(
         usuario=request.user,
         data__gte=data_inicio,
         data__lte=data_fim
-    )
+    ).order_by('data')
 
-    # 2. Cálculos de Estatísticas (Média do Humor)
-    total_registros = len(registros_humor)
-    media_humor = None
-    if total_registros > 0:
-        soma_notas = sum(r.notahumor for r in registros_humor)
-        media_humor = soma_notas / total_registros
+    humor_por_dia = {}
+    for r in registros_humor:
+        if r.data.day not in humor_por_dia:
+            humor_por_dia[r.data.day] = r
 
-    # 3. Determinação da string do período
-    if periodo == 'mensal':
+    total_dias_marcados = len(humor_por_dia)
+    dados_relatorio = []
+    
+    for humor_tipo in humor_tipos:
+        dias_marcados = [
+            dia for dia, registro in humor_por_dia.items() 
+            if registro.estado.id_tipo_humor == humor_tipo.id_tipo_humor
+        ]
+        
+        num_marcacoes = len(dias_marcados)
+        porcentagem = 0.0
+        if total_dias_marcados > 0:
+            porcentagem = round((num_marcacoes / total_dias_marcados) * 100, 1)
+
+        dados_relatorio.append({
+            'tipo': humor_tipo, 
+            'cor_classe': _get_humor_cor_classe(humor_tipo.estado),
+            'dias_marcados': dias_marcados,
+            'porcentagem': f"{porcentagem:.1f}",
+        })
+
+        # 2. Cálculos de Estatísticas (Média do Humor)
+        total_registros = len(registros_humor)
+        media_humor = None
+        if total_registros > 0:
+            soma_notas = sum(r.notahumor for r in registros_humor)
+            media_humor = soma_notas / total_registros
+
+        # 3. Determinação da string do período
+        if periodo == 'mensal':
+            mes_extenso = data_referencia.strftime('%B').capitalize() 
+            periodo_str = f"Mensal: {mes_extenso} / {data_referencia.year}"
+        elif periodo == 'semanal':
+            periodo_str = f"Semanal: {data_inicio.strftime('%d/%m/%Y')} a {data_fim.strftime('%d/%m/%Y')}"
+        elif periodo == 'quinzenal':
+            periodo_str = f"Quinzenal: {data_inicio.strftime('%d/%m/%Y')} a {data_fim.strftime('%d/%m/%Y')}"
+        else:
+            periodo_str = f"Período Personalizado: {data_inicio.strftime('%d/%m/%Y')} a {data_fim.strftime('%d/%m/%Y')}"
+
+        ultimo_dia = calendar.monthrange(data_referencia.year, data_referencia.month)[1]
         mes_extenso = data_referencia.strftime('%B').capitalize() 
         periodo_str = f"Mensal: {mes_extenso} / {data_referencia.year}"
-    elif periodo == 'semanal':
-        periodo_str = f"Semanal: {data_inicio.strftime('%d/%m/%Y')} a {data_fim.strftime('%d/%m/%Y')}"
-    elif periodo == 'quinzenal':
-        periodo_str = f"Quinzenal: {data_inicio.strftime('%d/%m/%Y')} a {data_fim.strftime('%d/%m/%Y')}"
-    else:
-        periodo_str = f"Período Personalizado: {data_inicio.strftime('%d/%m/%Y')} a {data_fim.strftime('%d/%m/%Y')}"
 
-    context = {
-        'registros_humor': registros_humor,
-        'periodo_str': periodo_str,
-        'data_geracao': timezone.localtime(timezone.now()).strftime('%d/%m/%Y %H:%M'),
-        'total_registros': total_registros,
-        'media_humor': media_humor,
-        'usuario': request.user.username if request.user.is_authenticated else 'Usuário Não Autenticado',
-    }
+        context = {
+            'periodo_str': periodo_str,
+            'data_geracao': timezone.localtime(timezone.now()).strftime('%d/%m/%Y %H:%M'),
+            'total_dias_marcados': total_dias_marcados,
+            'ultimo_dia': ultimo_dia,
+            'dias_do_mes': list(range(1, ultimo_dia + 1)),
+            'dados_relatorio': dados_relatorio,
+            'usuario': request.user.username,
+        }
 
-    # Renderiza o template HTML (otimizado para PDF/impressão)
-    html_content = render_to_string('app_LyfeSync/relatorios/pdf_humor.html', context)
+        # Renderiza o template HTML (otimizado para PDF/impressão)
+        html_content = render_to_string('app_LyfeSync/relatorios/pdf_humor.html', context)
 
-    # Retorna o HTML com o Content-Type como PDF
-    filename = f"relatorio_humor_{data_inicio.strftime('%Y%m%d')}_{data_fim.strftime('%Y%m%d')}.pdf"
-    response = HttpResponse(html_content, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        filename = f"relatorio_humor_tracker_{data_referencia.strftime('%Y%m')}.pdf"
+        response = HttpResponse(html_content, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
-    return response
+        return response

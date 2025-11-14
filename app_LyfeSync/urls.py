@@ -33,7 +33,7 @@ from .views import (
     registrar_dica, admin_registrar_dica, 
     
     # Views de Relatório
-    relatorios, relatorio, 
+    relatorios, relatorio, _get_humor_cor_classe,
     relatorio_habito, relatorio_humor, relatorio_gratidao, relatorio_afirmacao,
     
     # Views de Exportação

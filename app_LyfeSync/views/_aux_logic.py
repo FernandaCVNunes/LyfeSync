@@ -13,41 +13,52 @@ from ..models import StatusDiario, HumorTipo
 # LÓGICA AUXILIAR PRINCIPAL
 # -------------------------------------------------------------------
 
-def _get_report_date_range(request, hoje):
-    """Auxiliary function to determine the date range (start, end, reference data)
-    based on GET parameters (periodo, mes, ano).
-    
-    Retorna: data_inicio, data_fim, data_referencia, periodo, mes_param, ano_param
+def _get_report_date_range(request, hoje, default_periodo=None):
     """
-    periodo = request.GET.get('periodo', 'mensal')
+    Calcula o intervalo de datas (inicio e fim) com base nos parâmetros GET.
+    """
     
+    # 1. Definir o período (PRIORIZE ESTA LÓGICA DE DEFINIÇÃO DO PERÍODO)
+    if default_periodo in ['mensal', 'semanal', 'anual']:
+        periodo = default_periodo
+    else:
+        periodo = request.GET.get('periodo', 'mensal') 
+
+    # 2. Obter mês e ano para referência
     try:
         mes_param = int(request.GET.get('mes', hoje.month))
-        ano_param = int(request.GET.get('ano', hoje.year))
-        data_referencia = hoje.replace(day=1, month=mes_param, year=ano_param)
     except (ValueError, TypeError):
         mes_param = hoje.month
+        
+    try:
+        ano_param = int(request.GET.get('ano', hoje.year))
+    except (ValueError, TypeError):
         ano_param = hoje.year
-        data_referencia = hoje.replace(day=1, month=mes_param, year=ano_param)
 
+    # 3. Criar a data de referência (CORREÇÃO DO ERRO 'utcoffset')
+    try:
+        data_referencia = date(year=ano_param, month=mes_param, day=1)
+    except ValueError:
+        data_referencia = hoje
+    
+    # 4. Cálculo do Intervalo (NÃO PODE HAVER RECURSÃO AQUI)
     if periodo == 'semanal':
-        data_inicio_param = request.GET.get('data_inicio')
-        if data_inicio_param:
-             data_inicio = datetime.strptime(data_inicio_param, '%Y-%m-%d').date()
-        else:
-             # Começa no último domingo (se hoje for domingo, começa nele)
-             data_inicio = hoje - timedelta(days=hoje.weekday())
-        data_fim = data_inicio + timedelta(days=6)
+        inicio_semana = hoje - timedelta(days=hoje.weekday())
+        data_inicio = inicio_semana
+        data_fim = inicio_semana + timedelta(days=6)
         
-    elif periodo == 'quinzenal':
-        data_inicio = data_referencia
-        data_fim = data_inicio + timedelta(days=14)
+    elif periodo == 'anual':
+        data_inicio = data_referencia.replace(month=1, day=1)
+        data_fim = data_referencia.replace(month=12, day=31)
         
-    else: # Default: 'mensal'
+    # 'elif periodo == 'mensal': ou fallback
+    else: 
+        _, ultimo_dia_mes = calendar.monthrange(data_referencia.year, data_referencia.month)
         data_inicio = data_referencia.replace(day=1)
-        ultimo_dia = calendar.monthrange(ano_param, mes_param)[1]
-        data_fim = data_referencia.replace(day=ultimo_dia)
-        
+        data_fim = data_referencia.replace(day=ultimo_dia_mes)
+        periodo = 'mensal'
+
+    # 5. RETORNO FINAL
     return data_inicio, data_fim, data_referencia, periodo, mes_param, ano_param
 
 # -------------------------------------------------------------------
@@ -66,6 +77,19 @@ def get_humor_map():
         'Ruim': '/static/icons/ruim.png',
         'Péssimo': '/static/icons/pessimo.png',
     }
+
+def _get_humor_cor_classe(estado):
+    """Mapeia o estado do HumorTipo para uma classe CSS para colorir (relatórios)."""
+    # Mapeamento do nome do estado (string) para a classe CSS (para estilização)
+    mapping = {
+        'Excelente': 'humor-excelente',
+        'Bom': 'humor-bom',
+        'Neutro': 'humor-neutro',
+        'Ruim': 'humor-ruim',
+        'Péssimo': 'humor-pessimo',
+        # Adicione outros mapeamentos conforme seus estados de humor em HumorTipo
+    }
+    return mapping.get(estado, 'bg-light')
 
 
 # -------------------------------------------------------------------
@@ -191,7 +215,3 @@ class HumorManager:
 
 # Instância do gerenciador mock de Humor
 Humor_mock = HumorManager()
-
-# -------------------------------------------------------------------
-# FIM DA LÓGICA AUXILIAR
-# -------------------------------------------------------------------

@@ -1,87 +1,27 @@
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <title>Relatório de Humor - {{ periodo_str }}</title>
-    <!-- Estilos otimizados para PDF/Impressão -->
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            font-size: 10pt;
-            margin: 0;
-            padding: 0;
-            color: #333;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #f0f8ff; /* Fundo mais claro/azul */
-            border-bottom: 2px solid #007bff; /* Azul para Humor */
-        }
-        .header h1 {
-            color: #007bff;
-            margin: 5px 0;
-            font-size: 16pt;
-        }
-        .header p {
-            font-size: 11pt;
-            color: #555;
-            margin: 0;
-        }
-        .summary {
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #dee2e6;
-            background-color: #e9f5ff; /* Azul claro */
-            font-size: 11pt;
-            display: flex;
-            justify-content: space-around;
-        }
-        .summary-item {
-            text-align: center;
-            flex-grow: 1;
-        }
-        h2 {
-            font-size: 14pt;
-            color: #495057;
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 5px;
-            margin-top: 25px;
-        }
+        /* [Seção de Estilos CSS omitida por brevidade, assumindo que você manterá os seus estilos] */
+        body { font-family: 'Arial', sans-serif; font-size: 10pt; margin: 0; padding: 0; color: #333; }
+        .header { text-align: center; margin-bottom: 20px; padding: 10px; background-color: #f0f8ff; border-bottom: 2px solid #007bff; }
+        .header h1 { color: #007bff; margin: 5px 0; font-size: 16pt; }
+        .header p { font-size: 11pt; color: #555; margin: 0; }
+        .summary { margin-bottom: 20px; padding: 10px; border: 1px solid #dee2e6; background-color: #e9f5ff; font-size: 11pt; display: flex; justify-content: space-around; }
+        .summary-item { text-align: center; flex-grow: 1; }
+        h2 { font-size: 14pt; color: #495057; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 25px; }
         /* Estilos da Lista de Registros */
-        .registro-humor {
-            border: 1px solid #cce5ff; /* Borda levemente azulada */
-            padding: 10px;
-            margin-bottom: 15px;
-            border-radius: 4px;
-            background-color: #f8fafd;
-        }
-        .registro-humor strong {
-            color: #007bff;
-        }
-        .registro-humor p {
-            margin: 5px 0;
-            line-height: 1.4;
-        }
-        .detalhe-fator {
-            margin-top: 8px;
-            font-size: 9.5pt;
-            color: #6c757d;
-            border-left: 3px solid #007bff;
-            padding-left: 10px;
-            background-color: #f0f0f5;
-        }
-        .footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            font-size: 8pt;
-            color: #888;
-            padding: 5px 0;
-        }
+        .registro-humor { border: 1px solid #cce5ff; padding: 10px; margin-bottom: 15px; border-radius: 4px; background-color: #f8fafd; }
+        .registro-humor strong { color: #007bff; }
+        .registro-humor p { margin: 5px 0; line-height: 1.4; }
+        .detalhe-fator { margin-top: 8px; font-size: 9.5pt; color: #6c757d; border-left: 3px solid #007bff; padding-left: 10px; background-color: #f0f0f5; }
+        .footer { position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; font-size: 8pt; color: #888; padding: 5px 0; }
+        /* Adicione estilos para que a div.summary funcione bem em PDF (mantenha flex, mas garanta largura) */
+        .summary { display: -webkit-box; display: -webkit-flex; display: flex; width: 100%; }
+        .summary-item { -webkit-box-flex: 1; -webkit-flex-grow: 1; flex-grow: 1; }
     </style>
 </head>
 <body>
@@ -107,17 +47,17 @@
     {% if registros_humor %}
         {% for registro in registros_humor %}
         <div class="registro-humor">
-            <p><strong>Data:</strong> {{ registro.data.strftime('%d/%m/%Y') }}</p>
+            <p><strong>Data:</strong> {{ registro.data|date:"d/m/Y" }}</p>
             <p><strong>Humor (Nota):</strong> <span style="font-size: 12pt; color: #ffc107;">★ {{ registro.notahumor|floatformat:1 }} / 5.0</span></p>
             <p><strong>Descrição:</strong> {{ registro.descricaohumor|default:"Nenhuma descrição fornecida." }}</p>
 
             {% if registro.fatores %}
             <div class="detalhe-fator">
-                <strong>Fatores Identificados:</strong> {{ registro.fatores }}
+                <strong>Fatores Identificados:</strong> {{ registro.fatores|join:", " }}
             </div>
             {% endif %}
             
-            <p style="font-size: 8pt; text-align: right; color: #aaa;">Registrado em: {{ registro.data_registro.strftime('%d/%m/%Y %H:%M:%S') }}</p>
+            <p style="font-size: 8pt; text-align: right; color: #aaa;">Registrado em: {{ registro.data_registro|date:"d/m/Y H:i:s" }}</p>
         </div>
         {% endfor %}
     {% else %}
@@ -125,7 +65,7 @@
     {% endif %}
 
     <div class="footer">
-        Gerado por LyfeSync em {{ data_geracao }}
+        Gerado por LyfeSync em {{ data_geracao|date:"d/m/Y H:i" }}
     </div>
 
 </body>

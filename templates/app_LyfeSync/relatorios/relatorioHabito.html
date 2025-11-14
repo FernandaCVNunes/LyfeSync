@@ -1,3 +1,4 @@
+{#relatórioHabito.html#}
 {% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
 {% load static %}
 {% load custom_filters %}
@@ -13,144 +14,202 @@
 {% endblock %}
 
 {% block content_logado %}
-  <div class="container my-5">
-    <div class="row mb-4 report-header habitos-header">
-      <div class="col-12 col-md-8">
-        <h1 class="report-title">Relatório de Hábitos</h1>
-        <p class="lead text-muted">Acompanhamento Mensal dos seus Hábitos Realizados.</p>
-      </div>
-      <div class="col-12 col-md-4 text-md-end d-flex align-items-center justify-content-md-end">
-        <h3 class="mb-0 text-primary">{{ mes_extenso }} / {{ ano_selecionado }}</h3>
-      </div>
-    </div>
+    <div class="container my-5">
+        <div class="row mb-4 report-header habitos-header">
+            <div class="col-12 col-md-8">
+                <h1 class="report-title">Relatório de Hábitos</h1>
+                <p class="lead text-muted">Acompanhamento Mensal dos seus Hábitos Realizados.</p>
+            </div>
+            <div class="col-12 col-md-4 text-md-end d-flex align-items-center justify-content-md-end">
+                <h3 class="mb-0 text-primary">{{ mes_extenso }} / {{ ano_selecionado }}</h3>
+            </div>
+        </div>
 
-    <!-- Seletor de Mês/Ano (Bootstrap Card) -->
-    <div class="card shadow-sm mb-5 month-selector-card">
-      <div class="card-body p-3">
-        <form method="get" class="row g-3 align-items-end" action="{% url 'relatorio_habito' %}">
-          <div class="col-12 col-sm-6 col-md-4">
-            <label for="id_mes" class="form-label">Selecionar Mês:</label>
-            <select name="mes" id="id_mes" class="form-select">
-              {% for num, nome in meses %}
-                <option value="{{ num }}" {% if num == mes_selecionado %}selected{% endif %}>
-                  {{ nome }}
-                </option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="col-12 col-sm-6 col-md-4">
-            <label for="id_ano" class="form-label">Selecionar Ano:</label>
-            <!-- Adiciona o valor default do ano se a view não o fez (embora a view o faça) -->
-            <input type="number" name="ano" id="id_ano" class="form-control" value="{{ ano_selecionado|default:'' }}" min="2020" max="9999">
-          </div>
-          <div class="col-12 col-md-4">
-            <button type="submit" class="btn btn-primary w-100">Gerar Relatório</button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <!-- Seletor de Mês/Ano (Bootstrap Card) -->
+        <div class="card shadow-sm mb-5 month-selector-card">
+            <div class="card-body p-3">
+                <form method="get" class="row g-3 align-items-end" action="{% url 'relatorio_habito' %}">
+                <div class="col-12 col-sm-6 col-md-4">
+                    <label for="id_mes" class="form-label">Selecionar Mês:</label>
+                    <select name="mes" id="id_mes" class="form-select">
+                    {% for num, nome in meses %}
+                        <option value="{{ num }}" {% if num == mes_selecionado %}selected{% endif %}>
+                        {{ nome }}
+                        </option>
+                    {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-sm-6 col-md-4">
+                    <label for="id_ano" class="form-label">Selecionar Ano:</label>
+                    <!-- Adiciona o valor default do ano se a view não o fez (embora a view o faça) -->
+                    <input type="number" name="ano" id="id_ano" class="form-control" value="{{ ano_selecionado|default:'' }}" min="2020" max="9999">
+                </div>
+                <div class="col-12 col-md-4">
+                    <button type="submit" class="btn btn-primary w-100">Gerar Relatório</button>
+                </div>
+                </form>
+            </div>
+        </div>
 
-    {% if not dados_relatorio %}
-      <div class="alert alert-info text-center" role="alert">
-        Nenhum hábito ativo ou registro encontrado para {{ mes_extenso }} / {{ ano_selecionado }}.
-      </div>
-    {% else %}
-      <!-- Tabela do Relatório (Habitos Tracker) - Responsiva -->
-      <div class="table-responsive">
-        <table class="table table-bordered table-striped table-relatorio table-habitos align-middle shadow-sm">
-          <thead>
-            <tr class="text-uppercase">
-              <th scope="col" class="text-start" style="min-width: 180px;">Hábito</th>
-              <!-- Cabeçalho dos dias (1 a 31) -->
-              {% for dia in dias_do_mes %}
-                <th scope="col" style="min-width: 30px;">{{ dia }}</th>
-              {% endfor %}
-              <!-- Preenchimento das colunas do dia 31 para meses menores -->
-              {% with max_dias=31 %}
-                {% for i in max_dias|make_range %}
-                  {% if i > ultimo_dia %}
-                    <th scope="col" class="bg-light text-muted" style="min-width: 30px;"></th>
-                  {% endif %}
-                {% endfor %}
-              {% endwith %}
-              <th scope="col" class="resultado-celula-habito" style="min-width: 90px;">Resultado (dias)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Linhas do Relatório por Hábito -->
-            {% for dado in dados_relatorio %}
-            <tr>
-              <!-- Coluna Hábito -->
-              <th scope="row" class="text-start p-2 habito-nome">
-                {{ dado.nome }}
-              </th>
-              
-              <!-- Colunas dos Dias (1 a N) -->
-              {% for dia in dias_do_mes %}
-                <td class="celula-habito">
-                  {% if dia in dado.dias_concluidos %}
-                    <!-- Marcação de conclusão do hábito -->
-                    <div class="habito-celula-marcada"></div>
-                  {% endif %}
-                </td>
-              {% endfor %}
-              
-              <!-- Células vazias para preencher até o dia 31 (meses com menos de 31 dias) -->
-              {% with max_dias=31 %}
-                {% for i in max_dias|make_range %}
-                  {% if i > ultimo_dia %}
-                    <td class="bg-light"></td>
-                  {% endif %}
-                {% endfor %}
-              {% endwith %}
-
-              <!-- Coluna Resultado (Total de dias concluídos) -->
-              <td class="resultado-celula-habito text-primary">
-                {{ dado.total_concluido }}
-              </td>
-            </tr>
-            {% endfor %}
-            
-            <!-- Linhas Vazias de Preenchimento (Opcional, mas mantém a estética da imagem) -->
-            {% with num_habitos_exibidos=dados_relatorio|length %}
-              {% for i in 5|make_range %}
-                {% if i >= num_habitos_exibidos %}
-                  <tr class="vazio">
-                      <td class="text-start text-muted">--</td>
-                      {% for dia in dias_do_mes %}
-                          <td class="bg-light"></td>
-                      {% endfor %}
-                      <!-- Células vazias para preencher até o dia 31 -->
-                      {% with max_dias=31 %}
-                        {% for j in max_dias|make_range %}
-                          {% if j > ultimo_dia %}
-                            <td class="bg-light"></td>
-                          {% endif %}
+        {% if not dados_relatorio %}
+            <div class="alert alert-info text-center" role="alert">
+                Nenhum hábito ativo ou registro encontrado para {{ mes_extenso }} / {{ ano_selecionado }}.
+            </div>
+        {% else %}
+            <!-- Tabela do Relatório (Habitos Tracker) - Responsiva -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped table-relatorio table-habitos align-middle shadow-sm">
+                <thead>
+                    <tr class="text-uppercase">
+                    <th scope="col" class="text-start" style="min-width: 180px;">Hábito</th>
+                    <!-- Cabeçalho dos dias (1 a 31) -->
+                    {% for dia in dias_do_mes %}
+                        <th scope="col" style="min-width: 30px;">{{ dia }}</th>
+                    {% endfor %}
+                    <!-- Preenchimento das colunas do dia 31 para meses menores -->
+                    {% with max_dias=31 %}
+                        {% for i in max_dias|make_range %}
+                        {% if i > ultimo_dia %}
+                            <th scope="col" class="bg-light text-muted" style="min-width: 30px;"></th>
+                        {% endif %}
                         {% endfor %}
-                      {% endwith %}
-                      <td class="text-muted">0</td>
-                  </tr>
-                {% endif %}
-              {% endfor %}
-            {% endwith %}
-            
-          </tbody>
-        </table>
-      </div>
-    {% endif %}
+                    {% endwith %}
+                    <th scope="col" class="resultado-celula-habito" style="min-width: 90px;">Resultado (dias)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Linhas do Relatório por Hábito -->
+                    {% for dado in dados_relatorio %}
+                    <tr>
+                    <!-- Coluna Hábito -->
+                    <th scope="row" class="text-start p-2 habito-nome">
+                        {{ dado.nome }}
+                    </th>
+                    
+                    <!-- Colunas dos Dias (1 a N) -->
+                    {% for dia in dias_do_mes %}
+                        <td class="celula-habito">
+                        {% if dia in dado.dias_concluidos %}
+                            <!-- Marcação de conclusão do hábito -->
+                            <div class="habito-celula-marcada"></div>
+                        {% endif %}
+                        </td>
+                    {% endfor %}
+                    
+                    <!-- Células vazias para preencher até o dia 31 (meses com menos de 31 dias) -->
+                    {% with max_dias=31 %}
+                        {% for i in max_dias|make_range %}
+                        {% if i > ultimo_dia %}
+                            <td class="bg-light"></td>
+                        {% endif %}
+                        {% endfor %}
+                    {% endwith %}
 
-    <!-- Botões de Ação -->
-    <div class="d-flex justify-content-between mt-5">
-      <!-- Botão Voltar (pode usar 'javascript:history.back()' ou uma URL específica) -->
-      <button onclick="window.history.back()" class="btn btn-outline-secondary btn-lg shadow-sm">
-        <i class="bi bi-arrow-left me-2"></i> Voltar à Página Anterior
-      </button>
+                    <!-- Coluna Resultado (Total de dias concluídos) -->
+                    <td class="resultado-celula-habito text-primary">
+                        {{ dado.total_concluido }}
+                    </td>
+                    </tr>
+                    {% endfor %}
+                    
+                    <!-- Linhas Vazias de Preenchimento (Opcional, mas mantém a estética da imagem) -->
+                    {% with num_habitos_exibidos=dados_relatorio|length %}
+                    {% for i in 5|make_range %}
+                        {% if i >= num_habitos_exibidos %}
+                        <tr class="vazio">
+                            <td class="text-start text-muted">--</td>
+                            {% for dia in dias_do_mes %}
+                                <td class="bg-light"></td>
+                            {% endfor %}
+                            <!-- Células vazias para preencher até o dia 31 -->
+                            {% with max_dias=31 %}
+                                {% for j in max_dias|make_range %}
+                                {% if j > ultimo_dia %}
+                                    <td class="bg-light"></td>
+                                {% endif %}
+                                {% endfor %}
+                            {% endwith %}
+                            <td class="text-muted">0</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                    {% endwith %}
+                    
+                </tbody>
+                </table>
+            </div>
+        {% endif %}
 
-      <!-- Botão Alterar Relatório (Apontando para a URL solicitada) -->
-      <!-- O 'habito' aqui corresponde ao `name='habito'` na sua configuração de urls. -->
-      <a href="{% url 'habito' %}" class="btn btn-primary text-white btn-lg shadow-sm">
-        <i class="bi bi-gear me-2"></i> Alterar Hábitos
-      </a>
+        <!-- Botões de Ação -->
+        <div class="d-flex justify-content-between mt-5">
+            <!-- Botão Voltar (pode usar 'javascript:history.back()' ou uma URL específica) -->
+            <button onclick="window.history.back()" class="btn btn-outline-secondary btn-lg shadow-sm">
+                <i class="bi bi-arrow-left me-2"></i> Voltar à Página Anterior
+            </button>
+
+            <!-- Botão Exportar csv e pdf -->
+            <div class="btn-group shadow-sm" role="group">
+
+                <button type="button" class="btn btn-success btn-lg dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-download me-2"></i> Exportar
+                </button>
+
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" href="#" id="export-pdf-btn" data-url="{% url 'exportar_habito_pdf' %}">
+                            PDF
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#" id="export-csv-btn" data-url="{% url 'exportar_habito_csv' %}">
+                            CSV
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Botão Alterar Relatório (Apontando para a URL solicitada) -->
+            <!-- O 'habito' aqui corresponde ao `name='habito'` na sua configuração de urls. -->
+            <a href="{% url 'habito' %}" class="btn btn-primary text-white btn-lg shadow-sm">
+                <i class="bi bi-gear me-2"></i> Alterar Hábitos
+            </a>
+        </div>
     </div>
-  </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const mesSelect = document.getElementById('id_mes');
+    const anoInput = document.getElementById('id_ano');
+    const pdfBtn = document.getElementById('export-pdf-btn');
+    const csvBtn = document.getElementById('export-csv-btn');
+
+    function updateExportLinks() {
+        // Pega os valores atuais do seletor de Mês e Ano
+        const mes = mesSelect.value;
+        const ano = anoInput.value;
+
+        // Cria a string de query com os parâmetros mes e ano
+        const queryString = `?mes=${mes}&ano=${ano}`;
+
+        // Atualiza o link do PDF
+        const pdfUrlBase = pdfBtn.getAttribute('data-url');
+        pdfBtn.href = pdfUrlBase + queryString;
+
+        // Atualiza o link do CSV
+        const csvUrlBase = csvBtn.getAttribute('data-url');
+        csvBtn.href = csvUrlBase + queryString;
+    }
+
+    // Chama a função ao carregar a página
+    updateExportLinks();
+
+    // Adiciona event listeners para atualizar os links se o mês ou ano mudar
+    // (Embora o relatório só gere ao clicar em "Gerar Relatório", 
+    // é uma boa prática manter a URL do export coerente com os campos)
+    mesSelect.addEventListener('change', updateExportLinks);
+    anoInput.addEventListener('change', updateExportLinks);
+});
+</script>
 {% endblock %}

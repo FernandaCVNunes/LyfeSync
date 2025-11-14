@@ -1,3 +1,4 @@
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -116,12 +117,13 @@
                     {% endfor %}
                 </tr>
             </thead>
+            
             <tbody>
                 {% for habito in habitos %}
-                <tr>
-                    <td class="habito-nome">{{ habito.nome }}</td>
-                    {% for dia in dias_periodo %}
-                        {% with status=habito.acompanhamento|get_item:dia %}
+                    <tr>
+                        <td class="habito-nome">{{ habito.nome }}</td>
+                        
+                        {% for status in habito.status_diario %} 
                             {% if status == True %}
                                 <td class="concluido">✔</td>
                             {% elif status == False %}
@@ -129,9 +131,8 @@
                             {% else %}
                                 <td class="vazio">-</td>
                             {% endif %}
-                        {% endwith %}
-                    {% endfor %}
-                </tr>
+                        {% endfor %}
+                    </tr>
                 {% endfor %}
             </tbody>
         </table>

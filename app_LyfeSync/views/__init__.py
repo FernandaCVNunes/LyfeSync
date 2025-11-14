@@ -8,7 +8,8 @@ from ._aux_logic import (
     get_humor_map,
     _get_checked_days_for_last_7_days,
     get_habitos_e_acompanhamento,
-    Humor_mock # Usado em relatorio_humor
+    Humor_mock,
+    _get_humor_cor_classe
 )
 
 # -------------------------------------------------------------------

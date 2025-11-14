@@ -12,7 +12,7 @@ from django.template.loader import render_to_string
 from ..forms import GratidaoForm, AfirmacaoForm, HumorForm, DicasForm
 from ..models import Gratidao, Afirmacao, Humor, HumorTipo, Dicas, Habito, StatusDiario 
 # Importando a função utilitária do arquivo auxiliar
-from ._aux_logic import get_humor_map 
+from ._aux_logic import get_humor_map, _get_humor_cor_classe  
 
 # Configuração de locale para formatação de data/mês em português
 try:

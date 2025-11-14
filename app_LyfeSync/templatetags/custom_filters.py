@@ -31,3 +31,8 @@ def first_word(value):
     if not isinstance(value, str):
         return value
     return value.split(' ')[0]
+
+@register.filter(name='get_item') 
+def get_item(dictionary, key):
+    """Permite acessar o valor de um dicionário usando uma variável como chave."""
+    return dictionary.get(key)

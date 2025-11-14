@@ -7,11 +7,11 @@ import calendar
 from datetime import date
 
 # Importando os Models reais necessários para as views de relatório
-from ..models import Gratidao, Afirmacao, Habito, StatusDiario 
+from ..models import Gratidao, Afirmacao, Habito, StatusDiario, Humor, HumorTipo 
 from ..forms import GratidaoForm, AfirmacaoForm, HumorForm, DicasForm
 
 # Importando a lógica auxiliar
-from ._aux_logic import _get_report_date_range, Humor_mock, get_humor_map 
+from ._aux_logic import _get_report_date_range, _get_humor_cor_classe 
 
 
 # -------------------------------------------------------------------
@@ -206,65 +206,69 @@ def relatorio_afirmacao(request):
 
 @login_required(login_url='login')
 def relatorio_humor(request):
-    """Página de Relatório Específico de Humor.
-    Exibe os registros de humor e estatísticas do período selecionado.
-    
-    NOTA: Utiliza Humor_mock para simular a consulta ao ORM.
-    """
+    """Página de Relatório Específico de Humor, usando a estrutura Mood Tracker."""
     hoje = timezone.localdate()
     
-    # 1. Definição do Intervalo de Tempo usando função auxiliar
-    data_inicio, data_fim, data_referencia, periodo, mes_param, ano_param = _get_report_date_range(request, hoje)
+    # 1. Definição do Intervalo de Tempo (Sempre Mensal para este relatório)
+    data_inicio, data_fim, data_referencia, periodo, mes_param, ano_param = _get_report_date_range(request, hoje, default_periodo='mensal')
     
-    # 2. Busca dos Registros de Humor (Usando MOCK)
-    registros_humor = Humor_mock.filter(
+    # 2. Busca dos Tipos de Humor (necessário para as 5 linhas da tabela)
+    # Garante 5 tipos: Excelente(5.0) a Péssimo(1.0). Se necessário, adicione um campo de ordenação.
+    humor_tipos = HumorTipo.objects.all().order_by('id_tipo_humor') # Use a ordem que desejar
+    
+    # 3. Busca dos Registros de Humor do período
+    # Usamos select_related para buscar o tipo de humor junto, otimizando o acesso ao .estado.icone
+    registros_humor = Humor.objects.select_related('estado').filter(
         usuario=request.user,
         data__gte=data_inicio,
         data__lte=data_fim
-    )
-    
-    if isinstance(registros_humor, list):
-        # Ordena pelo campo 'data' (inversamente) e depois por 'idhumor' (inversamente)
-        registros_humor = sorted(
-            registros_humor, 
-            key=lambda r: (r.data, r.idhumor), 
-            reverse=True
-        )
+    ).order_by('data')
 
-    # 3. Processamento de Estatísticas
-    total_registros = len(registros_humor)
-    media_humor = 0
-    if total_registros > 0:
-        soma_notas = sum(r.notahumor for r in registros_humor)
-        media_humor = soma_notas / total_registros
-
-    # Mapeia as notas para nomes de humor (ex: 5 -> 'Excelente')
-    humor_map = get_humor_map()
+    # Mapeamento do dia do mês para o registro de humor (evita duplicidade de dias)
+    humor_por_dia = {}
+    for r in registros_humor:
+        if r.data.day not in humor_por_dia:
+            humor_por_dia[r.data.day] = r
+            
+    # 4. Processamento dos Dados para a Tabela
+    total_dias_marcados = len(humor_por_dia)
+    dados_relatorio = []
     
-    # 4. Formatação do Contexto 
-    if periodo == 'mensal':
-        mes_extenso = data_referencia.strftime('%B').capitalize()
-        periodo_str = f"Mensal: {mes_extenso} / {data_referencia.year}"
-    elif periodo == 'semanal':
-        periodo_str = f"Semanal: {data_inicio.strftime('%d/%m')} a {data_fim.strftime('%d/%m')} ({data_fim.year})"
-    elif periodo == 'quinzenal':
-        periodo_str = f"Quinzenal: {data_inicio.strftime('%d/%m')} a {data_fim.strftime('%d/%m')} ({data_fim.year})"
-    else:
-        periodo_str = "Período Inválido"
+    for humor_tipo in humor_tipos: # Itera sobre todos os tipos de humor (5 linhas)
+        
+        # Lista dos dias em que ESTE tipo de humor foi marcado
+        dias_marcados = [
+            dia for dia, registro in humor_por_dia.items() 
+            if registro.estado.id_tipo_humor == humor_tipo.id_tipo_humor
+        ]
+        
+        num_marcacoes = len(dias_marcados)
+        porcentagem = 0.0
+        if total_dias_marcados > 0:
+            porcentagem = round((num_marcacoes / total_dias_marcados) * 100, 1)
+
+        dados_relatorio.append({
+            'tipo': humor_tipo, 
+            # ADICIONE A PROPRIEDADE 'cor_classe' AO SEU MODELO HumorTipo (ou mapeie aqui)
+            # Como você não forneceu a classe no modelo, vou mapear a partir do 'estado'
+            'cor_classe': _get_humor_cor_classe(humor_tipo.estado), 
+            'dias_marcados': dias_marcados,
+            'porcentagem': f"{porcentagem:.1f}",
+        })
+
+    # 5. Formatação do Contexto
+    ultimo_dia = calendar.monthrange(data_referencia.year, data_referencia.month)[1]
+    mes_extenso = data_referencia.strftime('%B').capitalize()
 
     context = {
-        'titulo': 'Relatório de Humor',
-        'tipo_relatorio': 'Registros de Humor',
-        'registros_humor': registros_humor,
-        'total_registros': total_registros,
-        'media_humor': round(media_humor, 2) if media_humor else 0,
-        'humor_map': humor_map,
+        'hoje': hoje,
         'meses': [(i, calendar.month_name[i].capitalize()) for i in range(1, 13)],
+        'mes_extenso': mes_extenso,
         'mes_selecionado': mes_param,
         'ano_selecionado': ano_param,
-        'periodo_selecionado': periodo,
-        'data_inicio': data_inicio.strftime('%Y-%m-%d'), 
-        'data_fim': data_fim.strftime('%Y-%m-%d'), 
-        'periodo_str': periodo_str, 
+        'ultimo_dia': ultimo_dia,
+        'dias_do_mes': list(range(1, ultimo_dia + 1)),
+        'dados_relatorio': dados_relatorio,
+        'total_dias_marcados': total_dias_marcados,
     }
     return render(request, 'app_LyfeSync/relatorios/relatorioHumor.html', context)
