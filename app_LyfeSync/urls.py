@@ -10,7 +10,7 @@ from .views import (
     gratidao, registrar_gratidao, alterar_gratidao,delete_gratidao,
     afirmacao, registrar_afirmacao, alterar_afirmacao, delete_afirmacao,
     relatorios, relatorio_habito, relatorio_humor, relatorio_gratidao, relatorio_afirmacao,
-    conta, configuracoes_conta, registrar_dica
+    conta, configuracoes_conta, registrar_dica, excluir_conta
 )
 #from django.contrib.auth import views as auth_views
 
@@ -77,6 +77,7 @@ urlpatterns = [
     # -------------------------------------------------------------------
     path('conta/', conta, name='conta'),
     path('configuracoes/', configuracoes_conta, name='configuracoes_conta'),
+    path('configuracoes/excluir-conta/', excluir_conta, name='excluir_conta'),
     path('dicas/registrar/', registrar_dica, name='registrar_dica'),
     
     # -------------------------------------------------------------------

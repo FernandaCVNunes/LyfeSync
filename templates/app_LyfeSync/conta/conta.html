@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block content_logado %}
-  <div class="lyfesync-content-area">
+  <div class="lyfesync-content-area custom-content-area"> {# Adicionado classe custom-content-area para estilo no CSS #}
     <div class="d-flex w-100 flex-grow-1 p-4">
       <main class="main-content flex-grow-1">
         <h2 class="mb-4 text-primary">Configurações da Conta</h2>
@@ -25,7 +25,7 @@
         <div class="row">
           {# Seção de Navegação (Menu Lateral na página de Conta) #}
           <div class="col-md-3">
-            <div class="list-group sidebar-menu-conta">
+            <div class="list-group sidebar-menu-conta custom-sidebar"> {# Adicionado custom-sidebar para estilo no CSS #}
               <a href="#perfil" class="list-group-item list-group-item-action active"><i class="fas fa-user me-2"></i> Perfil</a>
               <a href="#seguranca" class="list-group-item list-group-item-action"><i class="fas fa-shield-alt me-2"></i> Segurança</a>
               <a href="#dados" class="list-group-item list-group-item-action"><i class="fas fa-database me-2"></i> Dados e Privacidade</a>
@@ -91,27 +91,239 @@
                   {% endif %}
                   {# FIM CAMPO TIPO DE USUÁRIO #}
 
-                  <button type="submit" class="btn btn-primary mt-3">Salvar Alterações</button>
+                  <button type="submit" name="update_perfil" class="btn btn-primary mt-3">Salvar Alterações</button>
                 </form>
               </div>
             </div>
 
-            {# Futuras Seções (Segurança e Dados) seriam adicionadas aqui com os respectivos IDs #}
+            {# NOVO: Seção de Segurança (Alteração de Senha) #}
             <div class="card shadow-sm mb-4" id="seguranca" style="display:none;">
               <div class="card-header bg-light">
-                <h5 class="mb-0">Segurança da Conta</h5>
+                <h5 class="mb-0">Segurança da Conta - Alterar Senha</h5>
               </div>
               <div class="card-body">
-                <p>Conteúdo para alteração de senha, autenticação de dois fatores, etc.</p>
+                <form method="POST">
+                  {% csrf_token %}
+                  
+                  <div class="alert alert-info" role="alert">
+                      <i class="fas fa-exclamation-circle me-2"></i> Você precisará digitar sua senha atual para alterar a senha.
+                  </div>
+
+                  {# Campos do Formulário de Alteração de Senha #}
+                  {% for field in password_form %}
+                    <div class="mb-3">
+                      <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                      {{ field }}
+                      {% for error in field.errors %}
+                        <div class="text-danger small mt-1">{{ error }}</div>
+                      {% endfor %}
+                      {% if field.help_text %}
+                          <div class="form-text text-muted">{{ field.help_text|safe }}</div>
+                      {% endif %}
+                    </div>
+                  {% endfor %}
+
+                  <button type="submit" name="change_password" class="btn btn-warning mt-3">Alterar Senha</button>
+                </form>
               </div>
             </div>
 
+            {# Seção de Dados e Privacidade #}
             <div class="card shadow-sm mb-4" id="dados" style="display:none;">
               <div class="card-header bg-light">
-                <h5 class="mb-0">Dados e Privacidade</h5>
+                <h5 class="mb-0"><i class="fas fa-database me-2"></i> Dados e Privacidade</h5>
               </div>
               <div class="card-body">
-                <p>Conteúdo para exportação de dados e política de privacidade.</p>
+                
+                <h6 class="mb-3 text-primary">Resumo dos seus Dados Atuais</h6>
+                <ul class="list-group list-group-flush mb-4 small">
+                    <li class="list-group-item"><strong>Nome Completo:</strong> {{ user.first_name }} {{ user.last_name }}</li>
+                    <li class="list-group-item"><strong>Email:</strong> {{ user.email }}</li>
+                    <li class="list-group-item"><strong>Nome de Usuário:</strong> {{ user.username }}</li>
+                    <li class="list-group-item"><strong>Tipo de Acesso:</strong> {{ user.perfil.tipoUsuario }}</li>
+                    <li class="list-group-item"><strong>Membro Desde:</strong> {{ user.date_joined|date:"d/m/Y" }}</li>
+                </ul>
+
+                <hr class="my-4">
+
+                {# --- SEÇÃO DE CONTEÚDO LEGAL E CONSENTIMENTO --- #}
+                <h4 class="mb-3">Política de Privacidade e Termos de Uso</h4>
+                
+                <div class="accordion" id="accordionLegal">
+                    
+                    {# Acordeão: Política de Privacidade #}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingPrivacy">
+                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePrivacy" aria-expanded="false" aria-controls="collapsePrivacy">
+                                <i class="fas fa-file-contract me-2 text-info"></i> 1. Política de Privacidade da LyfeSync
+                            </button>
+                        </h2>
+                        <div id="collapsePrivacy" class="accordion-collapse collapse" aria-labelledby="headingPrivacy" data-bs-parent="#accordionLegal">
+                            <div class="accordion-body small text-muted">
+                                {# Conteúdo da Política de Privacidade (Section 1-7) #}
+                                
+                                <h6>1. Introdução</h6>
+                                <p>A LyfeSync valoriza a sua privacidade e está comprometida em proteger os dados pessoais que você compartilha conosco. Esta Política de Privacidade descreve como coletamos, usamos, armazenamos e protegemos suas informações ao utilizar nossa plataforma digital de registro e acompanhamento de hábitos e bem-estar. Ao utilizar os serviços da LyfeSync, você concorda com a coleta e uso de suas informações de acordo com esta política.</p>
+                                
+                                <h6>2. Controlador de Dados</h6>
+                                <p>Nome da Empresa: LyfeSync | Contato para Dúvidas de Privacidade: lyfesyncpt@gmail.com | Copyright: © 2025 LyfeSync</p>
+
+                                <h6>3. Dados Coletados e Sua Finalidade</h6>
+                                <p>A LyfeSync coleta dados para fornecer, manter, proteger e melhorar nossos serviços, além de desenvolver novos recursos focados no bem-estar e crescimento contínuo do usuário.</p>
+                                
+                                <div class="table-responsive my-3">
+                                    <table class="table table-sm table-bordered table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Categoria de Dado</th>
+                                                <th>Exemplos de Dados Coletados</th>
+                                                <th>Finalidade Principal da Coleta</th>
+                                                <th>Base Legal (LGPD)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="fw-bold">Dados de Cadastro</td>
+                                                <td>Nome completo, data de nascimento, e-mail, senha (criptografada), ou tokens de acesso de terceiros (Facebook/Google).</td>
+                                                <td>Identificação e autenticação do usuário, gestão de conta e verificação de elegibilidade de idade.</td>
+                                                <td>Execução de contrato (Termos de Uso).</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold text-danger">Dados de Hábito e Bem-Estar (Sensíveis)</td>
+                                                <td>Registros de alimentação, exercícios, sono, meditação (nome, datas, frequência, quantidade, unidade, alvo, descrição, status de conclusão), Humor selecionado e descrição, Gratidões, e Afirmações.</td>
+                                                <td>Fornecer a funcionalidade essencial da plataforma: acompanhamento de progresso, geração de insights personalizados e suporte ao bem-estar emocional e físico.</td>
+                                                <td>Execução de contrato e **Consentimento Específico**.</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold">Dados de Uso e Desempenho</td>
+                                                <td>Frequência de acesso, interações na plataforma, geração de relatórios (PDF).</td>
+                                                <td>Melhoria contínua da experiência, diagnóstico de problemas técnicos e análise de desempenho.</td>
+                                                <td>Legítimo Interesse.</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p class="alert alert-warning small"><strong>Observação Importante sobre Dados Sensíveis:</strong> Os dados de Hábito e Bem-Estar são considerados Dados Pessoais Sensíveis. A LyfeSync os tratará com o máximo rigor, utilizando-os exclusivamente para a finalidade de fornecer o serviço contratado, mediante seu consentimento explícito e revogável.</p>
+                                
+                                <h6>4. Compartilhamento de Dados</h6>
+                                <p>A LyfeSync não compartilha, vende ou aluga seus Dados Pessoais Sensíveis. O compartilhamento ocorre estritamente com Prestadores de Serviços, para Cumprimento Legal e com Agregação e Anonimização (não identificável).</p>
+                                
+                                <h6>5. Retenção e Segurança dos Dados</h6>
+                                <p>Empregamos medidas técnicas e organizacionais avançadas (criptografia, firewalls) para proteger seus dados. A retenção ocorre apenas pelo tempo necessário para a prestação do serviço e obrigações legais.</p>
+                                
+                                <h6 class="mt-3">5.1. Segurança e Integridade do Processamento</h6>
+                                <p>A LyfeSync implementa: Autenticação Reforçada, Controle de Acesso estrito por credenciais, Integridade dos Dados (validações), e Relatórios Seguros (apenas para o seu acesso).</p>
+                                
+                                <h6 class="mt-3">5.2. Políticas de Retenção e Exclusão</h6>
+                                <p>Você pode excluir a qualquer momento seus registros de Hábitos, Humor, Gratidões e Afirmações. Em caso de Encerramento de Conta, todos os seus Dados de Hábito e Bem-Estar serão apagados permanentemente, exceto por retenções legais.</p>
+
+                                <h6>6. Seus Direitos como Titular de Dados</h6>
+                                <p>Você tem direitos de Confirmação e Acesso, Correção, Anonimização/Bloqueio/Eliminação, Revogação de Consentimento, Oposição e Portabilidade. Contato: lyfesyncpt@gmail.com.</p>
+                                
+                                <h6>7. Alterações desta Política</h6>
+                                <p>Podemos atualizar esta Política. Notificaremos sobre mudanças significativas.</p>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {# Acordeão: Termos de Uso #}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTerms">
+                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTerms" aria-expanded="false" aria-controls="collapseTerms">
+                                <i class="fas fa-scroll me-2 text-warning"></i> 2. Termos de Uso da Plataforma LyfeSync
+                            </button>
+                        </h2>
+                        <div id="collapseTerms" class="accordion-collapse collapse" aria-labelledby="headingTerms" data-bs-parent="#accordionLegal">
+                            <div class="accordion-body small text-muted">
+                                {# Conteúdo dos Termos de Uso (Section 1-9) #}
+                                
+                                <h6>1. Aceitação dos Termos</h6>
+                                <p>Ao acessar ou utilizar a plataforma LyfeSync, você concorda em cumprir e estar vinculado a estes Termos de Uso e à nossa Política de Privacidade. Caso não concorde, você não deve utilizar a plataforma.</p>
+                                
+                                <h6>2. Sobre o LyfeSync</h6>
+                                <p>O LyfeSync é uma ferramenta de apoio e monitoramento para registro de hábitos e bem-estar, e **não substitui** diagnósticos ou acompanhamento profissional de saúde.</p>
+                                
+                                <h6>3. Cadastro e Elegibilidade do Usuário</h6>
+                                <p>Requisitos: Capacidade legal para contratar. Segurança da Conta: Você é responsável por suas credenciais e deve notificar sobre uso não autorizado.</p>
+
+                                <h6>4. Uso da Plataforma e Funcionalidades</h6>
+                                <p>O LyfeSync oferece as seguintes funcionalidades principais:</p>
+                                <div class="table-responsive my-3">
+                                    <table class="table table-sm table-bordered table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Funcionalidade</th>
+                                                <th>Descrição do Uso</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td>Cadastro de Usuário</td><td>Criação de conta e autenticação via credenciais ou serviços de terceiros.</td></tr>
+                                            <tr><td>Gerenciar Hábito</td><td>Criação, acompanhamento, alteração e exclusão de hábitos (alimentação, exercícios, sono, meditação, etc.) com definição de nome, metas, frequência e datas.</td></tr>
+                                            <tr><td>Monitorar Humor</td><td>Registro, alteração e exclusão do estado de humor diário, com a possibilidade de inserir descrições. O sistema pode exibir informações de dica baseadas no humor selecionado.</td></tr>
+                                            <tr><td>Registrar Gratidão</td><td>Registro, alteração e cancelamento de textos de gratidão e reflexões pessoais.</td></tr>
+                                            <tr><td>Registrar Afirmações</td><td>Registro, alteração e cancelamento de afirmações positivas para reprogramação mental.</td></tr>
+                                            <tr><td>Gerar Relatórios</td><td>Visualização e download (impressão em PDF) de relatórios personalizados sobre o progresso e os registros de Hábitos, Humor, Gratidão e Afirmações.</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <h6>5. Direitos e Responsabilidades do Usuário</h6>
+                                <p>Conduta: Uso para fins lícitos. Propriedade dos Dados: Você detém a total propriedade do conteúdo inserido. Exclusão de Conteúdo: Você pode alterar ou excluir qualquer registro a qualquer momento.</p>
+                                
+                                <h6>6. Propriedade Intelectual</h6>
+                                <p>Todos os direitos de propriedade intelectual da plataforma (software, design, logotipos, etc., © 2025 LyfeSync) são de propriedade exclusiva da LyfeSync. Licença de Uso: Concedida para fins pessoais e não comerciais.</p>
+                                
+                                <h6>7. Isenção de Responsabilidade e Limitações</h6>
+                                <p class="alert alert-danger small"><strong>Natureza Informativa e de Apoio:</strong> O LyfeSync **não substitui** aconselhamento, diagnóstico ou tratamento médico ou psicológico profissional. Sem Garantias: Não garantimos resultados específicos de saúde física ou mental.</p>
+                                
+                                <h6>8. Rescisão</h6>
+                                <p>O LyfeSync pode encerrar o acesso em caso de violação dos Termos. O Usuário pode encerrar a conta a qualquer momento pelas configurações.</p>
+                                
+                                <h6>9. Disposições Gerais</h6>
+                                <p>Alterações: Reservamo-nos o direito de modificar os Termos. Lei Aplicável e Foro: Regidos pelas leis da República Federativa do Brasil.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                {# FORMULÁRIO DE CONSENTIMENTO (simples) #}
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="form-check mb-4">
+                        {# Renderiza o campo de checkbox do forms.py #}
+                        {{ consent_form.aceite_termos }}
+                        <label class="form-check-label" for="{{ consent_form.aceite_termos.id_for_label }}">
+                            Li e **concordo** com os <a href="#collapseTerms" data-bs-toggle="collapse">Termos de Uso</a> e a <a href="#collapsePrivacy" data-bs-toggle="collapse">Política de Privacidade</a> da LyfeSync.
+                        </label>
+                    </div>
+                    {% if consent_form.aceite_termos.errors %}
+                        <div class="text-danger small mt-1">{{ consent_form.aceite_termos.errors }}</div>
+                    {% endif %}
+                    
+                    <button type="submit" name="update_consentimento" class="btn btn-success mt-2 disabled" disabled>Confirmar Aceite (Apenas para Revalidação)</button>
+                    <div class="form-text text-muted">Nota: O aceite é registrado no cadastro. Este botão é apenas demonstrativo para revalidação.</div>
+                </form>
+                
+                <hr class="my-4">
+
+                {# FORMULÁRIO DE EXCLUSÃO DE CONTA #}
+                <h5 class="mb-3 text-danger"><i class="fas fa-user-times me-2"></i> Excluir ou Desativar Conta</h5>
+                <div class="alert alert-danger" role="alert">
+                    A exclusão da conta é **irreversível**. Todos os seus dados de Hábito e Bem-Estar serão perdidos. Por favor, leia a seção 5.2. da Política de Privacidade antes de prosseguir.
+                </div>
+                
+                <form method="POST" action="{% url 'excluir_conta' %}" onsubmit="return confirm('ATENÇÃO: Você está prestes a EXCLUIR sua conta. Tem certeza que deseja prosseguir? Esta ação é irreversível e apagará todos os seus registros de bem-estar.');">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="confirm_username" class="form-label">Para confirmar a exclusão, digite seu nome de usuário: <strong class="text-primary">{{ user.username }}</strong></label>
+                        <input type="text" class="form-control" id="confirm_username" name="confirm_username" required placeholder="Digite o nome de usuário exatamente como aparece acima">
+                    </div>
+                    <button type="submit" class="btn btn-danger mt-2"><i class="fas fa-trash-alt me-2"></i> Excluir Minha Conta Permanentemente</button>
+                </form>
+
               </div>
             </div>
 
@@ -128,11 +340,17 @@
                   const targetSection = document.querySelector(hash)
                   if (targetSection) {
                     targetSection.style.display = 'block'
-                    document.querySelector(`.sidebar-menu-conta a[href="${hash}"]`).classList.add('active')
+                    const activeLink = document.querySelector(`.sidebar-menu-conta a[href="${hash}"]`)
+                    if (activeLink) {
+                        activeLink.classList.add('active')
+                    }
                   } else {
                     // Default to #perfil if hash is not found
                     document.querySelector('#perfil').style.display = 'block'
-                    document.querySelector('.sidebar-menu-conta a[href="#perfil"]').classList.add('active')
+                    const defaultLink = document.querySelector('.sidebar-menu-conta a[href="#perfil"]')
+                    if (defaultLink) {
+                        defaultLink.classList.add('active')
+                    }
                   }
                 }
               
@@ -147,8 +365,9 @@
                   }
                 })
               
-                // Check initial hash on load
-                showSection(window.location.hash || '#perfil')
+                // Verifica o hash inicial no carregamento e também se o POST de senha redirecionou para #seguranca
+                const initialHash = window.location.hash || '#perfil'
+                showSection(initialHash)
               })
             </script>
           </div>

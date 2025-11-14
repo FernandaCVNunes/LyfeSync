@@ -613,3 +613,32 @@
     font-size: 0.65rem;
     /* Menor que text-xs */
 }
+
+/* --- ESTILOS PÁGINA CONTA --- */
+.custom-content-area {
+    /* As classes d-flex w-100 flex-grow-1 p-4 do Bootstrap já cuidam da maioria */
+    min-height: 100vh;
+    /* Garante que a área de conteúdo preencha a altura mínima */
+}
+
+/* Sidebar Menu (list-group) - Ajustes visuais */
+.custom-sidebar {
+    /* Semelhante a shadow-sm/md */
+    border-radius: 0.5rem;
+    overflow: hidden;
+    /* Para garantir que os itens se encaixem bem */
+}
+
+/* Ajuste para itens de navegação (list-group-item) */
+.custom-sidebar .list-group-item {
+    /* Tailwind: hover:bg-gray-100, focus:bg-gray-100 */
+    transition: background-color 0.15s ease-in-out;
+}
+
+.custom-sidebar .list-group-item.active {
+    /* Tailwind: text-white/text-primary-500 */
+    font-weight: 600;
+    border-left: 4px solid var(--bs-primary);
+    /* Destaque na lateral */
+    border-radius: 0;
+}

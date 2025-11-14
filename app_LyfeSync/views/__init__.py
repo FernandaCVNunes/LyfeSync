@@ -7,7 +7,7 @@ from .public_views import (
 
 # Views de Hábito (habit_views.py)
 from .habit_views import (
-    home_lyfesync,         # Necessário para 'homeLyfesync'
+    home_lyfesync,
     habito,
     registrar_habito,
     alterar_habito,
@@ -19,7 +19,7 @@ from .habit_views import (
 # Views de Autocuidado (selfcare_views.py)
 from .selfcare_views import (
     autocuidado, humor, registrar_humor, alterar_humor, load_humor_by_date, delete_humor,
-    gratidao, registrar_gratidao, alterar_gratidao, delete_gratidao, GratidaoFormSet, GratidaoForm,
+    gratidao, registrar_gratidao, alterar_gratidao, delete_gratidao,
     afirmacao, registrar_afirmacao, delete_afirmacao, alterar_afirmacao
 )
 
@@ -31,7 +31,7 @@ from .report_views import (
 
 # Views de Conta/Configurações (config_views.py)
 from .config_views import (
-    conta, configuracoes_conta
+    conta, configuracoes_conta, excluir_conta
 )
 
 # Views Administrativas (admin_views.py)

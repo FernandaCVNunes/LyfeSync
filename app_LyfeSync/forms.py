@@ -4,7 +4,7 @@ from .models import Habito, Gratidao, Afirmacao, Humor, Dicas, PerfilUsuario, Hu
 from django.utils import timezone
 from django.forms import TextInput, DateInput, NumberInput, Select, Textarea, RadioSelect, HiddenInput, modelformset_factory
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import UserChangeForm
+from django.contrib.auth.forms import UserChangeForm, PasswordChangeForm
 from django.contrib.auth.models import User
 from allauth.account.forms import SignupForm
 from django.db import transaction
@@ -232,78 +232,117 @@ class DicasForm(forms.ModelForm):
          # Adicionado widget para 'criado_por' (assumindo que existe no modelo Dicas)
          'criado_por': HiddenInput(), 
       }
-
-   # Removemos o __init__ customizado para aplicação de classes, pois os widgets
-   # já definem a classe 'form-control' corretamente e o ModelChoiceField é customizado.
    
 # -------------------------------------------------------------------
-# 3. FORMULÁRIOS DE USUÁRIO E PERFIL
+# 1. Formulário de Atualização de Perfil (Nome e Sobrenome)
 # -------------------------------------------------------------------
-
-class UserUpdateForm(UserChangeForm):
-   """
-   Formulário para o usuário editar seu nome e sobrenome.
-   """
-   class Meta:
-      model = User
-      fields = ('first_name', 'last_name') 
-      
-      widgets = {
-         'first_name': TextInput(attrs={'class': 'form-control'}),
-         'last_name': TextInput(attrs={'class': 'form-control'}),
-      }
-
-   def __init__(self, *args, **kwargs):
-        super(UserUpdateForm, self).__init__(*args, **kwargs)
-        if 'password' in self.fields:
-            # Garante que o campo 'password' é removido
-            del self.fields['password'] 
+class UserUpdateForm(forms.ModelForm):
+    """
+    Formulário para o usuário editar seu nome e sobrenome.
+    Utiliza ModelForm, que é mais limpo que UserChangeForm para esta finalidade.
+    """
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name']
         
-        # Aplica a classe de estilo Bootstrap no init para garantir consistência
-        for field in self.fields.values():field.widget.attrs.update({'class': 'form-control'})
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Aplica a classe 'form-control' do Bootstrap a todos os campos
+        for field in self.fields.values():
+            field.widget.attrs['class'] = 'form-control'
 
-# Formulário para o Perfil (Contém tipoUsuario)
+# -------------------------------------------------------------------
+# 2. Formulário de Perfil Estendido (tipoUsuario)
+# -------------------------------------------------------------------
 class PerfilUsuarioForm(forms.ModelForm):
-   """
-   Formulário para o usuário alterar o tipo de perfil (Ex: Básico, Premium).
-   """
-   class Meta:
-      model = PerfilUsuario
-      fields = ('tipoUsuario',) 
-      
-      widgets = {
-        'tipoUsuario': Select(attrs={'class': 'form-select'}), 
-      }
-      
-   def __init__(self, *args, **kwargs):
-      super().__init__(*args, **kwargs)
-      pass
+    """
+    Formulário para o usuário alterar o tipo de perfil.
+    """
+    class Meta:
+        model = PerfilUsuario
+        fields = ('tipoUsuario',) 
+        
+        widgets = {
+            # Note: Select é o widget base do Django. É melhor importá-lo.
+            'tipoUsuario': Select(attrs={'class': 'form-select'}), 
+        }
+        
+    # O __init__ do PerfilUsuarioForm não precisa de nada extra por padrão
 
+# -------------------------------------------------------------------
+# 3. Formulário de Alteração de Senha (NOVO - Segurança)
+# -------------------------------------------------------------------
+class CustomPasswordChangeForm(PasswordChangeForm):
+    """
+    Personaliza o PasswordChangeForm padrão do Django para aplicar 
+    classes Bootstrap 5 e labels em português.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Aplica a classe 'form-control' do Bootstrap a todos os campos
+        for field in self.fields.values():
+            field.widget.attrs['class'] = 'form-control'
+            
+        # Altera os labels dos campos para português
+        self.fields['old_password'].label = 'Senha Atual'
+        self.fields['new_password1'].label = 'Nova Senha'
+        self.fields['new_password2'].label = 'Confirme a Nova Senha'
+        
+        # Remove a ajuda padrão do Django para a primeira nova senha, se existir.
+        # Caso queira personalizar a mensagem de erro, use o help_text
+        self.fields['new_password1'].help_text = None 
+        self.fields['new_password2'].help_text = None 
+
+# -------------------------------------------------------------------
+# 4. Formulário de Cadastro Customizado (Allauth)
+# -------------------------------------------------------------------
 class CustomSignupForm(SignupForm):
-   """
-   Formulário de cadastro customizado para incluir nome e sobrenome no User.
-   Integrado com allauth.
-   """
-   # Estes campos serão incluídos no formulário de cadastro do allauth
-   first_name = forms.CharField(max_length=150, label='Nome', widget=TextInput(attrs={'class': 'form-control'}))
-   last_name = forms.CharField(max_length=150, label='Sobrenome', widget=TextInput(attrs={'class': 'form-control'}))
+    """
+    Formulário de cadastro customizado para incluir nome e sobrenome no User.
+    Integrado com allauth.
+    """
+    # Estes campos serão incluídos no formulário de cadastro do allauth
+    first_name = forms.CharField(max_length=150, label='Nome', widget=TextInput(attrs={'class': 'form-control'}))
+    last_name = forms.CharField(max_length=150, label='Sobrenome', widget=TextInput(attrs={'class': 'form-control'}))
 
-   @transaction.atomic
-   def save(self, request):
-      
-      # 1. Chama o save original (cria o objeto User, mas sem nome/sobrenome ainda)
-      user = super(CustomSignupForm, self).save(request)
-      
-      # 2. Atualiza os campos extras
-      user.first_name = self.cleaned_data['first_name']
-      user.last_name = self.cleaned_data['last_name']
-      
-      # 3. Salva o User
-      user.save()
-      
-      # 4. Configura o PerfilUsuario (Assumindo que o sinal já o criou)
-      if hasattr(user, 'perfil'):
-        user.perfil.tipoUsuario = 'Cliente'
-        user.perfil.save()
-      
-      return user
+    @transaction.atomic
+    def save(self, request):
+        
+        # 1. Chama o save original (cria o objeto User, mas sem nome/sobrenome ainda)
+        user = super(CustomSignupForm, self).save(request)
+        
+        # 2. Atualiza os campos extras
+        user.first_name = self.cleaned_data['first_name']
+        user.last_name = self.cleaned_data['last_name']
+        
+        # 3. Salva o User
+        user.save()
+        
+        # 4. Configura o PerfilUsuario (Assumindo que o sinal já o criou)
+        if hasattr(user, 'perfil'):
+            user.perfil.tipoUsuario = 'Cliente'
+            user.perfil.save()
+        
+        return user
+
+# -------------------------------------------------------------------
+#    Formulário de Consentimento para Dados e Privacidade
+# -------------------------------------------------------------------
+class ConsentimentoForm(forms.Form):
+    """
+    Formulário para o usuário confirmar que leu e concorda com 
+    os termos e políticas da plataforma.
+    """
+    # Campo booleano para aceitação. Required=True garante a validação.
+    aceite_termos = forms.BooleanField(
+        required=True,
+        label="Li e concordo com os Termos de Uso e a Política de Privacidade da LyfeSync.",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Remove o label automático para estilizar melhor no HTML, se desejar
+        self.fields['aceite_termos'].label = False
