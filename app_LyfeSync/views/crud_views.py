@@ -1,15 +1,16 @@
-# app_LyfeSync/views/report_views.py
+# app_LyfeSync/views/crud_views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils import timezone
 from datetime import timedelta
 import locale
 import json
 from django.views.decorators.http import require_POST
+from django.template.loader import render_to_string 
 from ..forms import GratidaoForm, AfirmacaoForm, HumorForm, DicasForm
-from ..models import Gratidao, Afirmacao, Humor, HumorTipo, Dicas 
+from ..models import Gratidao, Afirmacao, Humor, HumorTipo, Dicas, Habito, StatusDiario 
 # Importando a função utilitária do arquivo auxiliar
 from ._aux_logic import get_humor_map 
 
@@ -430,48 +431,3 @@ def delete_afirmacao(request, afirmacao_id):
         return JsonResponse({'status': 'success', 'message': f'Afirmação ID {afirmacao_id} excluída.'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-
-# -------------------------------------------------------------------
-# VIEWS DE RELATÓRIOS (ADICIONADAS/CORRIGIDAS)
-# -------------------------------------------------------------------
-
-@login_required(login_url='login')
-def relatorios(request):
-    """Página principal de Relatórios (LISTAGEM)."""
-    # Esta view serve como um índice ou dashboard de relatórios.
-    context = {
-        'titulo': 'Relatórios e Estatísticas',
-        'mensagem': 'Visualize as estatísticas de autocuidado aqui.'
-    }
-    # Renderize um template simples de listagem de relatórios (Você precisará criar este template)
-    return render(request, 'app_LyfeSync/relatorios/relatorios_list.html', context)
-
-@login_required(login_url='login')
-def relatorio(request):
-    """Placeholder para a view de relatório (singular/detalhado)."""
-    # Geralmente redireciona para a listagem ou um relatório padrão.
-    return redirect('relatorios')
-
-@login_required(login_url='login')
-def relatorio_habito(request):
-    """Página de Relatório Específico de Hábito."""
-    context = {'titulo': 'Relatório de Hábitos'}
-    return render(request, 'app_LyfeSync/relatorios/relatorio_habito.html', context)
-
-@login_required(login_url='login')
-def relatorio_humor(request):
-    """Página de Relatório Específico de Humor."""
-    context = {'titulo': 'Relatório de Humor'}
-    return render(request, 'app_LyfeSync/relatorios/relatorio_humor.html', context)
-
-@login_required(login_url='login')
-def relatorio_gratidao(request):
-    """Página de Relatório Específico de Gratidão."""
-    context = {'titulo': 'Relatório de Gratidão'}
-    return render(request, 'app_LyfeSync/relatorios/relatorio_gratidao.html', context)
-
-@login_required(login_url='login')
-def relatorio_afirmacao(request):
-    """Página de Relatório Específico de Afirmação."""
-    context = {'titulo': 'Relatório de Afirmação'}
-    return render(request, 'app_LyfeSync/relatorios/relatorio_afirmacao.html', context)

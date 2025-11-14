@@ -1,18 +1,47 @@
 # app_LyfeSync/urls.py
 
 from django.urls import path, include
-# Importa todas as views exportadas via __init__.py
-# A partir de agora, use 'views.' seguido do nome da função (ex: views.home)
+
 from .views import (
-    home, sobre_nos, contatos,home_lyfesync, habito, registrar_habito, 
-    alterar_habito, toggle_habito_day, delete_habit, get_habit_data,
-    autocuidado, humor, registrar_humor, alterar_humor, load_humor_by_date,
-    gratidao, registrar_gratidao, alterar_gratidao,delete_gratidao,
+    # Views Públicas
+    home, sobre_nos, contatos,
+    
+    # Views de Dashboard
+    home_lyfesync,
+    
+    # Views de Configuração/Conta
+    conta, configuracoes_conta, excluir_conta,
+    
+    # Views de Hábitos
+    habito, registrar_habito, alterar_habito, toggle_habito_day, 
+    delete_habit, get_habit_data,
+    
+    # Views de Autocuidado (CRUD)
+    autocuidado,
+    
+    # Humor
+    humor, registrar_humor, alterar_humor, load_humor_by_date, 
+    delete_humor,
+    
+    # Gratidão
+    gratidao, registrar_gratidao, alterar_gratidao, delete_gratidao,
+    
+    # Afirmação
     afirmacao, registrar_afirmacao, alterar_afirmacao, delete_afirmacao,
-    relatorios, relatorio_habito, relatorio_humor, relatorio_gratidao, relatorio_afirmacao,
-    conta, configuracoes_conta, registrar_dica, excluir_conta
+    
+    # Views de Dicas (Staff/Admin)
+    registrar_dica, admin_registrar_dica, 
+    
+    # Views de Relatório
+    relatorios, relatorio, 
+    relatorio_habito, relatorio_humor, relatorio_gratidao, relatorio_afirmacao,
+    
+    # Views de Exportação
+    exportar_habito_csv, exportar_habito_pdf,
+    exportar_gratidao_csv, exportar_gratidao_pdf,
+    exportar_afirmacao_csv, exportar_afirmacao_pdf, 
+    exportar_humor_csv, exportar_humor_pdf, 
 )
-#from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     # -------------------------------------------------------------------
@@ -71,7 +100,16 @@ urlpatterns = [
     path('relatorios/humor/', relatorio_humor, name='relatorio_humor'),
     path('relatorios/gratidao/', relatorio_gratidao, name='relatorio_gratidao'),
     path('relatorios/afirmacao/', relatorio_afirmacao, name='relatorio_afirmacao'),
-    
+    #Exportar relatórios
+    path('relatorio/gratidao/exportar/csv/', exportar_gratidao_csv, name='exportar_gratidao_csv'),
+    path('relatorio/gratidao/exportar/pdf/', exportar_gratidao_pdf, name='exportar_gratidao_pdf'),
+    path('relatorio/afirmacao/exportar/csv/', exportar_afirmacao_csv, name='exportar_afirmacao_csv'),
+    path('relatorio/afirmacao/exportar/pdf/', exportar_afirmacao_pdf, name='exportar_afirmacao_pdf'),
+    path('relatorio/habito/exportar/csv/', exportar_habito_csv, name='exportar_habito_csv'),
+    path('relatorio/habito/exportar/pdf/', exportar_habito_pdf, name='exportar_habito_pdf'),
+    path('relatorio/humor/exportar/csv/', exportar_humor_csv, name='exportar_humor_csv'),
+    path('relatorio/humor/exportar/pdf/', exportar_humor_pdf, name='exportar_humor_pdf'),
+
     # -------------------------------------------------------------------
     # CONTA E ADMIN
     # -------------------------------------------------------------------

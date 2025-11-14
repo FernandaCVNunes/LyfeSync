@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório de Humor - {{ periodo_str }}</title>
+    <!-- Estilos otimizados para PDF/Impressão -->
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 10pt;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f0f8ff; /* Fundo mais claro/azul */
+            border-bottom: 2px solid #007bff; /* Azul para Humor */
+        }
+        .header h1 {
+            color: #007bff;
+            margin: 5px 0;
+            font-size: 16pt;
+        }
+        .header p {
+            font-size: 11pt;
+            color: #555;
+            margin: 0;
+        }
+        .summary {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            background-color: #e9f5ff; /* Azul claro */
+            font-size: 11pt;
+            display: flex;
+            justify-content: space-around;
+        }
+        .summary-item {
+            text-align: center;
+            flex-grow: 1;
+        }
+        h2 {
+            font-size: 14pt;
+            color: #495057;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+            margin-top: 25px;
+        }
+        /* Estilos da Lista de Registros */
+        .registro-humor {
+            border: 1px solid #cce5ff; /* Borda levemente azulada */
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            background-color: #f8fafd;
+        }
+        .registro-humor strong {
+            color: #007bff;
+        }
+        .registro-humor p {
+            margin: 5px 0;
+            line-height: 1.4;
+        }
+        .detalhe-fator {
+            margin-top: 8px;
+            font-size: 9.5pt;
+            color: #6c757d;
+            border-left: 3px solid #007bff;
+            padding-left: 10px;
+            background-color: #f0f0f5;
+        }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 8pt;
+            color: #888;
+            padding: 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Relatório de Monitoramento de Humor</h1>
+        <p>Período: <strong>{{ periodo_str }}</strong></p>
+    </div>
+
+    <div class="summary">
+        <div class="summary-item">
+            Total de Registros: <strong>{{ total_registros }}</strong>
+        </div>
+        {% if media_humor %}
+        <div class="summary-item">
+            Média do Humor no Período: <strong style="color: #28a745;">{{ media_humor|floatformat:1 }} / 5.0</strong>
+        </div>
+        {% endif %}
+    </div>
+
+    <h2>Registros Detalhados</h2>
+
+    {% if registros_humor %}
+        {% for registro in registros_humor %}
+        <div class="registro-humor">
+            <p><strong>Data:</strong> {{ registro.data.strftime('%d/%m/%Y') }}</p>
+            <p><strong>Humor (Nota):</strong> <span style="font-size: 12pt; color: #ffc107;">★ {{ registro.notahumor|floatformat:1 }} / 5.0</span></p>
+            <p><strong>Descrição:</strong> {{ registro.descricaohumor|default:"Nenhuma descrição fornecida." }}</p>
+
+            {% if registro.fatores %}
+            <div class="detalhe-fator">
+                <strong>Fatores Identificados:</strong> {{ registro.fatores }}
+            </div>
+            {% endif %}
+            
+            <p style="font-size: 8pt; text-align: right; color: #aaa;">Registrado em: {{ registro.data_registro.strftime('%d/%m/%Y %H:%M:%S') }}</p>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p style="text-align: center; margin-top: 50px; color: #777;">Nenhum registro de humor encontrado para o período.</p>
+    {% endif %}
+
+    <div class="footer">
+        Gerado por LyfeSync em {{ data_geracao }}
+    </div>
+
+</body>
+</html>

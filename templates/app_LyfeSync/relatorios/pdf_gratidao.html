@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório de Gratidão - {{ periodo_str }}</title>
+    <!-- Inclui estilos otimizados para PDF/Impressão -->
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 10pt;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f0f0f5; /* Cor de fundo suave */
+            border-bottom: 2px solid #6c757d;
+        }
+        .header h1 {
+            color: #6a0dad; /* Roxo para ênfase (Gratidão) */
+            margin: 5px 0;
+            font-size: 16pt;
+        }
+        .header p {
+            font-size: 11pt;
+            color: #555;
+            margin: 0;
+        }
+        .summary {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            background-color: #e9ecef;
+            text-align: center;
+            font-size: 11pt;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            table-layout: fixed; /* Ajuda no controle de largura */
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            word-wrap: break-word;
+        }
+        th {
+            background-color: #8a2be2; /* Roxo mais escuro */
+            color: white;
+            font-size: 10pt;
+            text-transform: uppercase;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .col-data { width: 15%; }
+        .col-descricao { width: 85%; }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 8pt;
+            color: #888;
+            padding: 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Relatório Detalhado de Gratidão</h1>
+        <p>Período: <strong>{{ periodo_str }}</strong></p>
+    </div>
+
+    <div class="summary">
+        Total de Registros de Gratidão: <strong>{{ total_gratidoes }}</strong>
+    </div>
+
+    {% if gratidoes %}
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-data">Data</th>
+                    <th class="col-descricao">Registro de Gratidão</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for gratidao in gratidoes %}
+                <tr>
+                    <td class="col-data">{{ gratidao.data|date:"d/m/Y" }}</td>
+                    <td class="col-descricao">{{ gratidao.descricaogratidao|default:"[Sem descrição]" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p style="text-align: center; margin-top: 50px; color: #777;">Nenhum registro de gratidão encontrado para o período.</p>
+    {% endif %}
+
+    <div class="footer">
+        Gerado por LyfeSync em {{ now|date:"d/m/Y H:i" }}
+    </div>
+
+</body>
+</html>

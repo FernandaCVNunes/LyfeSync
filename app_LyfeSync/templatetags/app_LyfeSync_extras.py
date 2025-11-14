@@ -38,3 +38,14 @@ def jsonify(data):
         # Último recurso para strings simples ou outros tipos, garantindo
         # que o retorno sempre seja uma string JSON válida.
         return mark_safe(json.dumps(str(data)))
+    
+@register.filter
+def make_range(value):
+    """
+    Cria um range de 1 até o valor (inclusivo).
+    Ex: 5 | make_range -> [1, 2, 3, 4, 5]
+    """
+    try:
+        return range(1, int(value) + 1)
+    except (ValueError, TypeError):
+        return []
