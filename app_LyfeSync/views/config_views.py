@@ -10,12 +10,12 @@ from ..forms import UserUpdateForm, PerfilUsuarioForm, CustomPasswordChangeForm,
 from ..models import PerfilUsuario 
 
 
-@login_required(login_url='login')
+@login_required( login_url='account_login')
 def conta(request): 
     """Esta view é um atalho que redireciona para a view principal de configuração de conta."""
     return redirect('configuracoes_conta')
 
-@login_required(login_url='login')
+@login_required( login_url='account_login')
 def configuracoes_conta(request):
    """Permite ao usuário alterar seus dados, dados de perfil e senha."""
    
@@ -99,7 +99,7 @@ def configuracoes_conta(request):
 # -------------------------------------------------------------------
 # NOVA VIEW: Exclusão de Conta
 # -------------------------------------------------------------------
-@login_required(login_url='login')
+@login_required(login_url='account_login')
 def excluir_conta(request):
     """View para processar a exclusão permanente da conta do usuário."""
     if request.method == 'POST':

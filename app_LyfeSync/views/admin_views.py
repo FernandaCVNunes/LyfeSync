@@ -10,7 +10,8 @@ def is_superuser(user):
     """Retorna True se o usuário for um superusuário ativo."""
     return user.is_active and user.is_superuser
 
-@login_required(login_url='login') 
+# CORREÇÃO: login_url alterado de 'login' para 'account_login'
+@login_required(login_url='account_login') 
 @user_passes_test(is_superuser, login_url='home') # Redireciona para home se não for admin
 def registrar_dica(request):
     """Permite ao admin registrar uma nova dica."""
@@ -32,5 +33,4 @@ def registrar_dica(request):
     context = {
         'form': form,
     }
-    # CORREÇÃO: Template movido para a subpasta 'humor'
     return render(request, 'app_LyfeSync/humor/dicas.html', context)

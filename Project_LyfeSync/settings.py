@@ -149,6 +149,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/' 
 
 # URL para onde o usuário é redirecionado após o login (Allauth)
+LOGIN_URL = 'account_login'
 LOGIN_REDIRECT_URL = '/home-lyfesync/'
 
 ACCOUNT_FORMS = {

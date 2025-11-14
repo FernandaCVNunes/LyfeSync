@@ -279,7 +279,8 @@ class Dicas(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name="Criado Por"
+        verbose_name="Criado Por",
+        db_column='criado_por'
     )
     
     data_criacao = models.DateTimeField(

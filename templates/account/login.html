@@ -9,16 +9,13 @@
 {% block content %}
 <div class="login-container container-fluid d-flex justify-content-center align-items-center py-5">
     
-    <!-- Cartão Principal de Login/Cadastro -->
     <div class="custom-modal-content rounded-5 border-0 shadow-lg" style="max-width: 900px; width: 95%;">
         <div class="p-0">
             <div class="d-flex flex-column flex-md-row">
                 
-                <!-- Coluna de Login (Esquerda) -->
                 <div class="col-md-6 d-flex flex-column align-items-center justify-content-center p-5 text-center">
                     <h2 class="mb-4 fw-bold text-red">Bem-vindo de Volta!</h2>
                     
-                    <!-- Botão Google -->
                     <div class="w-100">
                         <a href="{% provider_login_url 'google' %}" class="btn btn-social btn-google w-100 mb-3 d-flex align-items-center justify-content-center rounded-pill shadow-sm">
                             <img src="{% static 'img/icones/google_icon.png' %}" alt="Google" class="social-icon-img me-2" />
@@ -26,18 +23,15 @@
                         </a>
                     </div>
                     
-                    <!-- Separador -->
                     <div class="divider d-flex align-items-center w-100 mb-4">
                         <hr class="flex-grow-1 border-gray" />
                         <span class="px-3 text-secondary">ou</span>
                         <hr class="flex-grow-1 border-gray" />
                     </div>
                     
-                    <!-- Formulário de Login Tradicional -->
                     <form method="post" action="{% url 'account_login' %}" class="w-100">
                         {% csrf_token %}
                         
-                        <!-- Mensagens de Erro do allauth para Login -->
                         {% if form.errors and form.data.login %}
                             <div class="alert alert-danger" role="alert">
                                 {% for field, errors in form.errors.items %}
@@ -52,7 +46,6 @@
                             <span class="input-group-text border-0 bg-white">
                                 <i class="fas fa-envelope input-icon text-muted"></i>
                             </span>
-                            <!-- O campo 'login' do allauth aceita email ou username -->
                             <input type="text" class="form-control border-0" name="login" placeholder="Email ou Nome de Usuário" aria-label="Email" required value="{{ form.login.value|default_if_none:'' }}">
                         </div>
                         
@@ -64,7 +57,6 @@
                         </div>
                         
                         <div class="form-check d-flex justify-content-start w-100 mb-4 ps-4">
-                            <!-- O campo remember do allauth é 'remember' -->
                             <input class="form-check-input me-2" type="checkbox" name="remember" id="id_remember"> 
                             <label class="form-check-label text-muted" for="id_remember">Relembre-me</label>
                         </div>
@@ -75,19 +67,14 @@
                     <a href="{% url 'account_reset_password' %}" class="mt-4 text-decoration-none text-red-dark">Esqueceu a senha? Clique aqui.</a>
                 </div>
                 
-                <!-- Coluna de Cadastro (Direita) - Formulário Completo de Cadastro -->
                 <div class="col-md-6 d-flex flex-column align-items-center justify-content-center p-5 text-white register-section rounded-end-5">
                     <h2 class="mb-4 fw-bold">Cadastre-se aqui!</h2>
                     
                     <p class="mb-4 text-center">Crie sua conta e comece a viver a sua melhor versão!</p>
 
-                    <!-- ATENÇÃO: ESTE FORMULÁRIO POSTA TODOS OS DADOS PARA A VIEW DE CADASTRO -->
                     <form method="post" action="{% url 'account_signup' %}" class="w-100">
                         {% csrf_token %}
                         
-                        <!-- Campos do CustomSignupForm (first_name, last_name, email, username, password, password2) -->
-                        
-                        <!-- Campo: Nome -->
                         <div class="input-group mb-3 custom-input-group-white rounded-pill overflow-hidden shadow-sm">
                             <span class="input-group-text border-0 bg-white">
                                 <i class="fas fa-id-badge input-icon-white text-muted"></i>
@@ -95,7 +82,6 @@
                             <input type="text" class="form-control border-0 text-dark" name="first_name" placeholder="Seu Nome" aria-label="Nome" required>
                         </div>
 
-                        <!-- Campo: Sobrenome -->
                         <div class="input-group mb-3 custom-input-group-white rounded-pill overflow-hidden shadow-sm">
                             <span class="input-group-text border-0 bg-white">
                                 <i class="fas fa-id-badge input-icon-white text-muted"></i>
@@ -103,7 +89,6 @@
                             <input type="text" class="form-control border-0 text-dark" name="last_name" placeholder="Seu Sobrenome" aria-label="Sobrenome" required>
                         </div>
                         
-                        <!-- Campo: Nome de Usuário (username) -->
                         <div class="input-group mb-3 custom-input-group-white rounded-pill overflow-hidden shadow-sm">
                             <span class="input-group-text border-0 bg-white">
                                 <i class="fas fa-user input-icon-white text-muted"></i>
@@ -111,7 +96,6 @@
                             <input type="text" class="form-control border-0 text-dark" name="username" placeholder="Nome de Usuário" aria-label="Nome de Usuário" required>
                         </div>
 
-                        <!-- Campo: Email -->
                         <div class="input-group mb-3 custom-input-group-white rounded-pill overflow-hidden shadow-sm">
                             <span class="input-group-text border-0 bg-white">
                                 <i class="fas fa-envelope input-icon-white text-muted"></i>
@@ -119,7 +103,6 @@
                             <input type="email" class="form-control border-0 text-dark" name="email" placeholder="Email" aria-label="Email" required>
                         </div>
                         
-                        <!-- Campo: Senha (password1) -->
                         <div class="input-group mb-3 custom-input-group-white rounded-pill overflow-hidden shadow-sm">
                             <span class="input-group-text border-0 bg-white">
                                 <i class="fas fa-lock input-icon-white text-muted"></i>
@@ -127,19 +110,16 @@
                             <input type="password" class="form-control border-0 text-dark" name="password" placeholder="Senha" aria-label="Senha" required>
                         </div>
 
-                        <!-- Campo: Confirme a Senha (password2) -->
                         <div class="input-group mb-4 custom-input-group-white rounded-pill overflow-hidden shadow-sm">
                             <span class="input-group-text border-0 bg-white">
                                 <i class="fas fa-lock input-icon-white text-muted"></i>
                             </span>
-                            <!-- O campo é chamado 'password2' no formulário do allauth -->
                             <input type="password" class="form-control border-0 text-dark" name="password2" placeholder="Confirme a Senha" aria-label="Confirme a Senha" required>
                         </div>
                         
                         <button type="submit" class="btn btn-register w-100 rounded-pill fw-bold shadow-sm">Cadastre-se</button>
                     </form>
                     
-                    <!-- Separador Social -->
                     <div class="divider d-flex align-items-center w-100 my-4">
                         <hr class="flex-grow-1 border-white opacity-50" />
                         <span class="px-3 text-white">ou</span>
