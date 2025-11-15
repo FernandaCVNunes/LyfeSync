@@ -109,8 +109,8 @@ def _get_checked_days_for_last_7_days(habito_obj):
     # MOCK: Simula a busca de conclusões
     completions = []
     # Simulando 3 dias de conclusão para um hábito com ID 1
-    if habito_obj.idhabito == 1: 
-         completions = [today, today - timedelta(days=1), today - timedelta(days=3)]
+    if habito_obj.id == 1: 
+        completions = [today, today - timedelta(days=1), today - timedelta(days=3)]
     
     result_map = {
         (today - timedelta(days=i)).strftime('%Y-%m-%d'): False
@@ -131,7 +131,7 @@ def _get_checked_days_for_last_7_days(habito_obj):
 # Mocks para Hábitos
 class Habito:
     def __init__(self, id, nome):
-        self.idhabito = id
+        self.id= id
         self.nome = nome
 
 class AcompanhamentoHabito:
@@ -172,11 +172,11 @@ def get_habitos_e_acompanhamento(user, data_inicio, data_fim):
         acompanhamento_map = {} # {data: status (True/False)}
         
         for ac in acompanhamentos:
-            if ac.habito_id == habito.idhabito and data_inicio <= ac.data <= data_fim:
+            if ac.habito_id == habito.id and data_inicio <= ac.data <= data_fim:
                 acompanhamento_map[ac.data] = ac.concluido
 
         habitos_processados.append({
-            'id': habito.idhabito,
+            'id': habito.id,
             'nome': habito.nome,
             'acompanhamento': acompanhamento_map
         })

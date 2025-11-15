@@ -35,7 +35,7 @@ from .config_views import (
 # -------------------------------------------------------------------
 # Dicas é uma função duplicada, vamos renomear a versão de admin para evitar conflito.
 from .admin_views import (
-    registrar_dica as admin_registrar_dica,
+    registrar_dica as admin_registrar_dica, alterar_dica, excluir_dica,
 )
 
 # -------------------------------------------------------------------
@@ -53,7 +53,40 @@ from .selfcare_views import (
     load_humor_by_date,
     
     # Dicas (Admin/Staff via selfcare_views.py)
-    registrar_dica, 
+    registrar_dica,
+    alterar_dica, 
+    excluir_dica,
+
+    
+    # Gratidão
+    gratidao,
+    registrar_gratidao,
+    alterar_gratidao,
+    delete_gratidao,
+    
+    # Afirmação
+    afirmacao,
+    registrar_afirmacao,
+    alterar_afirmacao,
+    delete_afirmacao
+)
+
+from .crud_views import (
+    is_staff_user, # Função de teste de autorização
+    autocuidado,
+    
+    # Humor
+    humor,
+    registrar_humor,
+    alterar_humor,
+    delete_humor,
+    load_humor_by_date,
+    
+    # Dicas
+    registrar_dica,
+    alterar_dica, 
+    excluir_dica,
+
     
     # Gratidão
     gratidao,

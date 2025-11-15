@@ -30,7 +30,7 @@ from .views import (
     afirmacao, registrar_afirmacao, alterar_afirmacao, delete_afirmacao,
     
     # Views de Dicas (Staff/Admin)
-    registrar_dica, admin_registrar_dica, 
+    registrar_dica, admin_registrar_dica, alterar_dica, excluir_dica,
     
     # Views de Relatório
     relatorios, relatorio, _get_humor_cor_classe,
@@ -116,7 +116,10 @@ urlpatterns = [
     path('conta/', conta, name='conta'),
     path('configuracoes/', configuracoes_conta, name='configuracoes_conta'),
     path('configuracoes/excluir-conta/', excluir_conta, name='excluir_conta'),
+
     path('dicas/registrar/', registrar_dica, name='registrar_dica'),
+    path('dicas/alterar/<int:dica_id>/', alterar_dica, name='alterar_dica'), 
+    path('dicas/excluir/<int:dica_id>/', excluir_dica, name='excluir_dica'),
     
     # -------------------------------------------------------------------
     # INTEGRAÇÃO COM ALLAUTH (Se aplicável)
