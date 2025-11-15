@@ -39,9 +39,15 @@
     font-size: 1.1rem;
     font-weight: 400;
     margin-top: 15px;
-    color: #495057;
+    color: #e88972;
 }
 
 .btn-contato {
     background-color: #e88972;
+    color: white;
+}
+
+.btn-contato:hover {
+    background-color: #c9715a;
+    color: #f0f0f0;
 }

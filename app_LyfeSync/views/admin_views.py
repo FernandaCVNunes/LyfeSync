@@ -3,7 +3,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from ..forms import DicasForm
-from ..models import Dicas
+from ..models import Dicas, HumorTipo
+from ._aux_logic import get_humor_map
 
 
 # Função de teste para verificar se o usuário é superusuário (Admin)
@@ -11,9 +12,7 @@ def is_superuser(user):
     """Retorna True se o usuário for um superusuário ativo."""
     return user.is_active and user.is_superuser
 
-# -------------------------------------------------------------------
 # FUNÇÃO DE TESTE DE AUTORIZAÇÃO (para Dicas)
-# -------------------------------------------------------------------
 
 def is_staff_user(user):
     """Função de teste para o decorador @user_passes_test.
@@ -21,27 +20,43 @@ def is_staff_user(user):
     """
     return user.is_active and user.is_staff
 
-@login_required(login_url='account_login') 
-@user_passes_test(is_superuser, login_url='home') 
+@login_required(login_url='login')
+@user_passes_test(is_staff_user, login_url='/') 
 def registrar_dica(request):
-    """Permite ao admin registrar uma nova dica."""
-
+    """Permite registrar uma nova dica (Admin/Staff ou usuário autorizado)."""
+    
+    # Lógica de POST e GET
     if request.method == 'POST':
         form = DicasForm(request.POST)
         if form.is_valid():
-            dica = form.save(commit=False)
-            dica.criado_por = request.user
-            dica.save()
-            messages.success(request, 'Dica cadastrada com sucesso!')
-            # Após o sucesso, redireciona para a mesma view para novo registro.
-            return redirect('registrar_dica') 
+            dica_obj = form.save(commit=False)
+            dica_obj.criado_por = request.user 
+            dica_obj.save()
+            messages.success(request, "Dica de autocuidado cadastrada com sucesso!")
+            return redirect('registrar_dica')
         else:
-            messages.error(request, 'Erro ao cadastrar a dica. Verifique os campos.')
+            messages.error(request, "Erro ao cadastrar dica. Verifique os campos.")
     else:
         form = DicasForm()
-        
+    
+    try:
+        humores_disponiveis = HumorTipo.objects.all().order_by('pk') 
+    except NameError:
+
+        humores_disponiveis = []
+
+    humor_map = get_humor_map() 
+    
+    try:
+        dicas_list = Dicas.objects.all().order_by('-data_criacao')
+    except Exception:
+        dicas_list = []
+
     context = {
         'form': form,
+        'humor_icon_class_map': humor_map, 
+        'dicas_list': dicas_list,
+        'humores_disponiveis': humores_disponiveis, 
     }
     return render(request, 'app_LyfeSync/dicas/dicas.html', context)
 

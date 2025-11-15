@@ -28,6 +28,10 @@
     padding: 0 1rem;
 }
 
+#navbarNav {
+    color: #495057;
+}
+
 /* 2. CONTAINER DE SIDEBAR + CONTEÚDO */
 .main-wrapper-logado {
     flex-grow: 1;
@@ -125,4 +129,54 @@
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+}
+
+/* 5. ESTILOS DE SUB-MENU (DROPDOWN) */
+
+/* Estilo para a seta indicadora de dropdown */
+.sidebar-logado a .sidebar-arrow {
+    transition: transform 0.2s ease-in-out;
+    margin-left: auto;
+    font-size: 0.8rem;
+}
+
+/* Rotação da seta quando o menu está expandido */
+.sidebar-logado a[aria-expanded="true"] .sidebar-arrow {
+    transform: rotate(180deg);
+}
+
+/* Estilo da lista do sub-menu (collapse) */
+#submenuAutocuidado {
+    /* Define o padding para os subitens */
+    padding-left: 0;
+}
+
+/* Estilo dos links do sub-menu */
+.sidebar-sublink {
+    display: flex;
+    align-items: center;
+    padding: 8px 20px 8px 45px;
+    margin-bottom: 2px;
+    color: var(--text-color-sidebar) !important;
+    /* Força a cor definida para o texto da sidebar */
+    text-decoration: none !important;
+    font-size: 0.95rem;
+    /* Um pouco menor que o link principal */
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.sidebar-sublink:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+    color: var(--primary-color);
+}
+
+/* Ícones de sub-menu */
+.sidebar-icon-sub {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    margin-right: 15px;
+    font-size: 1.1rem;
+    color: var(--text-color-link);
+    /* Cor de link padrão para ícones menores */
 }

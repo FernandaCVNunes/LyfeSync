@@ -74,6 +74,7 @@ from .selfcare_views import (
 from .crud_views import (
     is_staff_user, # Função de teste de autorização
     autocuidado,
+    extract_dica_info,
     
     # Humor
     humor,
@@ -81,6 +82,7 @@ from .crud_views import (
     alterar_humor,
     delete_humor,
     load_humor_by_date,
+    rebuild_descricaohumor,
     
     # Dicas
     registrar_dica,

@@ -5,128 +5,231 @@
 {% load app_LyfeSync_extras %}
 
 {% block title %}
-  Meu Humor
+    Meu Humor
 {% endblock %}
 
 {% block content_logado %}
-  {# Container principal Bootstrap, centralizado e com padding vertical #}
-  <div class="container py-4">
-    {# Row para a estrutura de 2 colunas: 7/12 (aprox. 3/5) e 5/12 (aprox. 2/5) #}
-    <div class="row g-4">
-      {# Coluna Principal: Humor de Hoje (Largo) - col-lg-7 é aproximadamente 3/5 (58%) #}
-      <div class="col-lg-7">
-        <div class="card shadow-lg mb-4 border-top border border-success">
-          <div class="card-body">
-            <h1 class="h3 font-weight-bold text-dark mb-4">Meu Humor</h1>
+    <div class="container py-4">
+        
+        {# Bloco de Mensagens do Django (Messages Framework) #}
+        {% if messages %}
+        <div class="messages mb-4">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default_if_none:'info' }} alert-dismissible fade show rounded-3 shadow" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
 
-            <div class="mb-4">
-              <a href="{% url 'registrarHumor' %}" class="btn btn-success btn-lg shadow-sm">
-                Adicionar Humor de Hoje
-              </a>
-            </div>
+        <div class="row g-4">
+            {# Coluna Principal: Humor de Hoje (Largo) - col-lg-7 é aproximadamente 3/5 (58%) #}
+            <div class="col-lg-7">
+                <div class="card shadow-lg mb-4 rounded-4 border-top border-5 border-success">
+                    <div class="card-body">
+                        <h1 class="h3 font-weight-bold text-dark mb-4">Meu Humor</h1>
 
-            {# Humor de Hoje #}
-            {% if humor_do_dia and humor_do_dia.idhumor %}
-              <div class="mb-4">
-                <h2 class="h5 text-secondary border-bottom pb-2">Humor de Hoje: <span class="text-success">{{ humor_do_dia.data|date:'d/m/Y' }}</span></h2>
+                        <div class="mb-4">
+                            <a href="{% url 'registrarHumor' %}" class="btn btn-success btn-lg shadow-sm rounded-3">
+                                Adicionar Humor de Hoje
+                            </a>
+                        </div>
 
-                {# Card de Detalhes do Humor #}
-                <div class="d-flex align-items-start p-3 border rounded bg-light humor-today-card">
-                  <div class="flex-shrink-0 me-3 humor-image-lg">
-                    {# CORREÇÃO: Acessa o ícone pelo objeto HumorTipo via Foreign Key #}
-                    <img src="{% static humor_do_dia.estado.icone %}" alt="{{ humor_do_dia.estado.estado }}" class="img-fluid" />
-                  </div>
+                        {# Humor de Hoje #}
+                        {% if humor_do_dia and humor_do_dia.idhumor %}
+                            <div class="mb-4">
+                                <h2 class="h5 text-secondary border-bottom pb-2">Humor de Hoje: <span class="text-success">{{ humor_do_dia.data|date:'d/m/Y' }}</span></h2>
 
-                  <div>
-                    {# CORREÇÃO: Acessa o nome do estado pelo objeto HumorTipo via Foreign Key #}
-                    <h2 class="h4 text-dark">{{ humor_do_dia.estado.estado }}:</h2>
-                    <p class="text-secondary mt-1">{{ humor_do_dia.descricaohumor|default:'Nenhuma descrição.' }}</p>
-                  </div>
-                </div>
+                                {# Card de Detalhes do Humor #}
+                                <div class="d-flex align-items-start p-3 border rounded-3 bg-light humor-today-card">
+                                    <div class="flex-shrink-0 me-3 humor-image-lg">
+                                        <img src="{% static humor_do_dia.estado.icone %}" alt="{{ humor_do_dia.estado.estado }}" class="img-fluid" />
+                                    </div>
 
-                <h3 class="h6 font-weight-bold text-secondary mt-4 mb-2">Descrição Completa:</h3>
+                                    <div>
+                                        <h2 class="h4 text-dark">{{ humor_do_dia.estado.estado }}:</h2>
+                                        {# Usando descricao_usuario_original que deve estar limpa da dica ID #}
+                                        <p class="text-secondary mt-1">{{ humor_do_dia.descricao_usuario_original|default:humor_do_dia.descricaohumor|default:'Nenhuma descrição.' }}</p>
+                                    </div>
+                                </div>
 
-                {# Área de Descrição #}
-                <div class="p-3 border rounded text-dark bg-light">{{ humor_do_dia.descricaohumor|default:'Nenhuma descrição.'|linebreaksbr }}</div>
+                                <h3 class="h6 font-weight-bold text-secondary mt-4 mb-2">Descrição Completa:</h3>
 
-                <div class="mt-3 text-end">
-                  {# Botão de Alterar - Usando btn-warning com a cor Laranja/Vermelho FORÇADA pelo CSS atualizado #}
-                  <a href="{% url 'alterarHumor' humor_do_dia.idhumor %}" class="btn btn-warning btn-sm shadow-sm">Alterar Humor de Hoje</a>
-                </div>
-              </div>
-            {% else %}
-              <div class="text-center p-5 bg-light border border-dashed rounded">
-                <p class="text-muted lead">Você ainda não registrou seu humor para hoje.</p>
-                <p class="text-sm text-secondary mt-2">Clique em "Adicionar Humor de Hoje" para começar!</p>
-              </div>
-            {% endif %}
-          </div>
-        </div>
-      </div>
+                                {# Área de Descrição #}
+                                <div class="p-3 border rounded-3 text-dark bg-light">{{ humor_do_dia.descricao_usuario_original|default:humor_do_dia.descricaohumor|default:'Nenhuma descrição.'|linebreaksbr }}</div>
 
-      {# Coluna Lateral: Dicas de Autocuidado (Estreito) - col-lg-5 é aproximadamente 2/5 (42%) #}
-      <div class="col-lg-5">
-        <div class="card shadow-lg mb-4 border-top border border-danger">
-          <div class="card-body">
-            <h2 class="h4 font-weight-bold text-dark mb-4">Dicas de Autocuidado</h2>
-            <p class="text-muted">Espaço reservado para dicas.</p>
-          </div>
-        </div>
-      </div>
-    </div>
+                                <div class="mt-3 text-end">
+                                    {# Botão de Alterar #}
+                                    <a href="{% url 'alterarHumor' humor_do_dia.idhumor %}" class="btn btn-warning btn-sm shadow-sm me-2 rounded-pill">Alterar Humor de Hoje</a>
+                                    
+                                    {# Botão de Excluir que chama o Modal #}
+                                    <button type="button" class="btn btn-danger btn-sm shadow-sm rounded-pill" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#excluirHumorModal"
+                                            data-humor-id="{{ humor_do_dia.idhumor }}"
+                                            data-humor-data="{{ humor_do_dia.data|date:'d/m/Y' }}">
+                                        Excluir
+                                    </button>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="text-center p-5 bg-light border border-2 border-dashed rounded-4">
+                                <p class="text-muted lead">Você ainda não registrou seu humor para hoje.</p>
+                                <p class="text-sm text-secondary mt-2">Clique em "Adicionar Humor de Hoje" para começar!</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
 
-    {# Histórico de Humor (Ocupa a largura total abaixo das colunas) #}
-    <div class="row mt-4">
-      <div class="col-12">
-        <div class="card shadow-lg mb-4 border-top border border-success">
-          <div class="card-body">
-            <h2 class="h4 font-weight-bold text-dark mb-4 border-bottom pb-2">Histórico de Humor (Últimas 2 Semanas)</h2>
+            {# Coluna Lateral: Dicas de Autocuidado (Com Lógica da Dica Dinâmica) #}
+            <div class="col-lg-5">
+                <div class="card shadow-lg mb-4 rounded-4 border-top border-5 border-danger">
+                    <div class="card-body">
+                        <h2 class="h4 font-weight-bold text-dark mb-4 border-bottom pb-2">Dica de Autocuidado</h2>
+                        
+                        {% if dica_do_dia %}
+                            <div class="p-3 border rounded-3 bg-light" style="border-left: 5px solid #dc3545 !important;">
+                                {# Nome da Dica #}
+                                <h3 class="h5 font-weight-bold text-danger">{{ dica_do_dia.nomeDica }}</h3> 
+                                
+                                {# Descrição da Dica #}
+                                <p class="text-dark mt-2">{{ dica_do_dia.descricaoDica|linebreaksbr }}</p>
+                            
+                                {# Mostrar o humor relacionado #}
+                                <div class="mt-3 text-end">
+                                    <span class="badge bg-danger text-white rounded-pill p-2">
+                                        Recomendado para: {{ dica_do_dia.humor_relacionado.estado }}
+                                    </span>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="text-center p-3 bg-light border border-2 border-dashed rounded-4">
+                                <p class="text-muted">Nenhuma dica encontrada para o seu humor atual ou todas as dicas foram vistas (a lista será reiniciada na próxima sessão).</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            {% if humores_recentes %}
-              <div class="list-group">
-                {% for humor_registro in humores_recentes %}
-                  {# Item da Lista Bootstrap - Adicionada classe humor-list-item-hover #}
-                  <div class="list-group-item d-flex justify-content-between align-items-center bg-light mb-2 rounded hover-shadow humor-list-item-hover">
-                    <div class="d-flex align-items-center flex-grow-1">
-                      <div class="flex-shrink-0 me-3 humor-image-sm">
-                        {# CORREÇÃO: Acessa o ícone pelo objeto HumorTipo via Foreign Key #}
-                        <img src="{% static humor_registro.estado.icone %}" alt="{{ humor_registro.estado.estado }}" class="img-fluid" />
-                      </div>
+        {# Histórico de Humor (Ocupa a largura total abaixo das colunas) #}
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card shadow-lg mb-4 rounded-4 border-top border-5 border-success">
+                    <div class="card-body">
+                        <h2 class="h4 font-weight-bold text-dark mb-4 border-bottom pb-2">Histórico de Humor (Últimas 2 Semanas)</h2>
 
-                      <div>
-                        <p class="text-sm text-muted mb-0">{{ humor_registro.data|date:'d/m/Y (l)' }}</p>
-                        {# CORREÇÃO: Acessa o nome do estado pelo objeto HumorTipo via Foreign Key #}
-                        <h3 class="h6 font-weight-bold text-dark mb-0">{{ humor_registro.estado.estado }}</h3>
+                        {% if humores_recentes %}
+                            <div class="list-group">
+                                {% for humor_registro in humores_recentes %}
+                                    <div class="list-group-item d-flex justify-content-between align-items-center bg-light mb-2 rounded-3 humor-list-item-hover" id="humor-{{ humor_registro.idhumor }}">
+                                        <div class="d-flex align-items-center flex-grow-1">
+                                            <div class="flex-shrink-0 me-3 humor-image-sm">
+                                                <img src="{% static humor_registro.estado.icone %}" alt="{{ humor_registro.estado.estado }}" class="img-fluid" />
+                                            </div>
 
-                        {% if humor_registro.descricaohumor %}
-                          {# Aumentei ligeiramente o max-width do text-truncate para ser mais legível em telas grandes #}
-                          <p class="text-sm text-secondary mb-0 text-truncate" style="max-width: 350px;">{{ humor_registro.descricaohumor|default:'Nenhuma descrição.' }}</p>
-                        {% endif %}
-                      </div>
-                    </div>
+                                            <div>
+                                                <p class="text-sm text-muted mb-0">{{ humor_registro.data|date:'d/m/Y (l)' }}</p>
+                                                <h3 class="h6 font-weight-bold text-dark mb-0">{{ humor_registro.estado.estado }}</h3>
 
-                    {# Botão Alterar - Usando btn-warning com a cor Laranja/Vermelho FORÇADA pelo CSS atualizado #}
-                    {% if humor_registro.idhumor %}
-                      <a href="{% url 'alterarHumor' humor_registro.idhumor %}" class="btn btn-sm btn-warning ms-3 shadow-sm">Alterar</a>
-                    {% endif %}
-                  </div>
-                {% endfor %}
-              </div>
-            {% else %}
-              <div class="text-center p-4 bg-light border border-dashed rounded">
-                <p class="text-muted">Nenhum registro de humor encontrado no período das últimas duas semanas.</p>
-              </div>
-            {% endif %}
-          </div>
-        </div>
-      </div>
-    </div>
+                                                {% if humor_registro.descricaohumor %}
+                                                    {# Nota: Descrição filtrada pela view (descricaohumor agora contém apenas a descrição do usuário) #}
+                                                    <p class="text-sm text-secondary mb-0 text-truncate" style="max-width: 350px;">{{ humor_registro.descricaohumor|default:'Nenhuma descrição.' }}</p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
 
-    {# Frase Motivacional #}
-    <div class="row mt-4">
-      <div class="col-12">
-        <p class="text-center text-secondary fst-italic">“O humor é a arte de transformar o peso da vida em leveza — quem ri, ressignifica o que dói.”</p>
-      </div>
-    </div>
-  </div>
-{% endblock %}
+                                        <div class="d-flex align-items-center">
+                                            {# Botão Alterar #}
+                                            {% if humor_registro.idhumor %}
+                                                <a href="{% url 'alterarHumor' humor_registro.idhumor %}" class="btn btn-sm btn-warning ms-3 shadow-sm rounded-pill">Alterar</a>
+                                                
+                                                {# Botão de Excluir Histórico que chama o Modal #}
+                                                <button type="button" class="btn btn-sm btn-danger ms-2 shadow-sm rounded-pill"
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#excluirHumorModal"
+                                                        data-humor-id="{{ humor_registro.idhumor }}"
+                                                        data-humor-data="{{ humor_registro.data|date:'d/m/Y' }}">
+                                                    Excluir
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center p-4 bg-light border border-2 border-dashed rounded-4">
+                                <p class="text-muted">Nenhum registro de humor encontrado no período das últimas duas semanas.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Frase Motivacional #}
+        <div class="row mt-4">
+            <div class="col-12">
+                <p class="text-center text-secondary fst-italic">“O humor é a arte de transformar o peso da vida em leveza — quem ri, ressignifica o que dói.”</p>
+            </div>
+        </div>
+    </div>
+    
+    {# MODAL DE CONFIRMAÇÃO PARA EXCLUSÃO DE HUMOR #}
+    <div class="modal fade" id="excluirHumorModal" tabindex="-1" aria-labelledby="excluirHumorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 shadow-lg border-0">
+                <div class="modal-header bg-danger text-white border-0">
+                    <h5 class="modal-title" id="excluirHumorModalLabel">Confirmar Exclusão de Humor</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" id="form-excluir-humor">
+                    {% csrf_token %}
+                    <div class="modal-body p-4">
+                        <p class="mb-3">Tem certeza de que deseja **excluir** o registro de humor da data:</p>
+                        <p class="fw-bold text-danger text-center h5 p-2 bg-light border rounded" id="humor-data-confirmacao"></p>
+                        <p class="mt-3 text-muted small">Esta ação não pode ser desfeita e você terá que registrar o humor novamente.</p>
+                    </div>
+                    <div class="modal-footer border-top-0">
+                        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger fw-bold rounded-pill">Sim, Excluir</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {# FIM DO MODAL #}
+
+{% endblock content_logado %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Lógica para o Modal de Exclusão de Humor
+        var excluirHumorModal = document.getElementById('excluirHumorModal');
+        if (excluirHumorModal) {
+            // Evento para preencher o modal antes de abrir
+            excluirHumorModal.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget; // Botão que disparou o modal
+                var humorId = button.getAttribute('data-humor-id');
+                var humorData = button.getAttribute('data-humor-data');
+                
+                var modalDataHumor = excluirHumorModal.querySelector('#humor-data-confirmacao');
+                var modalForm = excluirHumorModal.querySelector('#form-excluir-humor');
+
+                // 1. Atualiza a exibição da data
+                modalDataHumor.textContent = humorData;
+                
+                // humor.html: Lógica do Modal de Exclusão
+                // Usamos um placeholder único (999999999) no template Django para garantir que a URL seja reversível.
+                // O JavaScript substitui esse placeholder pelo ID real na abertura do modal.
+                var urlBase = "{% url 'delete_humor' 999999999 %}"; 
+                // Substitui o placeholder no JS pelo ID real
+                modalForm.setAttribute('action', urlBase.replace('999999999', humorId));
+            });
+        }
+    });
+</script>
+{% endblock scripts %}

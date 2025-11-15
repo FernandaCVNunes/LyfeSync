@@ -10,7 +10,7 @@ from allauth.account.forms import SignupForm
 from django.db import transaction
 
 # -------------------------------------------------------------------
-# 1. FORMULÁRIO DE HÁBITO
+# FORMULÁRIO DE HÁBITO
 # -------------------------------------------------------------------
 
 class HabitoForm(forms.ModelForm):
@@ -49,7 +49,7 @@ class HabitoForm(forms.ModelForm):
       }
       
 # -------------------------------------------------------------------
-# 2. FORMULÁRIOS PARA GRATIDAO
+# FORMULÁRIOS PARA GRATIDAO
 # -------------------------------------------------------------------
 
 class GratidaoForm(forms.ModelForm):
@@ -114,7 +114,7 @@ GratidaoFormSet = modelformset_factory(
 )
    
 # -------------------------------------------------------------------
-# 1. FORMULÁRIO DE AFIRMAÇÃO
+# FORMULÁRIO DE AFIRMAÇÃO
 # -------------------------------------------------------------------
 
 class AfirmacaoForm(forms.ModelForm):
@@ -139,7 +139,7 @@ class AfirmacaoForm(forms.ModelForm):
             'descricaoafirmacao': 'Afirmação',
         }
 
-# 2. FORMSET DE AFIRMAÇÕES
+# FORMSET DE AFIRMAÇÕES
 # -------------------------------------------------------------------
 
 AfirmacaoFormSet = modelformset_factory(
@@ -152,7 +152,7 @@ AfirmacaoFormSet = modelformset_factory(
 )
 
 # -------------------------------------------------------------------
-# 1. FORMULÁRIO DE HUMOR
+# FORMULÁRIO DE HUMOR
 # -------------------------------------------------------------------
 
 class HumorForm(forms.ModelForm):
@@ -196,16 +196,18 @@ class HumorForm(forms.ModelForm):
          }
       }
 
+# -------------------------------------------------------------------
+# FORMULÁRIO DE DICAS
+# -------------------------------------------------------------------
+
 class DicasForm(forms.ModelForm):
    """
    Formulário para o administrador cadastrar novas dicas.
    Usa ModelChoiceField com RadioSelect para 'humor_relacionado'.
    """
-   # CORREÇÃO PRINCIPAL: Garante que o campo FK seja ModelChoiceField com RadioSelect
-   # O campo 'humor_relacionado' deve corresponder ao nome do campo FK no modelo Dicas
+
    humor_relacionado = forms.ModelChoiceField(
       queryset=HumorTipo.objects.all(),
-      # O widget RadioSelect permite estilizar melhor a seleção no template
       widget=forms.RadioSelect(), 
       required=True, 
       label="Relacionar a qual Humor:",
@@ -214,9 +216,7 @@ class DicasForm(forms.ModelForm):
 
    class Meta:
       model = Dicas 
-      # CORRIGIDO: Garante que 'humor_relacionado' e 'criado_por' estão nos fields, se aplicável
-      # Assumindo que 'criado_por' é preenchido na view, mantemos ele como Hidden.
-      fields = ['humor_relacionado', 'nomeDica', 'descricaoDica', 'criado_por'] # Adicionado 'criado_por'
+      fields = ['humor_relacionado', 'nomeDica', 'descricaoDica', 'criado_por'] 
       
       widgets = {
          'nomeDica': TextInput(attrs={
@@ -234,7 +234,7 @@ class DicasForm(forms.ModelForm):
       }
    
 # -------------------------------------------------------------------
-# 1. Formulário de Atualização de Perfil (Nome e Sobrenome)
+# Formulário de Atualização de Perfil (Nome e Sobrenome)
 # -------------------------------------------------------------------
 class UserUpdateForm(forms.ModelForm):
     """
@@ -253,7 +253,7 @@ class UserUpdateForm(forms.ModelForm):
             field.widget.attrs['class'] = 'form-control'
 
 # -------------------------------------------------------------------
-# 2. Formulário de Perfil Estendido (tipoUsuario)
+# Formulário de Perfil Estendido (tipoUsuario)
 # -------------------------------------------------------------------
 class PerfilUsuarioForm(forms.ModelForm):
     """
@@ -271,7 +271,7 @@ class PerfilUsuarioForm(forms.ModelForm):
     # O __init__ do PerfilUsuarioForm não precisa de nada extra por padrão
 
 # -------------------------------------------------------------------
-# 3. Formulário de Alteração de Senha (NOVO - Segurança)
+#Formulário de Alteração de Senha (NOVO - Segurança)
 # -------------------------------------------------------------------
 class CustomPasswordChangeForm(PasswordChangeForm):
     """
@@ -296,7 +296,7 @@ class CustomPasswordChangeForm(PasswordChangeForm):
         self.fields['new_password2'].help_text = None 
 
 # -------------------------------------------------------------------
-# 4. Formulário de Cadastro Customizado (Allauth)
+# Formulário de Cadastro Customizado (Allauth)
 # -------------------------------------------------------------------
 class CustomSignupForm(SignupForm):
     """

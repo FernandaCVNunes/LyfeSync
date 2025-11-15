@@ -114,15 +114,14 @@ Gestão de Dicas de Autocuidado
                             <div id="hidden-radio-widget" class="d-none">{{ form.humor_relacionado }}</div>
 
                             <div class="d-flex flex-wrap justify-content-center gap-3 humor-grid">
-                                {% for value, label in form.humor_relacionado.field.choices %}
-                                {% if value %}
-                                {% with image_path=humor_icon_class_map|get_item:label|default:'img/icon/adchumor.png' %}
-                                <div class="humor-option-card" data-humor-container data-humor-value="{{ value }}" onclick="selectHumor('{{ value }}', this)">
-                                    <img src="{% static image_path %}" alt="{{ label }}" class="humor-image-lg" />
-                                    <span class="humor-label">{{ label }}</span>
+                                {% for tipo in humores_disponiveis %} 
+                                {% comment %} Altere 'value, label' para 'tipo' {% endcomment %}
+                                <div class="humor-option-card" data-humor-container data-humor-value="{{ tipo.pk }}" onclick="selectHumor('{{ tipo.pk }}', this)">
+                                    {% with image_path=tipo.icone|default:'img/icon/adchumor.png' %}
+                                    <img src="{% static image_path %}" alt="{{ tipo.estado }}" class="humor-image-lg" />
+                                    {% endwith %}
+                                    <span class="humor-label">{{ tipo.estado }}</span>
                                 </div>
-                                {% endwith %}
-                                {% endif %}
                                 {% endfor %}
                             </div>
 
@@ -189,15 +188,14 @@ Gestão de Dicas de Autocuidado
                         </div>
 
                         <div class="d-flex flex-wrap justify-content-center gap-3 humor-grid" id="humor-grid-edit">
-                            {% for value, label in form.humor_relacionado.field.choices %}
-                            {% if value %}
-                            {% with image_path=humor_icon_class_map|get_item:label|default:'img/icon/adchumor.png' %}
-                            <div class="humor-option-card" data-humor-container data-humor-value="{{ value }}" onclick="selectHumorEdit('{{ value }}', this)">
-                                <img src="{% static image_path %}" alt="{{ label }}" class="humor-image-lg" />
-                                <span class="humor-label">{{ label }}</span>
+                            {% for tipo in humores_disponiveis %} 
+                            {% comment %} Altere 'value, label' para 'tipo' {% endcomment %}
+                            <div class="humor-option-card" data-humor-container data-humor-value="{{ tipo.pk }}" onclick="selectHumor('{{ tipo.pk }}', this)">
+                                {% with image_path=tipo.icone|default:'img/icon/adchumor.png' %}
+                                <img src="{% static image_path %}" alt="{{ tipo.estado }}" class="humor-image-lg" />
+                                {% endwith %}
+                                <span class="humor-label">{{ tipo.estado }}</span>
                             </div>
-                            {% endwith %}
-                            {% endif %}
                             {% endfor %}
                         </div>
                         

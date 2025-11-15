@@ -36,3 +36,8 @@ def first_word(value):
 def get_item(dictionary, key):
     """Permite acessar o valor de um dicionário usando uma variável como chave."""
     return dictionary.get(key)
+
+@register.filter(name='add_class')
+def add_class(field, css):
+    # Lógica para adicionar a classe
+    return field.as_widget(attrs={"class": css})
