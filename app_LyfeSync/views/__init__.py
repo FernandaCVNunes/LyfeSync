@@ -9,7 +9,9 @@ from ._aux_logic import (
     _get_checked_days_for_last_7_days,
     get_habitos_e_acompanhamento,
     Humor_mock,
-    _get_humor_cor_classe
+    _get_humor_cor_classe, 
+    extract_dica_info, 
+    rebuild_descricaohumor 
 )
 
 # -------------------------------------------------------------------

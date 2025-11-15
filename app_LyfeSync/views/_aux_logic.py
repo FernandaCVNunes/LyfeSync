@@ -214,3 +214,89 @@ class HumorManager:
 
 # Instância do gerenciador mock de Humor
 Humor_mock = HumorManager()
+
+def extract_dica_info(dica_raw: str) -> dict:
+    """
+    Extrai informações estruturadas de uma string de "dica" em formato raw (bruto).
+
+    Esta função assume que a string de dica está formatada da seguinte forma:
+    "<Título ou Categoria>:<Conteúdo da Dica>"
+    
+    Exemplo: "Saúde:Beba pelo menos 2 litros de água por dia."
+
+    Args:
+        dica_raw (str): A string de dica bruta a ser processada.
+
+    Returns:
+        dict: Um dicionário com as chaves 'categoria' e 'conteudo'.
+    """
+    try:
+        # Tenta dividir a string no primeiro ':' encontrado.
+        # Isto é comum em logs ou dados semi-estruturados.
+        if ':' in dica_raw:
+            categoria, conteudo = dica_raw.split(':', 1)
+            return {
+                "categoria": categoria.strip(),
+                "conteudo": conteudo.strip()
+            }
+        else:
+            # Se não houver delimitador, assume-se que toda a string é o conteúdo
+            return {
+                "categoria": "Geral",
+                "conteudo": dica_raw.strip()
+            }
+    except Exception as e:
+        print(f"Erro ao extrair informação da dica '{dica_raw}': {e}")
+        return {
+            "categoria": "Erro",
+            "conteudo": dica_raw
+        }
+
+def rebuild_descricaohumor(descricao: str, humor: str) -> str:
+    """
+    Reconstrói e formata uma string final combinando uma descrição de evento/situação
+    com um rótulo de humor (sentiment) associado.
+
+    O objetivo é criar uma saída legível e padronizada.
+
+    Args:
+        descricao (str): A descrição principal do evento ou situação.
+        humor (str): O rótulo de humor ou sentimento associado (e.g., "Alegre", "Triste", "Sarcástico").
+
+    Returns:
+        str: A string formatada final.
+    """
+    # Garante que o rótulo de humor esteja em maiúsculas e entre parênteses retos
+    humor_formatado = f"[{humor.upper()}]"
+    
+    # Combina a descrição e o humor formatado.
+    # Exemplo: "O dia está ótimo, o sol brilha" [ALEGRE]
+    return f"{descricao.strip()} {humor_formatado}"
+
+# --- Exemplos de Uso ---
+if __name__ == '__main__':
+    print("--- Teste de extract_dica_info ---")
+    dica1 = "Produtividade:Use a técnica Pomodoro para manter o foco."
+    dica2 = "Lazer:Tire um tempo para caminhar ao ar livre."
+    dica3 = "Apenas uma frase de dica sem categoria."
+
+    info1 = extract_dica_info(dica1)
+    info2 = extract_dica_info(dica2)
+    info3 = extract_dica_info(dica3)
+
+    print(f"Dica 1 (Original: '{dica1}'): {info1}")
+    print(f"Dica 2 (Original: '{dica2}'): {info2}")
+    print(f"Dica 3 (Original: '{dica3}'): {info3}")
+    
+    print("\n--- Teste de rebuild_descricaohumor ---")
+    desc1 = "Recebi a notícia de que o projeto foi aprovado."
+    humor1 = "alegre"
+    
+    desc2 = "Demorou mais tempo do que o esperado para terminar esta tarefa."
+    humor2 = "frustrado"
+
+    resultado1 = rebuild_descricaohumor(desc1, humor1)
+    resultado2 = rebuild_descricaohumor(desc2, humor2)
+
+    print(f"Resultado 1: {resultado1}")
+    print(f"Resultado 2: {resultado2}")
