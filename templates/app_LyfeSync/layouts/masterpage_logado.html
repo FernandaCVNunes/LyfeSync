@@ -78,37 +78,37 @@
             </li>
             <li>
               <a 
-                  href="#submenuAutocuidado" 
-                  data-bs-toggle="collapse" 
+                  href="{% url 'autocuidado' %}" 
                   aria-expanded="false" 
                   class="sidebar-link collapsed"
+                  onclick="toggleAndNavigate(event, this, '#submenuAutocuidado')"
               >
                   <img src="{% static 'img/icon/autocuidado.png' %}" alt="Ícone Autocuidado" class="sidebar-icon" />
                   <span>Autocuidado</span>
                   <i class="fas fa-chevron-down ms-auto sidebar-arrow"></i>
               </a>
-
+              
               <div class="collapse" id="submenuAutocuidado">
-                    <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-                        <li>
-                            <a href="{% url 'humor' %}" class="sidebar-sublink">
-                                <img src="{% static 'img/icon/adchumor.png' %}" alt="Ícone Humor" class="sidebar-icon-sub" />
-                                Humor
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{% url 'gratidao' %}" class="sidebar-sublink">
-                                <img src="{% static 'img/icon/gratidao.png' %}" alt="Ícone Gratidão" class="sidebar-icon-sub" />
-                                Gratidão
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{% url 'afirmacao' %}" class="sidebar-sublink">
-                                <img src="{% static 'img/icon/afirmacoes.png' %}" alt="Ícone Afirmações" class="sidebar-icon-sub" />
-                                Afirmações
-                            </a>
-                        </li>
-                    </ul>
+                <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                  <li>
+                      <a href="{% url 'humor' %}" class="sidebar-sublink">
+                          <img src="{% static 'img/icon/adchumor.png' %}" alt="Ícone Humor" class="sidebar-icon-sub" />
+                          Humor
+                      </a>
+                  </li>
+                  <li>
+                      <a href="{% url 'gratidao' %}" class="sidebar-sublink">
+                          <img src="{% static 'img/icon/gratidao.png' %}" alt="Ícone Gratidão" class="sidebar-icon-sub" />
+                          Gratidão
+                      </a>
+                  </li>
+                  <li>
+                    <a href="{% url 'afirmacao' %}" class="sidebar-sublink">
+                        <img src="{% static 'img/icon/afirmacoes.png' %}" alt="Ícone Afirmações" class="sidebar-icon-sub" />
+                        Afirmações
+                    </a>
+                  </li>
+                </ul>
               </div>
             </li>
 
@@ -199,6 +199,31 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     {% block extra_js %}
+      <script>
+          function toggleAndNavigate(event, element, targetId) {
+              // Previne o comportamento padrão (navegação imediata) do link.
+              event.preventDefault();
+              
+              const isExpanded = $(targetId).hasClass('show');
+              const targetUrl = element.getAttribute('href');
+
+              // Toggle (Alternar) o sub-menu:
+              $(targetId).collapse('toggle');
+              
+              // Atualiza o atributo aria-expanded manualmente (melhora a acessibilidade e o controle visual)
+              element.setAttribute('aria-expanded', !isExpanded);
+
+              // Se o menu JÁ ESTAVA ABERTO (e o clique está fechando), ou se não há sub-menus para exibir, 
+              // navegamos para o link principal.
+              if (isExpanded || $(targetId + ' ul li').length === 0) {
+                  
+                  // Navega para a URL principal do item
+                  setTimeout(() => {
+                      window.location.href = targetUrl;
+                  }, 100); // Pequeno atraso para o efeito de fechamento do menu
+              } 
+          }
+      </script>
     {% endblock %}
   </body>
 </html>
