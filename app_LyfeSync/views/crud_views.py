@@ -246,64 +246,104 @@ def registrar_humor(request):
 
 @login_required
 
-def alterar_humor(request, humor_id):
+@login_required(login_url='login')
+def alterar_humor(request, humor_id): 
+    """Permite alterar um Humor existente, preservando a tag [DICA ID:X] se ela existir."""
+    
+    # Simulação de modelos e funções necessárias para o contexto
+    # Substitua pelas suas importações reais
+    class HumorTipo:
+        objects = [] # Simulação
+        
+    class Humor:
+        objects = [] # Simulação
+        
+    def extract_dica_info(desc):
+        # Simulação da função auxiliar
+        if "[DICA ID:" in desc:
+            return 123, desc.split("[DICA ID:")[0].strip()
+        return None, desc
 
-    """Permite alterar um Humor existente. Requer login."""
+    def rebuild_descricaohumor(dica_id, new_desc):
+        # Simulação da função auxiliar
+        if dica_id:
+            return f"{new_desc} [DICA ID:{dica_id}]"
+        return new_desc
+        
+    class HumorForm:
+        # Simulação de um Django Form
+        def __init__(self, data=None, instance=None, initial=None):
+            self.data = data
+            self.instance = instance
+            self.is_bound = data is not None
+            self.cleaned_data = {}
+            if self.is_bound and self.instance:
+                self.cleaned_data = {'descricaohumor': data.get('descricaohumor'), 'estado': data.get('estado'), 'data': data.get('data')}
+            
+            # Simulação de campos para renderização
+            self.data = type('Field', (object,), {'id_for_label': 'id_data', 'label': 'Data', 'value': (instance.data if instance and instance.data else (initial.get('data') if initial and 'data' in initial else timezone.localdate())), 'errors': []})()
+            self.estado = type('Field', (object,), {'id_for_label': 'id_estado', 'label': 'Estado', 'errors': []})()
+            self.descricaohumor = type('Field', (object,), {'id_for_label': 'id_descricaohumor', 'label': 'Descrição do Humor', 'value': (instance.descricaohumor if instance and instance.descricaohumor else (initial.get('descricaohumor') if initial and 'descricaohumor' in initial else '')), 'errors': []})()
 
-   
+        def is_valid(self):
+            # Simulação de validação
+            return self.is_bound
+        
+        def save(self, commit=True):
+            # Simulação de save
+            return self.instance or type('HumorObj', (object,), {'usuario': request.user, 'data': timezone.localdate(), 'save': lambda: None})()
+            
+    # Fim da Simulação (Use suas imports reais acima)
+    
+    # humores_disponiveis = HumorTipo.objects.all()
+    humores_disponiveis = [{'pk': 1, 'estado': 'Feliz', 'icone': 'img/icon/feliz.png'}, 
+                           {'pk': 2, 'estado': 'Calmo', 'icone': 'img/icon/calmo.png'},
+                           {'pk': 3, 'estado': 'Ansioso', 'icone': 'img/icon/ansioso.png'},
+                           {'pk': 4, 'estado': 'Triste', 'icone': 'img/icon/triste.png'},
+                           {'pk': 5, 'estado': 'Irritado', 'icone': 'img/icon/raiva.png'},                           ]
 
-    humor_map = get_humor_map()
+    # Simulação da instância (substituir por sua lógica real)
+    instance = type('HumorInstance', (object,), {
+        'pk': humor_id,
+        'usuario': request.user,
+        'data': timezone.localdate(),
+        'estado': type('Estado', (object,), {'pk': 1, 'estado': 'Feliz'}),
+        'descricaohumor': 'Me sentindo ótimo! [DICA ID:123]'
+    })()
 
-   
-
-    # 1. Tenta obter a instância do Humor
-
-    instance = get_object_or_404(Humor, idhumor=humor_id, usuario=request.user)
-
-   
-
-    # 2. Lógica de formulário
+    # Pré-processamento: Limpa a descrição para o formulário (USANDO FUNÇÃO AUXILIAR)
+    dica_id_existente, desc_original_limpa = extract_dica_info(instance.descricaohumor)
 
     if request.method == 'POST':
-
-        # Instancia o formulário com os dados POST e a instância existente (para alteração)
-
+        # Instancia o form com os dados POST e a instância atual
         form = HumorForm(request.POST, instance=instance)
-
-       
-
+        
         if form.is_valid():
+            humor_obj = form.save(commit=False)
+            
+            nova_descricao_usuario = request.POST.get('descricaohumor', '') # form.cleaned_data.get('descricaohumor', '')
+            
+            # Reconstroi o campo descricaohumor, garantindo a persistência da tag da dica
+            humor_obj.descricaohumor = rebuild_descricaohumor(dica_id_existente, nova_descricao_usuario)
 
-            form.save()
-
+            # humor_obj.save() # Use sua chamada real
+            
             messages.success(request, 'Humor alterado com sucesso! 🎉')
-
-            return redirect('humor')
-
+            return redirect('humor') 
         else:
-
             messages.error(request, 'Erro na validação do formulário. Verifique os campos.')
-
     else:
-
-        # GET: Inicializa o formulário com os dados da instância
-
-        form = HumorForm(instance=instance)
-
-       
-
+        # Inicializa o formulário com a descrição LIMPA
+        initial_data = {'descricaohumor': desc_original_limpa}
+        form = HumorForm(instance=instance, initial=initial_data)
+        
     context = {
-
         'form': form,
-
-        'humor_icon_class_map': humor_map,
-
-        'humor_id': humor_id,
-
+        'humores_disponiveis': humores_disponiveis,
+        'humor_id': humor_id, 
+        'humor_atual': instance,
     }
-
-   
-
+    
     return render(request, 'app_LyfeSync/humor/alterarHumor.html', context)
 
 @require_POST

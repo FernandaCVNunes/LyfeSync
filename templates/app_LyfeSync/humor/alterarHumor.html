@@ -1,500 +1,149 @@
 {# alterarHumor.html #}
 {% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
-
 {% load static %}
-
 {% load custom_filters %}
-
 {% load app_LyfeSync_extras %}
 
-
-
 {% block title %}
-
-  Alterar Humor
-
+Alterar Humor
 {% endblock %}
 
-
-
 {% block content_logado %}
-
-  <style>
-
-    /* Estilos Customizados Adicionais (Baseado em registrarHumor.html) */
-
-    .humor-image {
-
-      width: 30px;
-
-      height: 30px;
-
-      transition: transform 0.1s;
-
-    }
-
-   
-
-    /* Estilo para o container de humor selecionado */
-
-    .selected-humor {
-
-      background-color: #ecfdf5; /* Tailwind: bg-green-50, um verde claro */
-
-      border: 2px solid #34d399; /* Tailwind: border-green-400 */
-
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-
-      transform: scale(1.05);
-
-    }
-
-   
-
-    /* Estilo para a textarea, baseado na sua imagem de referência */
-
-    .custom-textarea {
-
-      background-color: #e6f7ff; /* Cor azul claro */
-
-      border-radius: 20px;
-
-      border-color: #b3e0ff;
-
-    }
-
-   
-
-    /* Estilo do botão SALVAR (Cor Laranja/Vermelho da imagem de anexo) */
-
-    .btn-salvar-humor {
-
-      background-color: #f44336;
-
-    }
-
-   
-
-    .btn-salvar-humor:hover {
-
-      background-color: #d32f2f;
-
-    }
-
-   
-
-    /* Ajuste de layout */
-
-    .humor-option-item {
-
-      padding: 8px;
-
-      border-radius: 12px;
-
-      border: 2px solid transparent;
-
-      transition: all 0.15s ease-in-out;
-
-    }
-
-  </style>
-
-
-
-  {# Se este arquivo CSS não existir em static/css/ o botão continuará branco. #}
-
-  <link rel="stylesheet" href="{% static 'css/homeLifesync.css' %}" />
-
-
-
-  <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-
-    <div class="flex flex-wrap gap-4">
-
-      <div class="w-full bg-white p-6 rounded-xl shadow-lg">
-
-        <h1 class="text-3xl font-bold text-lyfesync-green mb-6">Alterar Humor Registrado</h1>
-
-
-
-        <form id="form-alteracao-humor" method="POST" action="{% url 'alterarHumor' humor_id=humor_id|default:0 %}">
-
-          {% csrf_token %}
-
-
-
-          {# Mensagens de feedback (sucesso/erro) #}
-
-          <div id="feedback-message" class="mb-4 hidden"></div>
-
-
-
-          {# 1. SELEÇÃO DE DATA #}
-
-          <div class="mb-6">
-
-            <label for="id_data" class="block text-xl font-semibold text-gray-700 mb-2">Selecione a Data para Edição:</label>
-
-            <input type="date" id="id_data" name="data" class="w-full sm:w-1/2 p-3 border-2 border-green-200 rounded-lg focus:border-lyfesync-green focus:ring focus:ring-green-100 transition duration-150" value="{{ form.data.value|default_if_none:'' }}" required onchange="loadHumorData(this.value)" />
-
-            <input type="hidden" name="humor_id" id="humor_id" value="{{ humor_id|default_if_none:'' }}" />
-
-          </div>
-
-
-
-          {# 2. SELEÇÃO DE HUMOR (RENDERIZADO PELO DJANGO) #}
-
-          <div id="humor-selection-container" class="mb-8" style="display: none;">
-
-            <label class="block text-xl font-semibold text-gray-700 mb-4">Novo Humor:</label>
-
-
-
-            <div class="flex flex-wrap gap-3">
-
-              {# Renderização direta dos ícones #}
-
-              {% for value, label in form.estado.field.choices %}
-
-                {% with image_path=humor_icon_class_map|get_item:value|default:'img/icon/adchumor.png' %}
-
-                  <div class="humor-option-item cursor-pointer hover:shadow-md transition duration-150 flex flex-col items-center justify-center text-center" data-humor-container data-humor-value="{{ value }}" onclick="selectHumor('{{ value }}', this)">
-
-                    {% if value %}
-
-                      <img src="{% static image_path %}" alt="{{ label }}" class="humor-image" />
-
-                    {% else %}
-
-                      <img src="{% static 'img/icon/adchumor.png' %}" alt="{{ label }}" class="humor-image" />
-
-                    {% endif %}
-
-                    <span class="text-xs font-semibold text-gray-700 mt-1">{{ label|split_by_space|first }}</span>
-
-                  </div>
-
-                {% endwith %}
-
-              {% endfor %}
-
-            </div>
-
-
-
-            {# Mantém o campo real do formulário 'estado' oculto para submissão #}
-
-            <div id="hidden-radio-widget" style="display: none;">{{ form.estado }}</div>
-
-
-
-            {% if form.estado.errors %}
-
-              <div class="text-red-500 text-sm mt-1">{{ form.estado.errors }}</div>
-
-            {% endif %}
-
-          </div>
-
-
-
-          {# 3. CAMPO DE DESCRIÇÃO #}
-
-          <div id="description-container" class="mb-8" style="display: none;">
-
-            <label for="id_descricaohumor" class="block text-xl font-semibold text-gray-700 mb-2">Nova Descrição:</label>
-
-            <textarea id="id_descricaohumor" name="descricaohumor" rows="8" placeholder="Descreva brevemente o que motivou seu humor hoje..." class="w-full p-4 border-2 border-green-200 rounded-xl focus:border-lyfesync-green focus:ring focus:ring-green-100 transition duration-150 custom-textarea"></textarea>
-
-
-
-            {% if form.descricaohumor.errors %}
-
-              <div class="text-red-500 text-sm mt-1">{{ form.descricaohumor.errors }}</div>
-
-            {% endif %}
-
-          </div>
-
-
-
-          {# 4. BOTÃO SALVAR #}
-
-          <div class="flex justify-end">
-
-            <button type="submit" id="btn-salvar" class="btn-salvar-humor py-3 px-8 text-white font-bold rounded-xl shadow-lg transition duration-200" style="display: none;">SALVAR ALTERAÇÕES</button>
-
-          </div>
-
-        </form>
-
-      </div>
-
-    </div>
-
+{# É crucial que as classes como .rs-form-control, .humor-image-lg, .humor-option-card.active, .btn-salvar-form estejam
+definidas em homeLyfesync.css #}
+<link rel="stylesheet" href="{% static 'css/homeLyfesync.css' %}">
+
+<div class="container py-4 py-md-5">
+  <div class="row justify-content-center">
+    {# Coluna Principal do Formulário - Ocupa toda a largura, centralizado #}
+    <div class="col-12 col-lg-8 card p-4 p-md-5 rounded-4 shadow-lg border-0 bg-white">
+
+              <h2 class="fw-bold mb-4 humor-title text-center text-lg-start">
+                    Edite seu humor registrado:
+                </h2>
+
+              <!-- Mensagens do Django (Necessita de Bootstrap JS para fechar o alert) -->
+              {% if messages %}
+                  <div class="mb-4">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                  {{ message }}
+                                  <button type="button" class="btn-close" data-bs-dismiss="alert"
+            aria-label="Close"></button>
+                              </div>
+                        {% endfor %}
+                    </div>
+              {% endif %}
+
+              {# AÇÃO FIXA: Sempre a URL de alteração com o PK da instância #}
+              <form id="form-registro-humor"             method="POST"            
+        action="{% url 'alterarHumor' humor_id=form.instance.pk %}">
+                    {% csrf_token %}
+                 
+                    {# Campo de Data - Tornamos a data somente leitura (read-only) em modo edição #}
+                    <div class="mb-4">
+                          <label for="{{ form.data.id_for_label }}"
+            class="form-label h5 fw-semibold text-secondary mb-2">{{ form.data.label }}:</label>
+                          {# Aplicamos a classe rs-form-control e garantimos que é read-only #}
+                          <input type="date" name="data" id="{{ form.data.id_for_label }}"                      
+             class="form-control rs-form-control"                        value="{{ form.data.value|date:'Y-m-d' }}"    
+                               readonly />
+                         
+                          {# Exibimos erros de data, se houver #}
+                          {% if form.data.errors %}
+                              <div class="text-danger small mt-1">{{ form.data.errors }}</div>
+                          {% endif %}
+                      </div>
+
+                    {# ------------------------------------------------------------------- #}
+                    {# CAMPO 'ESTADO' (Seleção Visual de Humor) #}
+                    {# ------------------------------------------------------------------- #}
+                    <div class="mb-4">
+                          <label class="form-label h5 fw-semibold text-secondary mb-3">{{ form.estado.label }}</label>
+
+                          {# 1. INPUT HIDDEN REAL: Este campo envia o PK do humor selecionado #}
+                          <input type="hidden"                         name="estado"                        
+            id="id_estado"                        
+            value="{% if form.instance.estado.pk %}{{ form.instance.estado.pk }}{% endif %}" />
+                         
+                          {# 2. Exibe Erros do Campo #}
+                          {% if form.estado.errors %}
+                              <div class="text-danger small mt-1">{{ form.estado.errors }}</div>
+                          {% endif %}
+
+                          {# Grade de Seleção Visual de Humor #}
+                          <div class="d-flex flex-wrap justify-content-center gap-3 humor-grid" role="radiogroup"
+            aria-labelledby="id_estado_label">
+                                {% for tipo in humores_disponiveis %}
+                                    {% with image_path=tipo.icone|default:'img/icon/adchumor.png' %}
+                                        {# CORREÇÃO APLICADA AQUI: Incorporando a classe &#39;active&#39; na linha do
+            atributo class #}
+                                        <div
+              class="humor-option-card {% if form.instance.estado.pk == tipo.pk %}active{% endif %}"                    
+                          data-humor-container                                 data-humor-value="{{ tipo.pk }}"        
+                                      onclick="selectHumor('{{ tipo.pk }}', this)"                                
+              tabindex="0"                                 role="radio"                                
+              aria-checked="{% if form.instance.estado.pk == tipo.pk %}true{% else %}false{% endif %}"                  
+                           >
+                                              <img src="{% static image_path %}" alt="{{ tipo.estado }}"
+                class="humor-image-lg" />
+                                              <span class="humor-label">{{ tipo.estado }}</span>
+                                          </div>
+                                    {% endwith %}
+                                {% endfor %}
+                            </div>
+                      </div>
+
+                    {# Campo 'descricaohumor' #}
+                    <div class="mb-4">
+                          <label for="{{ form.descricaohumor.id_for_label }}"
+            class="form-label h5 fw-semibold text-secondary mb-2">{{ form.descricaohumor.label }}:</label>
+                          {# Renderiza o campo de textarea. Garantimos a classe rs-form-control #}
+                          <textarea name="descricaohumor" id="{{ form.descricaohumor.id_for_label }}" rows="5"
+            class="form-control rs-form-control">{{ form.descricaohumor.value|default_if_none:'' }}</textarea>
+
+                          {% if form.descricaohumor.errors %}
+                              <div class="text-danger small mt-1">{{ form.descricaohumor.errors }}</div>
+                          {% endif %}
+                      </div>
+
+                    <div class="d-flex justify-content-end mt-4">
+                          <button type="submit" class="btn btn-salvar-form text-white fw-bold rounded-3 shadow-lg">
+                                SALVAR ALTERAÇÕES
+                            </button>
+                      </div>
+                </form>
+          </div>
   </div>
+</div>
+<script>
+  // Função JavaScript para gerenciar a seleção de humor
+  function selectHumor(humorValue, element) {
+    // Garante que o valor de comparação é sempre uma string
+    const val = String(humorValue);
 
+    // 1. Remove a classe de seleção de todos os containers
+    document.querySelectorAll('[data-humor-container]').forEach(function (el) {
+      el.classList.remove('active'); // 'active' é a classe customizada para o estado selecionado
+      el.setAttribute('aria-checked', 'false');
+    });
 
-
-  <script>
-
-    // Funções de Utilidade e Constantes
-
-    const AJAX_LOAD_URL = "{% url 'load_humor_by_date' %}"
-
-    const ALTERAR_URL_TEMPLATE = "{% url 'alterarHumor' humor_id=999999999 %}"
-
-    const REGISTRAR_URL = "{% url 'registrarHumor' %}"
-
-   
-
-    // Elementos DOM
-
-    const formElement = document.getElementById('form-alteracao-humor')
-
-    const humorIdInput = document.getElementById('humor_id')
-
-    const descriptionInput = document.getElementById('id_descricaohumor')
-
-    const feedbackMessage = document.getElementById('feedback-message')
-
-    const btnSalvar = document.getElementById('btn-salvar')
-
-    const humorSelectionContainer = document.getElementById('humor-selection-container')
-
-    const descriptionContainer = document.getElementById('description-container')
-
-    const dateInput = document.getElementById('id_data')
-
-   
-
-    /**
-
-     * Marca o humor selecionado no DOM e no campo de rádio oculto.
-
-     */
-
-    function selectHumor(humorValue, element) {
-
-      // 1. Remove a classe de seleção de todos os containers
-
-      document.querySelectorAll('[data-humor-container]').forEach(function (el) {
-
-        el.classList.remove('selected-humor')
-
-      })
-
-   
-
-      // 2. Adiciona a classe de seleção ao elemento clicado
-
-      if (element) {
-
-        element.classList.add('selected-humor')
-
-      }
-
-   
-
-      // 3. Marca o input de rádio correspondente
-
-      const radioInputs = document.querySelectorAll('input[name="estado"][type="radio"]')
-
-      radioInputs.forEach(function (input) {
-
-        input.checked = input.value === humorValue
-
-      })
-
+    // 2. Adiciona a classe de seleção ao elemento clicado (se houver)
+    if (element) {
+      element.classList.add('active');
+      element.setAttribute('aria-checked', 'true');
     }
 
-   
-
-    /**
-
-     * Limpa e prepara os campos para novo registro/edição.
-
-     * Seleciona o humor se os dados forem encontrados.
-
-     */
-
-    function handleDataDisplay(data, dateString) {
-
-      // Limpa seleções antigas
-
-      document.querySelectorAll('[data-humor-container]').forEach((el) => el.classList.remove('selected-humor'))
-
-      document.querySelectorAll('input[name="estado"][type="radio"]').forEach((el) => (el.checked = false))
-
-   
-
-      // Mostra containers (Humor e Descrição)
-
-      humorSelectionContainer.style.display = 'block'
-
-      descriptionContainer.style.display = 'block'
-
-      btnSalvar.style.display = 'inline-block'
-
-      descriptionInput.value = data.descricaohumor || '' // Preenche a descrição se existir
-
-   
-
-      if (data.exists) {
-
-        // MODO EDIÇÃO
-
-        humorIdInput.value = data.id
-
-        formElement.action = ALTERAR_URL_TEMPLATE.replace('999999999', data.id)
-
-        btnSalvar.textContent = 'SALVAR ALTERAÇÕES'
-
-        feedbackMessage.className = 'alert alert-success mt-4 p-3 bg-green-100 text-green-700 rounded'
-
-        feedbackMessage.textContent = `Registro encontrado para ${dateString}. Você pode alterá-lo.`
-
-   
-
-        // 🚨 Seleciona o ícone de humor existente
-
-        const selectedElement = document.querySelector(`[data-humor-value="${data.estado}"]`)
-
-        if (selectedElement) {
-
-          selectHumor(data.estado, selectedElement)
-
-        } else {
-
-          // Caso onde o humor salvo não tem um ícone correspondente no template
-
-          selectHumor(data.estado, null)
-
-          console.warn(`Aviso: O humor salvo '${data.estado}' foi marcado no rádio, mas o ícone visual correspondente não foi encontrado.`)
-
-        }
-
-      } else {
-
-        // MODO NOVO REGISTRO
-
-        humorIdInput.value = ''
-
-        formElement.action = REGISTRAR_URL
-
-        btnSalvar.textContent = 'REGISTRAR NOVO HUMOR'
-
-        feedbackMessage.className = 'alert alert-info mt-4 p-3 bg-blue-100 text-blue-700 rounded'
-
-        feedbackMessage.textContent = `Nenhum registro encontrado para ${dateString}. Você pode criar um novo.`
-
-      }
-
-      feedbackMessage.style.display = 'block'
-
+    // 3. ATUALIZA O INPUT HIDDEN REAL
+    const hiddenInput = document.getElementById('id_estado');
+    if (hiddenInput) {
+      hiddenInput.value = val;
+    } else {
+      console.error("Erro: Input hidden 'id_estado' não encontrado!");
     }
-
-   
-
-    /**
-
-     * Busca dados de humor via AJAX com base na data.
-
-     */
-
-    function loadHumorData(dateString) {
-
-      // Limpa feedback e oculta elementos antes de carregar
-
-      feedbackMessage.style.display = 'none'
-
-      humorSelectionContainer.style.display = 'none'
-
-      descriptionContainer.style.display = 'none'
-
-      btnSalvar.style.display = 'none'
-
-   
-
-      if (!dateString) return
-
-   
-
-      console.log(`[AJAX] Buscando humor para a data: ${dateString}`)
-
-   
-
-      fetch(`${AJAX_LOAD_URL}?date=${dateString}`)
-
-        .then((response) => {
-
-          if (!response.ok) {
-
-            console.error(`[AJAX ERROR] Falha na resposta do servidor. Status: ${response.status}`)
-
-            throw new Error('Falha na resposta do servidor. (Status: ' + response.status + ')')
-
-          }
-
-          return response.json()
-
-        })
-
-        .then((data) => {
-
-          console.log('[AJAX SUCCESS] Dados de humor recebidos:', data)
-
-          handleDataDisplay(data, dateString)
-
-        })
-
-        .catch((error) => {
-
-          console.error('Erro final na função loadHumorData:', error)
-
-          feedbackMessage.className = 'alert alert-danger mt-4 p-3 bg-red-100 text-red-700 rounded'
-
-          feedbackMessage.textContent = 'Ocorreu um erro ao tentar carregar o humor. Tente novamente e verifique o Console (F12) para detalhes.'
-
-          feedbackMessage.style.display = 'block'
-
-        })
-
-    }
-
-   
-
-    // Inicialização no carregamento da página
-
-    document.addEventListener('DOMContentLoaded', function () {
-
-      const initialDate = dateInput.value
-
-   
-
-      if (!initialDate) {
-
-        // Define a data de hoje se o campo estiver vazio
-
-        const today = new Date()
-
-        const todayString = today.toISOString().split('T')[0]
-
-        dateInput.value = todayString
-
-        loadHumorData(todayString)
-
-      } else {
-
-        // Carrega os dados para a data inicial (útil para POST com erro)
-
-        loadHumorData(initialDate)
-
-      }
-
-    })
-
-  </script>
-
+  }
+  // NOTA: A lógica de pré-seleção no DOMContentLoaded foi removida,
+  // pois o Django agora aplica a classe &#39;active&#39; diretamente ao elemento
+  // correto durante a renderização inicial do template.
+</script>
 {% endblock %}

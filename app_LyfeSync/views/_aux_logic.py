@@ -71,23 +71,22 @@ def get_humor_map():
     """
     # MOCK: Simula a busca de tipos de humor
     return {
-        'Excelente': '/static/icons/excelente.png',
-        'Bom': '/static/icons/bom.png',
-        'Neutro': '/static/icons/neutro.png',
-        'Ruim': '/static/icons/ruim.png',
-        'Péssimo': '/static/icons/pessimo.png',
+        'Feliz': 'img/icon/feliz.png',
+        'Calmo': 'img/icon/calmo.png',
+        'Ansioso': 'img/icon/ansioso.png',
+        'Triste': 'img/icon/triste.png',
+        'Irritado': 'img/icon/raiva.png',
     }
 
 def _get_humor_cor_classe(estado):
     """Mapeia o estado do HumorTipo para uma classe CSS para colorir (relatórios)."""
     # Mapeamento do nome do estado (string) para a classe CSS (para estilização)
     mapping = {
-        'Excelente': 'humor-excelente',
-        'Bom': 'humor-bom',
-        'Neutro': 'humor-neutro',
-        'Ruim': 'humor-ruim',
-        'Péssimo': 'humor-pessimo',
-        # Adicione outros mapeamentos conforme seus estados de humor em HumorTipo
+        'Feliz': 'img/icon/feliz.png',
+        'Calmo': 'img/icon/calmo.png',
+        'Ansioso': 'img/icon/ansioso.png',
+        'Triste': 'img/icon/triste.png',
+        'Irritado': 'img/icon/raiva.png',        
     }
     return mapping.get(estado, 'bg-light')
 
