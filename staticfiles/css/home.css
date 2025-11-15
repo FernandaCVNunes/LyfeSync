@@ -42,4 +42,6 @@
     color: #495057;
 }
 
-/* Qualquer outro estilo específico da home deve vir aqui */
+.btn-contato {
+    background-color: #e88972;
+}

@@ -61,7 +61,7 @@ body {
 
 /* Botão Entrar/Sair (Estilo Padrão) */
 .btn-nav-login {
-    background-color: var(--primary-color);
+    background-color: #102b37;
     color: #fff;
     border-radius: 50px;
     padding: 8px 25px;
@@ -71,7 +71,6 @@ body {
 
 .btn-nav-login.nav-link {
     color: #fff !important;
-    /* Garante que a cor da fonte seja branca */
 }
 
 .btn-nav-login:hover {

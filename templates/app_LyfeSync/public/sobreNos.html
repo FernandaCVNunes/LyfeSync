@@ -6,6 +6,10 @@
 	Sobre Nós - LyfeSync
 {% endblock %}
 
+{% block extra_css %}
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
 	<div class="about-content-wrapper">
 		<section class="container py-5">
@@ -49,7 +53,7 @@
 		<section class="container py-5 text-center">
 			<h2 class="fw-bold mb-4">Pronto para Sincronizar Sua Vida?</h2>
 
-			<a href="{% url 'account_login' %}" class="btn btn-lg btn-red-primary rounded-pill shadow-sm">Comece sua Jornada Agora!</a>
+			<a href="{% url 'account_login' %}" class="btn btn-lg btn-contato rounded-pill shadow-sm">Comece sua Jornada Agora!</a>
 		</section>
 	</div>
 

@@ -4,6 +4,10 @@
 
 {% block title %}Contatos - LyfeSync{% endblock %}
 
+{% block extra_css %}
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
 <div class="contact-content-wrapper">
     <section class="container py-5">
@@ -44,7 +48,7 @@
                             </div>
 
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-lg btn-contact-submit rounded-pill fw-bold">
+                                <button type="submit" class="btn btn-lg rounded-pill fw-bold btn-contato">
                                     <i class="fas fa-paper-plane me-2"></i> Enviar Mensagem
                                 </button>
                             </div>

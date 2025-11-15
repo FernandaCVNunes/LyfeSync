@@ -57,15 +57,15 @@
                                 <i class="fas fa-user-circle"></i> Minha Conta
                             </a>
                         </li>
-                        <li class="nav-item">
+                        <li class="nav-item d-flex align-items-center">
                             <!-- Link para Sair (usando a URL do allauth) -->
                             <!-- O class="btn-logout" será usado pelo script para submeter o formulário POST -->
-                            <a class="btn-nav-login nav-link btn-logout" href="{% url 'account_logout' %}">Sair</a>
+                            <a class="btn-nav-login btn-logout" href="{% url 'account_logout' %}">Sair</a>
                         </li>
                     {% else %}
-                        <li class="nav-item">
+                        <li class="nav-item d-flex align-items-center">
                             <!-- Link para Entrar (usando a URL do allauth) -->
-                            <a class="btn-nav-login nav-link" href="{% url 'account_login' %}">Entrar</a>
+                            <a class="btn-nav-login" href="{% url 'account_login' %}">Entrar</a>
                         </li>
                     {% endif %}
                 </ul>

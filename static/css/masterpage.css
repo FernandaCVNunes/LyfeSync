@@ -11,8 +11,9 @@
     /* Fundo base para área logada/navbar fixa */
     --bg-color-public: #ffffff;
     /* Fundo base para área pública (body) */
-    --text-color-dark: #333333;
-    --text-color-link: #6c757d;
+    --text-color-dark: #0f3c4e;
+    --text-color-link: #0f3c4e;
+    --text-color-light: #58606b;
     --navbar-height: 55px;
     /* Altura de referência da Navbar */
 }
@@ -61,23 +62,18 @@ body {
 
 /* Botão Entrar/Sair (Estilo Padrão) */
 .btn-nav-login {
-    background-color: var(--primary-color);
-    color: #fff;
-    border-radius: 50px;
+    background-color: #102b37;
+    color: #fff !important;
+    border-radius: 40px;
     padding: 8px 25px;
     margin-left: 15px;
     transition: background-color 0.3s ease;
-}
-
-.btn-nav-login.nav-link {
-    color: #fff !important;
-    /* Garante que a cor da fonte seja branca */
+    text-decoration: none;
 }
 
 .btn-nav-login:hover {
     background-color: #c9715a;
-    /* Tom ligeiramente mais escuro no hover */
-    color: #fff;
+    color: #fff !important;
 }
 
 /* ===================== 2. FOOTER (ESTILOS BASE) ===================== */
@@ -92,7 +88,7 @@ body {
 
 .footer-bottom {
     background-color: rgba(0, 0, 0, 0.05);
-    color: var(--text-color-link);
+    color: var(--text-color-light);
     margin-top: 1rem;
     padding: 0.5rem 0;
     border-top: 1px solid rgba(0, 0, 0, 0.05);
