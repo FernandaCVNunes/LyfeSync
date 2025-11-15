@@ -77,10 +77,39 @@
               </a>
             </li>
             <li>
-              <a href="{% url 'autocuidado' %}" class="sidebar-link">
-                <img src="{% static 'img/icon/autocuidado.png' %}" alt="Ícone Autocuidado" class="sidebar-icon" />
-                <span>Autocuidado</span>
+              <a 
+                  href="#submenuAutocuidado" 
+                  data-bs-toggle="collapse" 
+                  aria-expanded="false" 
+                  class="sidebar-link collapsed"
+              >
+                  <img src="{% static 'img/icon/autocuidado.png' %}" alt="Ícone Autocuidado" class="sidebar-icon" />
+                  <span>Autocuidado</span>
+                  <i class="fas fa-chevron-down ms-auto sidebar-arrow"></i>
               </a>
+
+              <div class="collapse" id="submenuAutocuidado">
+                    <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                        <li>
+                            <a href="{% url 'humor' %}" class="sidebar-sublink">
+                                <img src="{% static 'img/icon/adchumor.png' %}" alt="Ícone Humor" class="sidebar-icon-sub" />
+                                Humor
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'gratidao' %}" class="sidebar-sublink">
+                                <img src="{% static 'img/icon/gratidao.png' %}" alt="Ícone Gratidão" class="sidebar-icon-sub" />
+                                Gratidão
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'afirmacao' %}" class="sidebar-sublink">
+                                <img src="{% static 'img/icon/afirmacoes.png' %}" alt="Ícone Afirmações" class="sidebar-icon-sub" />
+                                Afirmações
+                            </a>
+                        </li>
+                    </ul>
+              </div>
             </li>
 
             {# ITEM: DICAS (Apenas para Administrador) #}
