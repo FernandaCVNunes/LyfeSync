@@ -1,4 +1,4 @@
-<!-- contato.html -->
+<!-- templates/app_LyfeSync/public/contato.html -->
 {% extends 'app_LyfeSync/layouts/masterpage.html' %}
 {% load static %}
 
@@ -13,6 +13,32 @@
     <section class="container py-5">
         <div class="row justify-content-center">
             <div class="col-lg-8">
+
+               {# Bloco para exibir as mensagens do Django #}
+                {% if messages %}
+                <div class="mb-4">
+                    {% for message in messages %}
+                        
+                        {# A lógica condicional é aplicada diretamente na string de classes #}
+                        <div class="alert 
+                            {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% else %}alert-info{% endif %} 
+                            alert-dismissible fade show" role="alert">
+                            
+                            {# Lógica para o Ícone Font Awesome #}
+                            <i class="fas 
+                            {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} 
+                            me-2"></i>
+                            
+                            {{ message }}
+                            
+                            {# O botão de fechar requer o Bootstrap JS #}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        
+                    {% endfor %}
+                </div>
+                {% endif %}
+
                 <h1 class="display-5 fw-bold mb-4 text-center text-red">Fale Conosco</h1>
                 <p class="lead text-center text-muted mb-5">
                     Tem alguma dúvida, sugestão ou precisa de suporte? Envie-nos uma mensagem!
