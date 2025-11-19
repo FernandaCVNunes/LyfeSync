@@ -1,0 +1,241 @@
+{# registrarHumor.html #}
+
+{% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
+
+{% load static %}
+
+{% load custom_filters %}
+
+{% load app_LyfeSync_extras %}
+
+{% block title %}
+  Registrar Humor
+{% endblock %}
+
+{% block content_logado %}
+  <style>
+    /* Estilos Customizados Adicionais (Se o Tailwind não for suficiente) */
+    .humor-image {
+      width: 30px; /* Tamanho da imagem, conforme solicitado */
+      height: 30px;
+      transition: transform 0.1s;
+    }
+    
+    /* Estilo para o container de humor selecionado */
+    .selected-humor {
+      background-color: #ecfdf5; /* Tailwind: bg-green-50, um verde claro */
+      border: 2px solid #34d399; /* Tailwind: border-green-400 */
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      transform: scale(1.05);
+    }
+    
+    /* Estilo para a textarea, baseado na sua imagem de referência */
+    .custom-textarea {
+      background-color: #e6f7ff; /* Cor azul claro da imagem de anexo */
+      border-radius: 20px; /* Borda arredondada */
+      border-color: #b3e0ff; /* Cor da borda */
+    }
+    
+    /* Estilo do botão SALVAR */
+    .btn-salvar-humor {
+      background-color: #f44336; /* Cor Laranja/Vermelho da imagem de anexo */
+    }
+    
+    .btn-salvar-humor:hover {
+      background-color: #d32f2f;
+    }
+    
+    /* Estilo para as imagens pequenas na tabela de humor */
+    .humor-image-small {
+      width: 20px;
+      height: 20px;
+    }
+  </style>
+
+  <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+    <div class="flex flex-wrap lg:flex-nowrap gap-8">
+      <div class="w-full lg:w-3/5 bg-white p-6 rounded-xl shadow-lg">
+        <h1 class="text-3xl font-bold text-lyfesync-green mb-8">Como você está se sentindo hoje?</h1>
+
+        <form id="form-registro-humor" method="POST" action="{% url 'registrarHumor' %}">
+          {% csrf_token %}
+
+          <div class="mb-6">
+            <label for="id_data" class="block text-xl font-semibold text-gray-700 mb-2">Data:</label>
+
+            <input type="date" id="id_data" name="data" class="w-full sm:w-1/2 p-3 border-2 border-green-200 rounded-lg focus:border-lyfesync-green focus:ring focus:ring-green-100 transition duration-150" value="{{ form.data.value|default_if_none:'' }}" required />
+
+            {% if form.data.errors %}
+              <div class="text-red-500 text-sm mt-1">{{ form.data.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-10">
+            <label class="block text-xl font-semibold text-gray-700 mb-4">Selecione seu Humor:</label>
+
+            {# Oculta o widget completo do Django, mas ele deve existir para a validação #}
+
+            <div id="hidden-radio-widget" style="display: none; visibility: hidden;">{{ form.estado }}</div>
+
+            <div class="flex flex-wrap gap-4">
+              {% for value, label in form.estado.field.choices %}
+                {# O value agora é 'FELIZ', 'CALMO', etc. #}
+                {% with image_path=humor_icon_class_map|get_item:value|default:'img/icon/adchumor.png' %}
+                  
+                  {# CORREÇÃO: Linha consolidada e limpa de caracteres inválidos #}
+                  <div class="p-3 border-2 border-gray-100 rounded-xl cursor-pointer hover:shadow-md transition duration-150 flex flex-col items-center justify-center text-center" data-humor-container data-humor-value="{{ value }}" onclick="selectHumor('{{ value }}', this)">
+                    {# O CAMINHO DA IMAGEM É OBTIDO PELO DICIONÁRIO #}
+                    {% if value %}
+                      <img src="{% static image_path %}" alt="{{ label }}" class="humor-image" />
+                    {% else %}
+                      {# Se for o valor vazio (''), use a imagem padrão de placeholder #}
+                      <img src="{% static 'img/icon/adchumor.png' %}" alt="{{ label }}" class="humor-image" />
+                    {% endif %}
+
+                    <span class="text-base font-semibold text-gray-700 pr-2">{{ label|split_by_space|first }}</span>
+                  </div>
+                {% endwith %}
+              {% endfor %}
+            </div>
+
+            {% if form.estado.errors %}
+              <div class="text-red-500 text-sm mt-1">{{ form.estado.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-8">
+            <label for="id_descricaohumor" class="block text-xl font-semibold text-gray-700 mb-2">Descrição:</label>
+
+            <textarea id="id_descricaohumor" name="descricaohumor" rows="8" placeholder="Descreva brevemente o que motivou seu humor hoje..." class="w-full p-4 border-2 border-green-200 rounded-xl focus:border-lyfesync-green focus:ring focus:ring-green-100 transition duration-150 custom-textarea">{{ form.descricaohumor.value|default_if_none:'' }}</textarea>
+
+            {% if form.descricaohumor.errors %}
+              <div class="text-red-500 text-sm mt-1">{{ form.descricaohumor.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="flex justify-end">
+            <button type="submit" class="btn-salvar-humor py-3 px-8 text-white font-bold rounded-xl shadow-lg transition duration-200">SALVAR</button>
+            </div>
+        </form>
+          </div>
+
+      <div class="w-full lg:w-2/5 space-y-8">
+        <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-lyfesync-green">
+          <h2 class="text-2xl font-bold text-lyfesync-green mb-4">Tabela de Humor</h2>
+
+          <div class="text-gray-700 space-y-4 text-sm">
+            {# Ícones de referência no topo (Ajustado para 5 ícones em linha) #}
+
+            <div class="flex justify-around items-center mb-6 border-b pb-4">
+              {% for value, image_path in humor_icon_class_map.items %}
+                <img src="{% static image_path %}" alt="{{ value }}" class="humor-image-small" />
+              {% endfor %}
+            </div>
+
+            {% for value, image_path in humor_icon_class_map.items %}
+              <div class="flex items-start gap-3">
+                <span class="font-bold text-gray-700">{{ value }}:</span>
+
+                <div>
+                  {% if value == 'Feliz' %}
+                    Representa momentos de alegria, contentamento ou satisfação com a vida. É um estado positivo de bem-estar emocional.
+                  {% elif value == 'Calmo' %}
+                    Indica tranquilidade, serenidade e uma sensação de paz interior, sem grandes agitações emocionais.
+                  {% elif value == 'Ansioso' %}
+                    Expressa preocupação, nervosismo ou estresse. Pode ser um estado de alerta em relação a eventos futuros.
+                  {% elif value == 'Triste' %}
+                    Reflete sentimentos de melancolia, tristeza ou desânimo, geralmente associados a situações de perda ou dificuldades.
+                  {% elif value == 'Irritado' %}
+                    Representa frustração, raiva ou impaciência, geralmente como resposta a algo que incomoda ou causa desconforto.
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Função JavaScript para gerenciar a seleção de humor
+    function selectHumor(humorValue, element) {
+      // 1. Remove a classe de seleção de todos os containers
+      // CORREÇÃO: Usando o seletor [data-humor-container] que foi adicionado ao HTML.
+      document.querySelectorAll('[data-humor-container]').forEach(function (el) {
+        el.classList.remove('selected-humor')
+      })
+    
+      // 2. Adiciona a classe de seleção ao elemento clicado (o container div)
+      element.classList.add('selected-humor')
+    
+      // 3. ENCONTRA O INPUT DE RÁDIO CORRESPONDENTE E O MARCA COMO CHECADO
+      const radioInputs = document.querySelectorAll('input[name="estado"][type="radio"]')
+    
+      let found = false
+    
+      radioInputs.forEach(function (input) {
+        if (input.value === humorValue) {
+          input.checked = true
+          found = true
+        } else {
+          input.checked = false
+        }
+      })
+    
+      if (!found) {
+        console.warn(`Aviso: O input de rádio para o valor "${humorValue}" não foi encontrado. O form pode falhar.`)
+      }
+    }
+    
+    document.addEventListener('DOMContentLoaded', function () {
+      // Define a data atual se o campo estiver vazio (mantido)
+      const dateInput = document.getElementById('id_data')
+    
+      if (dateInput && !dateInput.value) {
+        const today = new Date()
+    
+        const yyyy = today.getFullYear()
+    
+        let mm = today.getMonth() + 1
+    
+        let dd = today.getDate()
+    
+        if (mm < 10) mm = '0' + mm
+    
+        if (dd < 10) dd = '0' + dd
+    
+        dateInput.value = yyyy + '-' + mm + '-' + dd
+      }
+    
+      // ------------------------------------------------------------------
+      // Lógica de Pré-Seleção e Marcação Inicial
+      // ------------------------------------------------------------------
+    
+      // Localiza o rádio que o Django marcou como 'checked' (se for uma edição ou validação falha)
+      const checkedRadio = document.querySelector('input[name="estado"][type="radio"]:checked')
+    
+      let preSelectedValue = null
+    
+      if (checkedRadio) {
+        // Se o Django já marcou um rádio (edição/validação), usamos esse valor.
+        preSelectedValue = checkedRadio.value
+      }
+    
+      // Inicializa o estilo do container selecionado APENAS SE HOUVER UM VALOR PRÉ-SELECIONADO
+      if (preSelectedValue) {
+        const initialElement = document.querySelector(`[data-humor-value="${preSelectedValue}"]`)
+    
+        if (initialElement) {
+          // Chama a função de seleção para aplicar as classes CSS e marcar o rádio
+          selectHumor(preSelectedValue, initialElement)
+        }
+      } else {
+        // Garante que NENHUM rádio esteja marcado no carregamento para novos registros
+        document.querySelectorAll('input[name="estado"][type="radio"]').forEach(function (input) {
+          input.checked = false
+        })
+      }
+    })
+  </script>
+{% endblock %}

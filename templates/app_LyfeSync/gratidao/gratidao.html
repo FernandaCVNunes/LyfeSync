@@ -7,6 +7,7 @@
 {% endblock %}
 
 {% block content_logado %}
+
     <div class="container p-4 p-md-5">
         <div class="card p-4 p-md-5 rounded-4 shadow-lg border-0 gratidao-card-container">
             {# Título e Subtítulo #}
@@ -108,6 +109,12 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="d-flex justify-content-between mt-5">
+        <button onclick="window.history.back()" class="btn btn-outline-secondary btn-lg shadow-sm">
+            <i class="bi bi-arrow-left me-2"></i> Voltar à Página Anterior
+        </button>
     </div>
     
 {% endblock %}

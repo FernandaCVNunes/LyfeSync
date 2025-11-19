@@ -53,106 +53,112 @@ Alterar Humor
 
   <link rel="stylesheet" href="{% static 'css/homeLyfesync.css' %}">
 
-  <div class="container py-4 py-md-5">
-  <div class="row justify-content-center">
-  {# Coluna Principal do Formulário - Ocupa toda a largura, centralizado #}
-  <div class="col-12 col-lg-8 card p-4 p-md-5 rounded-4 shadow-lg border-0 bg-white">
+    <div class="container py-4 py-md-5">
+        <div class="row justify-content-center">
+            {# Coluna Principal do Formulário - Ocupa toda a largura, centralizado #}
+            <div class="col-12 col-lg-8 card p-4 p-md-5 rounded-4 shadow-lg border-0 bg-white">
 
-          <h2 class="fw-bold mb-4 humor-title text-center text-lg-start">
-              Edite seu humor registrado:
-          </h2>
+                <h2 class="fw-bold mb-4 humor-title text-center text-lg-start">
+                    Edite seu humor registrado:
+                </h2>
 
-          <!-- Mensagens do Django (Necessita de Bootstrap JS para fechar o alert) -->
-          {% if messages %}
-              <div class="mb-4">
-                  {% for message in messages %}
-                      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                          {{ message }}
-                          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                      </div>
-                  {% endfor %}
-              </div>
-          {% endif %}
+                <!-- Mensagens do Django (Necessita de Bootstrap JS para fechar o alert) -->
+                {% if messages %}
+                    <div class="mb-4">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
 
-          {# AÇÃO FIXA: Sempre a URL de alteração com o PK da instância #}
-          <form id="form-registro-humor"
-              method="POST"
-              action="{% url 'alterarHumor' humor_id=form.instance.pk %}">
-              {% csrf_token %}
-            
-              {# Campo de Data - Tornamos a data somente leitura (read-only) em modo edição #}
-              <div class="mb-4">
-                  <label for="{{ form.data.id_for_label }}" class="form-label h5 fw-semibold text-secondary mb-2">{{ form.data.label }}:</label>
-                  {# Aplicamos a classe rs-form-control e garantimos que é read-only #}
-                  <input type="date" name="data" id="{{ form.data.id_for_label }}" 
-                        class="form-control rs-form-control" 
-                        value="{{ form.data.value|date:'Y-m-d' }}" 
-                        readonly />
-                  
-                  {# Exibimos erros de data, se houver #}
-                  {% if form.data.errors %}
-                      <div class="text-danger small mt-1">{{ form.data.errors }}</div>
-                  {% endif %}
-              </div>
+                {# AÇÃO FIXA: Sempre a URL de alteração com o PK da instância #}
+                <form id="form-registro-humor"
+                    method="POST"
+                    action="{% url 'alterarHumor' humor_id=form.instance.pk %}">
+                    {% csrf_token %}
+                    
+                    {# Campo de Data - Tornamos a data somente leitura (read-only) em modo edição #}
+                    <div class="mb-4">
+                        <label for="{{ form.data.id_for_label }}" class="form-label h5 fw-semibold text-secondary mb-2">{{ form.data.label }}:</label>
+                        {# Aplicamos a classe rs-form-control e garantimos que é read-only #}
+                        <input type="date" name="data" id="{{ form.data.id_for_label }}" 
+                                class="form-control rs-form-control" 
+                                value="{{ form.data.value|date:'Y-m-d' }}" 
+                                readonly />
+                        
+                        {# Exibimos erros de data, se houver #}
+                        {% if form.data.errors %}
+                            <div class="text-danger small mt-1">{{ form.data.errors }}</div>
+                        {% endif %}
+                    </div>
 
-              {# ------------------------------------------------------------------- #}
-              {# CAMPO 'ESTADO' (Seleção Visual de Humor) #}
-              {# ------------------------------------------------------------------- #}
-              <div class="mb-4">
-                  <label class="form-label h5 fw-semibold text-secondary mb-3">{{ form.estado.label }}</label>
+                    {# ------------------------------------------------------------------- #}
+                    {# CAMPO 'ESTADO' (Seleção Visual de Humor) #}
+                    {# ------------------------------------------------------------------- #}
+                    <div class="mb-4">
+                        <label class="form-label h5 fw-semibold text-secondary mb-3">{{ form.estado.label }}</label>
 
-                  {# 1. INPUT HIDDEN REAL: Este campo envia o PK do humor selecionado #}
-                  <input type="hidden" 
-                          name="estado" 
-                          id="id_estado" 
-                          value="{% if form.instance.estado.pk %}{{ form.instance.estado.pk }}{% endif %}" />
-                  
-                  {# 2. Exibe Erros do Campo #}
-                  {% if form.estado.errors %}
-                      <div class="text-danger small mt-1">{{ form.estado.errors }}</div>
-                  {% endif %}
+                        {# 1. INPUT HIDDEN REAL: Este campo envia o PK do humor selecionado #}
+                        <input type="hidden" 
+                                name="estado" 
+                                id="id_estado" 
+                                value="{% if form.instance.estado.pk %}{{ form.instance.estado.pk }}{% endif %}" />
+                        
+                        {# 2. Exibe Erros do Campo #}
+                        {% if form.estado.errors %}
+                            <div class="text-danger small mt-1">{{ form.estado.errors }}</div>
+                        {% endif %}
 
-                  {# Grade de Seleção Visual de Humor #}
-                  <div class="d-flex flex-wrap justify-content-center gap-3 humor-grid" role="radiogroup" aria-labelledby="id_estado_label">
-                      {% for tipo in humores_disponiveis %}
-                          {% with image_path=tipo.icone|default:'img/icon/adchumor.png' %}
-                              <div class="humor-option-card" 
-                                data-humor-container 
-                                data-humor-value="{{ tipo.pk }}" 
-                                onclick="selectHumor('{{ tipo.pk }}', this)"
-                                tabindex="0"
-                                role="radio"
-                                aria-checked="{% if form.instance.estado.pk == tipo.pk %}true{% else %}false{% endif %}"
-                                {% if form.instance.estado.pk == tipo.pk %}class="active"{% endif %}
-                                >
-                                <img src="{% static image_path %}" alt="{{ tipo.estado }}" class="humor-image-lg" />
-                                <span class="humor-label">{{ tipo.estado }}</span>
-                              </div>
-                          {% endwith %}
-                      {% endfor %}
-                  </div>
-              </div>
+                        {# Grade de Seleção Visual de Humor #}
+                        <div class="d-flex flex-wrap justify-content-center gap-3 humor-grid" role="radiogroup" aria-labelledby="id_estado_label">
+                            {% for tipo in humores_disponiveis %}
+                                {% with image_path=tipo.icone|default:'img/icon/adchumor.png' %}
+                                    <div class="humor-option-card" 
+                                        data-humor-container 
+                                        data-humor-value="{{ tipo.pk }}" 
+                                        onclick="selectHumor('{{ tipo.pk }}', this)"
+                                        tabindex="0"
+                                        role="radio"
+                                        aria-checked="{% if form.instance.estado.pk == tipo.pk %}true{% else %}false{% endif %}"
+                                        {% if form.instance.estado.pk == tipo.pk %}class="active"{% endif %}
+                                        >
+                                        <img src="{% static image_path %}" alt="{{ tipo.estado }}" class="humor-image-lg" />
+                                        <span class="humor-label">{{ tipo.estado }}</span>
+                                    </div>
+                                {% endwith %}
+                            {% endfor %}
+                        </div>
+                    </div>
 
-              {# Campo 'descricaohumor' #}
-              <div class="mb-4">
-                  <label for="{{ form.descricaohumor.id_for_label }}" class="form-label h5 fw-semibold text-secondary mb-2">{{ form.descricaohumor.label }}:</label>
-                  {# Renderiza o campo de textarea. Garantimos a classe rs-form-control #}
-                  <textarea name="descricaohumor" id="{{ form.descricaohumor.id_for_label }}" rows="5" class="form-control rs-form-control">{{ form.descricaohumor.value|default_if_none:'' }}</textarea>
+                    {# Campo 'descricaohumor' #}
+                    <div class="mb-4">
+                        <label for="{{ form.descricaohumor.id_for_label }}" class="form-label h5 fw-semibold text-secondary mb-2">{{ form.descricaohumor.label }}:</label>
+                        {# Renderiza o campo de textarea. Garantimos a classe rs-form-control #}
+                        <textarea name="descricaohumor" id="{{ form.descricaohumor.id_for_label }}" rows="5" class="form-control rs-form-control">{{ form.descricaohumor.value|default_if_none:'' }}</textarea>
 
-                  {% if form.descricaohumor.errors %}
-                      <div class="text-danger small mt-1">{{ form.descricaohumor.errors }}</div>
-                  {% endif %}
-              </div>
+                        {% if form.descricaohumor.errors %}
+                            <div class="text-danger small mt-1">{{ form.descricaohumor.errors }}</div>
+                        {% endif %}
+                    </div>
 
-              <div class="d-flex justify-content-end mt-4">
-                  <button type="submit" class="btn btn-salvar-form text-white fw-bold rounded-3 shadow-lg">
-                      SALVAR ALTERAÇÕES
-                  </button>
-              </div>
-          </form>
-      </div>
-  </div>
-  </div>
+                    <div class="d-flex justify-content-end mt-4">
+                        <button type="submit" class="btn btn-salvar-form text-white fw-bold rounded-3 shadow-lg">
+                            SALVAR ALTERAÇÕES
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between mt-5">
+        <button onclick="window.history.back()" class="btn btn-outline-secondary btn-lg shadow-sm">
+            <i class="bi bi-arrow-left me-2"></i> Voltar à Página Anterior
+        </button>
+    </div>
 
 {% endblock %}
 
