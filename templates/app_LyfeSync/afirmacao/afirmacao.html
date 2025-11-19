@@ -5,6 +5,10 @@
 
 {% block title %}Minhas Afirmações{% endblock %}
 
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'app_LyfeSync/css/autocuidado.css' %}">
+{% endblock %}
+
 {% block content_logado %}
 
 <div class="modal fade" id="alterarAfirmacaoModal" tabindex="-1" aria-labelledby="alterarAfirmacaoModalLabel" aria-hidden="true">

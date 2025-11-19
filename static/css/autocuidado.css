@@ -1,0 +1,175 @@
+/* autocuidado.css (Gratidão e Afirmação) */
+
+/* ========================================================= */
+/* --- ESTILOS DE AUTOCUIDADO GERAL --- */
+/* ========================================================= */
+
+/* Título H2 do Menu de Autocuidado: Cor verde #48BB78 */
+.autocuidado-link-title {
+    color: var(--lyfesync-green, #48BB78);
+}
+
+/* Título de Card de Dica */
+.dica-card-title {
+    color: var(--lyfesync-green, #48BB78);
+}
+
+/* Fundo verde claro para o card de dica */
+.dica-card-green {
+    background-color: #ECFDF5;
+    border-color: var(--lyfesync-green, #48BB78) !important;
+}
+
+
+/* ========================================================= */
+/* --- ESTILOS PÁGINA REGISTRAR GRATIDÃO --- */
+/* ========================================================= */
+
+/* Ícones pequenos (Gratidão) (30px) */
+.gratidao-icon-size {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+}
+
+.gratidao-page-container {
+    min-height: 100vh;
+}
+
+.gratidao-main-title {
+    font-size: 2.25rem;
+}
+
+.gratidao-textarea {
+    font-size: 1.15rem !important;
+    resize: none !important;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    min-height: 180px !important;
+}
+
+.gratidao-date-container {
+    margin-bottom: 0rem !important;
+}
+
+.gratidao-date-label {
+    font-size: 1.125rem;
+}
+
+.gratidao-date-input {
+    width: 150px;
+    border-radius: 0.5rem;
+    background-color: #E9ECEF !important;
+    border: 1px solid #E9ECEF !important;
+    box-shadow: none !important;
+}
+
+.gratidao-title-color {
+    color: var(--lyfesync-red-salvar);
+}
+
+.gratidao-question-color {
+    color: var(--lyfesync-green);
+}
+
+.gratidao-field-bg {
+    background-color: #C6F6D5 !important;
+    border: 1px solid #C6F6D5 !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06) !important;
+    padding: 1.5rem !important;
+    border-radius: 0.5rem !important;
+}
+
+/* Botão de Salvar (Gratidão) - Remapeado para .btn-salvar-padrao no HTML */
+/* .btn-salvar-gratidao (REMOVER E USAR .btn-salvar-padrao) */
+
+
+/* ========================================================= */
+/* --- ESTILOS PÁGINA REGISTRAR AFIRMAÇÃO --- */
+/* ========================================================= */
+
+.afirmacao-page-container {
+    min-height: 100vh;
+}
+
+.afirmacao-main-title {
+    font-size: 2.25rem;
+}
+
+.afirmacao-date-label {
+    font-size: 1.125rem;
+}
+
+.afirmacao-date-input {
+    width: 150px;
+    background-color: #BDBDBD !important;
+    border-radius: 0.5rem;
+    border: none !important;
+    color: #4A5568 !important;
+}
+
+.afirmacao-text-container {
+    max-width: 500px;
+}
+
+.afirmacao-circle-group {
+    margin-bottom: 5rem !important;
+}
+
+/* Definição do formato circular */
+.affirmation-circle {
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+}
+
+.affirmation-circle:hover {
+    transform: translateY(-5px);
+}
+
+/* Cores específicas para os círculos */
+.circle-blue {
+    background-color: #C0CFF7;
+}
+
+.circle-pink {
+    background-color: #F7C0C0;
+}
+
+.circle-green {
+    background-color: #C0F7C9;
+}
+
+/* Estilo para garantir que o textarea dentro do círculo se ajuste */
+.afirmacao-textarea {
+    background: transparent;
+    border: none;
+    padding: 1rem;
+    resize: none;
+    width: 100%;
+    height: 100%;
+    font-size: 1.25rem;
+    font-style: italic;
+    color: #333;
+    box-shadow: none !important;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .affirmation-circles-wrapper {
+        flex-direction: column;
+    }
+}
+
+.afirmacao-error-message {
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    position: absolute;
+}

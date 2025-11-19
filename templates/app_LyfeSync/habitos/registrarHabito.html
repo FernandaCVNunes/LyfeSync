@@ -1,5 +1,10 @@
 {# registrarHabito.html #}
 
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'app_LyfeSync/css/habito.css' %}">
+{% endblock %}
+
+
 <div class="modal fade" id="registrarHabitoModal" tabindex="-1" aria-labelledby="registrarHabitoLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rs-modal-content shadow-lg rounded-3">

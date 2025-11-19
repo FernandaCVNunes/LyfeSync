@@ -8,6 +8,10 @@
     Meu Humor
 {% endblock %}
 
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'app_LyfeSync/css/humor.css' %}">
+{% endblock %}
+
 {% block content_logado %}
     <div class="container py-4">
         
@@ -126,7 +130,7 @@
                                 {% for humor_registro in humores_recentes %}
                                     <div class="list-group-item d-flex justify-content-between align-items-center bg-light mb-2 rounded-3 humor-list-item-hover" id="humor-{{ humor_registro.idhumor }}">
                                         <div class="d-flex align-items-center flex-grow-1">
-                                            <div class="flex-shrink-0 me-3 humor-image-sm">
+                                            <div class="flex-shrink-0 me-3 humor-image">
                                                 <img src="{% static humor_registro.estado.icone %}" alt="{{ humor_registro.estado.estado }}" class="img-fluid" />
                                             </div>
 

@@ -1,0 +1,20 @@
+/* theme.css (Variáveis Globais) */
+
+/* VARIÁVEIS DE TEMA GERAL */
+:root {
+    /* Cores que podem ser usadas em toda a aplicação */
+    --lyfesync-red-salvar: #E5534B;
+    --lyfesync-green: #4CAF50;
+    /* Verde Padrão */
+    --lyfesync-text-emerald: #10B981;
+    /* Verde Esmeralda */
+    --lyfesync-gray-input: #E9ECEF;
+    --lyfesync-text-gray: #4A5568;
+
+    /* VARIÁVEIS PARA O RELATÓRIO DE HUMOR */
+    --mood-great: var(--lyfesync-green);
+    --mood-good: var(--lyfesync-text-emerald);
+    --mood-ok: #F6E05E;
+    --mood-sad: #4299E1;
+    --mood-angry: var(--lyfesync-red-salvar);
+}

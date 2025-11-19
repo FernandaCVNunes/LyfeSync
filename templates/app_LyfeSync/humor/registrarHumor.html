@@ -12,10 +12,13 @@ Registrar Humor
 {% endif %}
 {% endblock %}
 
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'app_LyfeSync/css/humor.css' %}">
+{% endblock %}
+
 {% block content_logado %}
 
-{# É crucial que as classes como .rs-form-control, .humor-image-lg, .humor-option-card.active, .btn-salvar-form estejam
-definidas em homeLyfesync.css #}
+{# É crucial que as classes como .rs-form-control,#}
 <link rel="stylesheet" href="{% static 'css/homeLyfesync.css' %}">
 
 <div class="container py-4 py-md-5">

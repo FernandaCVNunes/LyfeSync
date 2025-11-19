@@ -1,0 +1,252 @@
+/* humor.css */
+
+/* Ícones de Humor (48px) no formulário */
+.humor-image-lg {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    margin-bottom: 0.5rem;
+}
+
+/* Ícones pequenos (Humor) (30px) */
+.humor-image {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    transition: transform 0.1s;
+}
+
+/* ESTILOS PÁGINA REGISTRAR HUMOR (DETALHES DO CARD) */
+.humor-title {
+    color: var(--lyfesync-text-emerald);
+    font-size: 2.25rem;
+    font-weight: 700;
+}
+
+.humor-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem 0;
+}
+
+/* Card de Opção de Humor */
+.humor-option-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 120px;
+    padding: 0.5rem;
+    border: 2px solid #E5E7EB;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    background-color: #FFFFFF;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+}
+
+.humor-option-card:hover {
+    border-color: #34D399;
+    transform: translateY(-2px);
+}
+
+/* ESTILO ATIVO */
+.humor-option-card.active {
+    border-color: var(--lyfesync-text-emerald);
+    background-color: #ECFDF5;
+    box-shadow: 0 0 0 4px #10B981, 0 8px 12px -3px rgba(0, 0, 0, 0.2);
+    transform: scale(1.05);
+}
+
+.humor-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #4B5563;
+    text-align: center;
+}
+
+.humor-option-card.active .humor-label {
+    font-weight: 700;
+    color: var(--lyfesync-text-emerald);
+}
+
+.humor-page-container {
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+@media (max-width: 640px) {
+    .humor-option-card {
+        flex-basis: calc(33.333% - 1rem);
+        width: auto;
+    }
+}
+
+/* Botão de Salvar (Verde Esmeralda - Registrar Humor) */
+.btn-salvar-form {
+    background-color: var(--lyfesync-text-emerald);
+    border: none;
+    padding: 0.75rem 2rem;
+    font-size: 1.125rem;
+    transition: background-color 0.2s;
+    color: #FFFFFF;
+    font-weight: bold;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+}
+
+.btn-salvar-form:hover {
+    background-color: #059669;
+}
+
+.humor-btn-salvar {
+    margin-top: 3rem;
+    max-width: 300px;
+    width: 100%;
+}
+
+/* ESTILOS RELATÓRIO DE HUMOR (MOOD TRACKER) */
+.mood-report-header {
+    font-size: 1.5rem;
+    font-weight: 700;
+    padding: 1.5rem 0;
+}
+
+.mood-header-title {
+    color: var(--lyfesync-green);
+}
+
+.mood-header-month {
+    color: var(--lyfesync-red-salvar);
+}
+
+.mood-report-table {
+    table-layout: fixed;
+    width: 100%;
+    border-collapse: collapse;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background-color: #FFFFFF;
+}
+
+.mood-report-table thead th {
+    background-color: #F7FAFC;
+    font-weight: 600;
+    color: var(--lyfesync-text-gray);
+    padding: 0.75rem 0.2rem;
+    border: 1px solid #E2E8F0;
+    font-size: 0.8rem;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.mood-report-table tbody td {
+    height: 48px;
+    padding: 0;
+    border: 1px solid #E2E8F0;
+    vertical-align: middle;
+}
+
+.col-humor {
+    width: 100px;
+    background-color: #FEFCE8;
+    padding: 0.5rem;
+}
+
+.col-day {
+    width: 2.5%;
+    text-align: center;
+}
+
+.col-result {
+    width: 80px;
+}
+
+.mood-icon-cell svg {
+    width: 40px;
+    height: 40px;
+    vertical-align: middle;
+    display: block;
+    margin: 0 auto;
+}
+
+.mood-fill {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Usa as variáveis do tema: --mood-great, --mood-good, etc. */
+.mood-fill-great {
+    background-color: var(--mood-great);
+}
+
+.mood-fill-good {
+    background-color: var(--mood-good);
+}
+
+.mood-fill-ok {
+    background-color: var(--mood-ok);
+}
+
+.mood-fill-sad {
+    background-color: var(--mood-sad);
+}
+
+.mood-fill-angry {
+    background-color: var(--mood-angry);
+}
+
+@media (max-width: 768px) {
+    .mood-report-header {
+        font-size: 1.1rem;
+    }
+
+    .mood-report-table thead th {
+        font-size: 0.6rem;
+        padding: 0.5rem 0.1rem;
+    }
+
+    .col-humor {
+        width: 60px;
+        padding: 0.2rem;
+    }
+
+    .mood-icon-cell svg {
+        width: 30px;
+        height: 30px;
+    }
+
+    .col-result {
+        width: 60px;
+    }
+}
+
+/* Novo estilo para o item de histórico de humor ao passar o mouse */
+.humor-list-item-hover:hover {
+    background-color: #e9ecef !important;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo para a textarea, baseado na sua imagem de referência */
+.humor-custom-textarea {
+    background-color: #e6f7ff;
+    /* Cor azul claro */
+    border-radius: 20px;
+    border-color: #b3e0ff;
+}
+
+/* Ajuste de layout */
+.humor-option-item {
+    padding: 8px;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    transition: all 0.15s ease-in-out;
+}

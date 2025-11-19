@@ -8,48 +8,11 @@
 Alterar Humor
 {% endblock %}
 
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'app_LyfeSync/css/humor.css' %}">
+{% endblock %}
+
 {% block content_logado %}
-
-  <style>
-  /* Estilos Customizados Adicionais (Baseado em registrarHumor.html) */
-  .humor-image {
-    width: 30px;
-    height: 30px;
-    transition: transform 0.1s;
-  }
-
-  /* Estilo para o container de humor selecionado */
-  .selected-humor {
-    background-color: #ecfdf5; /* Tailwind: bg-green-50, um verde claro */
-    border: 2px solid #34d399; /* Tailwind: border-green-400 */
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    transform: scale(1.05);
-  }
-
-  /* Estilo para a textarea, baseado na sua imagem de referência */
-  .custom-textarea {
-    background-color: #e6f7ff; /* Cor azul claro */
-    border-radius: 20px;
-    border-color: #b3e0ff;
-  }
-
-  /* Estilo do botão SALVAR (Cor Laranja/Vermelho da imagem de anexo) */
-  .btn-salvar-humor {
-    background-color: #f44336;
-  }
-
-  .btn-salvar-humor:hover {
-    background-color: #d32f2f;
-  }
-
-  /* Ajuste de layout */
-  .humor-option-item {
-    padding: 8px;
-    border-radius: 12px;
-    border: 2px solid transparent;
-    transition: all 0.15s ease-in-out;
-  }
-  </style>
 
   <link rel="stylesheet" href="{% static 'css/homeLyfesync.css' %}">
 
@@ -123,7 +86,7 @@ Alterar Humor
                                         tabindex="0"
                                         role="radio"
                                         aria-checked="{% if form.instance.estado.pk == tipo.pk %}true{% else %}false{% endif %}"
-                                        {% if form.instance.estado.pk == tipo.pk %}class="active"{% endif %}
+                                        {% if form.instance.estado.pk == tipo.pk %}class="humor-option-card.active"{% endif %}
                                         >
                                         <img src="{% static image_path %}" alt="{{ tipo.estado }}" class="humor-image-lg" />
                                         <span class="humor-label">{{ tipo.estado }}</span>

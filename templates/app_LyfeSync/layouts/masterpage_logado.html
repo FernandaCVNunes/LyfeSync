@@ -16,8 +16,12 @@
     {# Arquivos de Estilo Personalizados #}
     {# masterpage.css é carregado primeiro para estilos comuns (navbar/footer) #}
     <link rel="stylesheet" href="{% static 'css/masterpage.css' %}" />
+    {# Novo theme.css para variáveis globais de cor #}
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}" />
     {# masterpage_logado.css sobrescreve para o layout sidebar/fixed-navbar #}
     <link rel="stylesheet" href="{% static 'css/masterpage_logado.css' %}" />
+    {# homeLyfesync.css com os estilos globais de componentes/ícones #}
+    <link rel="stylesheet" href="{% static 'css/homeLyfesync.css' %}" />
   </head>
   
   <body class="lyfesync-full-layout">

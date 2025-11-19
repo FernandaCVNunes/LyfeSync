@@ -1,4 +1,9 @@
 {# alterarGratidao.html #}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'app_LyfeSync/css/autocuidado.css' %}">
+{% endblock %}
+
 <form method="POST" id="form-alterar-gratidao" data-gratidao-id="{{ gratidao_id }}">
     {% csrf_token %}
     

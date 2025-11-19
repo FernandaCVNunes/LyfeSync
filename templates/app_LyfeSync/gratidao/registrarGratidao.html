@@ -6,6 +6,10 @@
     Registrar 3 Gratidões
 {% endblock %}
 
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'app_LyfeSync/css/autocuidado.css' %}">
+{% endblock %}
+
 {% block content_logado %}
     <div class="container-fluid p-4 p-md-5 gratidao-page-container">
         <form method="POST" id="form-registrar-gratidao">

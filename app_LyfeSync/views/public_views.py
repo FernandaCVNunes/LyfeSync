@@ -56,7 +56,7 @@ def contatos(request):
         # 5. Tenta enviar o e-mail
         try:
             mail.send(fail_silently=False)
-            messages.success(request, 'Mensagem enviada com sucesso! Em breve entraremos em contato.')
+            messages.success(request, 'Mensagem enviada com sucesso! Em 48h entraremos em contato.')
             # Redireciona para a mesma página para limpar o POST
             return HttpResponseRedirect(reverse('contatos')) 
         except Exception as e:
