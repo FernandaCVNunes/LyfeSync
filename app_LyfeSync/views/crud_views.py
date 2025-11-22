@@ -243,8 +243,6 @@ def registrar_humor(request):
     }
     return render(request, 'app_LyfeSync/humor/registrarHumor.html', context)
 
-@login_required
-
 @login_required(login_url='login')
 def alterar_humor(request, humor_id): 
     """Permite alterar um Humor existente, preservando a tag [DICA ID:X] se ela existir."""

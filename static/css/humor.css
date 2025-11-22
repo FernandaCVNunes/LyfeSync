@@ -111,6 +111,19 @@
     width: 100%;
 }
 
+.btn-alterar {
+    background-color: #ffc107 !important;
+    border-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.btn-alterar:hover {
+    background-color: rgba(255, 255, 0, 0.425) !important;
+    border-color: rgba(255, 255, 0, 0.425) !important;
+    color: #212529 !important;
+}
+
+
 /* ESTILOS RELATÓRIO DE HUMOR (MOOD TRACKER) */
 .mood-report-header {
     font-size: 1.5rem;

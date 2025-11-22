@@ -18,8 +18,8 @@
                     
                     <div class="w-100">
                         <a href="{% provider_login_url 'google' %}" class="btn btn-social btn-google w-100 mb-3 d-flex align-items-center justify-content-center rounded-pill shadow-sm">
-                            <img src="{% static 'img/icones/google_icon.png' %}" alt="Google" class="social-icon-img me-2" />
-                            Fazer login com o Google
+                            <i class="fab fa-google social-icon-white"></i>
+                            <p>Fazer login com o Google</p>
                         </a>
                     </div>
                     
@@ -65,6 +65,11 @@
                     </form>
                     
                     <a href="{% url 'account_reset_password' %}" class="mt-4 text-decoration-none text-red-dark">Esqueceu a senha? Clique aqui.</a>
+                    <div class="d-flex justify-content-between mt-5">
+                        <button onclick="window.history.back()" class="btn btn-outline-secondary btn-lg shadow-sm">
+                            <i class="bi bi-arrow-left me-2"></i> Voltar à Página Anterior
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="col-md-6 d-flex flex-column align-items-center justify-content-center p-5 text-white register-section rounded-end-5">
@@ -133,9 +138,9 @@
                         </a>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
+    
 </div>
 {% endblock %}

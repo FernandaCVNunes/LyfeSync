@@ -7,7 +7,6 @@
 /* ========================================================= */
 
 /* Ícones de Autocuidado no Menu (50px) */
-/* **REMOVER !important** - Confie na cascata ou especifique o seletor HTML */
 .autocuidado-icon-lg {
     max-width: 8%;
     width: 50px;
@@ -104,16 +103,16 @@
 
 /* Estilo para Botões de Alterar (btn-warning) */
 .btn-warning {
-    background-color: var(--lyfesync-red-salvar) !important;
-    border-color: var(--lyfesync-red-salvar) !important;
-    color: white !important;
+    background-color: var(--lyfesync-red-salvar);
+    border-color: var(--lyfesync-red-salvar);
+    color: white;
     transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 }
 
 .btn-warning:hover {
-    background-color: #C5443C !important;
-    border-color: #C5443C !important;
-    color: white !important;
+    background-color: #C5443C;
+    border-color: #C5443C;
+    color: white;
     opacity: 0.9;
 }
 
