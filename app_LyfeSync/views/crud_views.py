@@ -175,7 +175,7 @@ def humor(request):
         'humores_disponiveis': tipos_de_humor,
         'dica_do_dia': dica_do_dia, 
     }
-    return render(request, 'app_LyfeSync/humor/humor.html', context)
+    return render(request, 'app_LyfeSync/autocuidado/humor.html', context)
     
 @login_required(login_url='login')
 def registrar_humor(request):
@@ -209,7 +209,7 @@ def registrar_humor(request):
         'form': form,
         'humores_disponiveis': humores_disponiveis 
     }
-    return render(request, 'app_LyfeSync/humor/registrarHumor.html', context)
+    return render(request, 'app_LyfeSync/autocuidado/registrarHumor.html', context)
 
 @login_required(login_url='login')
 def alterar_humor(request, humor_id):
@@ -258,7 +258,7 @@ def alterar_humor(request, humor_id):
         'humor_atual': instance,
     }
     
-    return render(request, 'app_LyfeSync/humor/alterarHumor.html', context)
+    return render(request, 'app_LyfeSync/autocuidado/alterarHumor.html', context)
 
 @require_POST
 @login_required(login_url='login')
