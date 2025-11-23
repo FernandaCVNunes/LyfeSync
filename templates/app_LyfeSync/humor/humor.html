@@ -4,13 +4,123 @@
 {% load custom_filters %}
 {% load app_LyfeSync_extras %}
 
-{% block title %}
-    Meu Humor
-{% endblock %}
+{% block title %}Meu Humor{% endblock %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'app_LyfeSync/css/humor.css' %}">
+    {# Carrega os estilos customizados para a página de humor #}
+    <link rel="stylesheet" href="{% static 'app_LyfeSync/css/humor.css' %}">
 {% endblock %}
+
+{# -------------------------------------------------------------------------------- #}
+{# NOVO BLOCO: FUNÇÕES GLOBAIS (Para resolver o ReferenceError do onclick) #}
+{# -------------------------------------------------------------------------------- #}
+{% block extra_scripts %}
+<script>
+    const URL_REGISTRO = "{% url 'registrarHumor' %}";
+    const URL_ALTERACAO_BASE = "{% url 'alterarHumor' humor_id=0 %}"; 
+    const URL_DELETE_TEMPLATE = "{% url 'deleteHumor' humor_id=0 %}"; 
+    const URL_LOAD_HUMOR_BY_DATE = "{% url 'load_humor_by_date' %}";
+
+    function selectHumorModal(humorValue, element) {
+        // ... (Corpo da função 'selectHumorModal' é mantido)
+        const val = String(humorValue);
+        const hiddenInput = document.getElementById('id_estado_modal');
+        const modalTitle = document.getElementById('registroOuAlteracaoModalLabel');
+        const humorIdModalInput = document.getElementById('humor_id_modal');
+
+        // 1. Limpa o destaque de todos os cartões
+        document.querySelectorAll('#registroOuAlteracaoModal [data-humor-container]').forEach(function (el) {
+            el.classList.remove('active', 'selected', 'border', 'border-4', 'border-primary');
+            el.setAttribute('aria-checked', 'false');
+        });
+
+        // 2. Adiciona o destaque ao elemento clicado
+        if (element) {
+            element.classList.add('active', 'selected', 'border', 'border-4', 'border-primary');
+            element.setAttribute('aria-checked', 'true');
+            
+            // 3. Atualiza o Título APENAS no modo Registro (ID vazio)
+            if (modalTitle && (!humorIdModalInput || humorIdModalInput.value === '')) {
+                const humorEstado = element.querySelector('.humor-label').textContent;
+                modalTitle.textContent = `Registrar Humor: ${humorEstado}`;
+            }
+        }
+
+        // 4. ATUALIZA O INPUT HIDDEN REAL
+        if (hiddenInput) {
+            hiddenInput.value = val;
+        }
+    }
+    
+    function callAlteracaoModal(humorPk, dataStr, estadoId, descricao) {
+        // Assume que 'bootstrap' está carregado.
+        const modalElement = document.getElementById('registroOuAlteracaoModal');
+        // Tenta obter a instância, se não existir, cria uma nova.
+        const modalInstance = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+
+        // Cria um botão virtual com os atributos de dados necessários
+        const tempButton = document.createElement('button');
+        tempButton.setAttribute('data-mode', 'alteracao');
+        tempButton.setAttribute('data-humor-id', humorPk);
+        tempButton.setAttribute('data-humor-data', dataStr);
+        tempButton.setAttribute('data-humor-estado', estadoId);
+        // Usa encodeURIComponent para garantir que caracteres especiais não quebrem o HTML/JS
+        tempButton.setAttribute('data-humor-descricao', encodeURIComponent(descricao || ''));
+
+        // Dispara o modal, e o listener 'show.bs.modal' fará o resto
+        modalInstance.show(tempButton);
+    }
+    
+    // Função loadHumorByDate mantida global (se for usada por um onclick em outro lugar)
+    function loadHumorByDate(dataSelecionada) {
+        console.warn("loadHumorByDate: Função de API não implementada. Endpoint: " + URL_LOAD_HUMOR_BY_DATE);
+        
+        const cardContent = document.getElementById('humor-detail-content');
+        const loadingSpinner = document.getElementById('humor-loading-spinner');
+
+        if (loadingSpinner) loadingSpinner.classList.remove('d-none');
+        if (cardContent) cardContent.innerHTML = ''; 
+
+        const apiUrl = `${URL_LOAD_HUMOR_BY_DATE}?data=${dataSelecionada}`; 
+
+        fetch(apiUrl)
+            .then(response => {
+                if (!response.ok) {
+                    // Trata caso de 404/not found ou server error
+                    if (response.status === 404) {
+                        return { humor_pk: null }; // Simula "não encontrado"
+                    }
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (loadingSpinner) loadingSpinner.classList.add('d-none');
+                
+                if (cardContent && data.humor_pk) {
+                    cardContent.innerHTML = `
+                        <h5 class="card-title text-primary">${data.estado_nome}</h5>
+                        <p><strong>Descrição:</strong> ${data.descricaohumor || 'Nenhuma descrição fornecida.'}</p>
+                        ${data.dica ? `<div class="alert alert-info py-2"><strong>Dica:</strong> ${data.dica.texto}</div>` : ''}
+                        <p class="small text-muted">Registrado em: ${new Date(data.data_registro).toLocaleString()}</p>
+                        
+                        <button class="btn btn-sm btn-outline-secondary mt-2" 
+                                onclick="callAlteracaoModal('${data.humor_pk}', '${data.data_registro_str}', '${data.estado_id}', '${data.descricaohumor_raw}')">
+                            Editar
+                        </button>
+                    `;
+                } else if (cardContent) {
+                    cardContent.innerHTML = '<p class="text-muted">Nenhum registro de humor encontrado para esta data.</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao carregar humor por data:', error);
+                if (loadingSpinner) loadingSpinner.classList.add('d-none');
+                if (cardContent) cardContent.innerHTML = '<p class="text-danger">Erro ao carregar dados.</p>';
+            });
+    }
+</script>
+{% endblock extra_scripts %}
 
 {% block content_logado %}
     <div class="container py-4">
@@ -28,52 +138,65 @@
         {% endif %}
 
         <div class="row g-4">
-            {# Coluna Principal: Humor de Hoje (Largo) - col-lg-7 é aproximadamente 3/5 (58%) #}
+            {# Coluna Principal: Humor de Hoje (Largo) #}
             <div class="col-lg-7">
                 <div class="card shadow-lg mb-4 rounded-4 border-top border-2 border-success">
                     <div class="card-body">
                         <h1 class="h3 font-weight-bold text-dark mb-4">Meu Humor</h1>
 
                         <div class="mb-4">
-                            <a href="{% url 'registrarHumor' %}" class="btn btn-success btn-lg shadow-sm rounded-3">
-                                Adicionar Humor de Hoje
-                            </a>
+                            {# Botão de Registro/Inclusão: Desabilitado se o humor do dia já existe #}
+                            <button type="button" class="btn {% if humor_do_dia %}btn-info{% else %}btn-success{% endif %} btn-lg shadow-sm rounded-3"
+                                data-bs-toggle="modal"
+                                data-bs-target="#registroOuAlteracaoModal"
+                                data-mode="registro"
+                                {% if humor_do_dia %}
+                                title="O registro de hoje já existe. Use o botão 'Alterar Humor de Hoje' abaixo." disabled
+                                {% endif %}
+                                >
+                                {% if humor_do_dia %}Humor de Hoje Já Registrado{% else %}Adicionar Humor de Hoje{% endif %}
+                            </button>
                         </div>
 
-                        {# Humor de Hoje #}
-                        {% if humor_do_dia and humor_do_dia.idhumor %}
+                        {# --- Detalhes do Humor de Hoje --- #}
+                        {% if humor_do_dia and humor_do_dia.pk %}
                             <div class="mb-4">
-                                <h2 class="h5 text-secondary border-bottom pb-2">Humor de Hoje: <span class="text-success">{{ humor_do_dia.data|date:'d/m/Y' }}</span></h2>
+                                <h2 class="h5 text-secondary border-bottom pb-2">Registro de Hoje: <span class="text-success">{{ humor_do_dia.data|date:'d/m/Y' }}</span></h2>
 
-                                {# Card de Detalhes do Humor #}
                                 <div class="d-flex align-items-start p-3 border rounded-3 bg-light humor-today-card">
-                                    <div class="flex-shrink-0 me-3 humor-image-lg">
-                                        <img src="{% static humor_do_dia.estado.icone %}" alt="{{ humor_do_dia.estado.estado }}" class="img-fluid" />
+                                    <div class="flex-shrink-0 humor-image me-3">
+                                        <img src="{% static humor_do_dia.estado.icone %}" alt="{{ humor_do_dia.estado.estado }}" width="40" height="40" class="img-fluid" />
                                     </div>
-
-                                    <div>
-                                        <h2 class="h4 text-dark">{{ humor_do_dia.estado.estado }}:</h2>
-                                        {# Usando descricao_usuario_original que deve estar limpa da dica ID #}
-                                        <p class="text-secondary mt-1">{{ humor_do_dia.descricao_usuario_original|default:humor_do_dia.descricaohumor|default:'Nenhuma descrição.' }}</p>
+                                    <div class="flex-grow-1">
+                                        <h4 class="h4 text-dark mb-1">{{ humor_do_dia.estado.estado }}</h4>
+                                        <p class="text-secondary mt-1 mb-0">{{ humor_do_dia.descricao_usuario_original|default:humor_do_dia.descricaohumor|default:'Nenhuma descrição.' }}</p>
                                     </div>
                                 </div>
 
                                 <h3 class="h6 font-weight-bold text-secondary mt-4 mb-2">Descrição Completa:</h3>
-
-                                {# Área de Descrição #}
                                 <div class="p-3 border rounded-3 text-dark bg-light">{{ humor_do_dia.descricao_usuario_original|default:humor_do_dia.descricaohumor|default:'Nenhuma descrição.'|linebreaksbr }}</div>
 
                                 <div class="mt-3 text-end">
-                                    {# Botão de Alterar #}
-                                    <a href="{% url 'alterarHumor' humor_do_dia.idhumor %}" class="btn btn-warning btn-sm shadow-sm me-2 rounded-pill btn-alterar">Alterar Humor de Hoje</a>
+                                    {# Botão de Alterar: Abre o modal em modo Alteração (Passa os dados) #}
+                                    <button type="button" class="btn btn-warning btn-sm shadow-sm me-2 rounded-pill btn-alterar"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#registroOuAlteracaoModal"
+                                        data-mode="alteracao"
+                                        data-humor-id="{{ humor_do_dia.pk }}"
+                                        data-humor-estado="{{ humor_do_dia.estado.pk }}"
+                                        data-humor-data="{{ humor_do_dia.data|date:'Y-m-d' }}"
+                                        data-humor-descricao="{{ humor_do_dia.descricao_usuario_original|default:humor_do_dia.descricaohumor|default:'' }}"
+                                        >
+                                        <i class="bi bi-pencil-square me-1"></i> Alterar Humor de Hoje
+                                    </button>
                                     
-                                    {# Botão de Excluir que chama o Modal #}
-                                    <button type="button" class="btn btn-danger btn-sm shadow-sm rounded-pill" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#excluirHumorModal"
-                                            data-humor-id="{{ humor_do_dia.idhumor }}"
-                                            data-humor-data="{{ humor_do_dia.data|date:'d/m/Y' }}">
-                                        Excluir
+                                    {# Botão de Excluir: Abre o Modal de Confirmação #}
+                                    <button type="button" class="btn btn-danger btn-sm shadow-sm rounded-pill"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#excluirHumorModal"
+                                        data-humor-id="{{ humor_do_dia.pk }}"
+                                        data-humor-data="{{ humor_do_dia.data|date:'d/m/Y' }}">
+                                        <i class="bi bi-trash-fill me-1"></i> Excluir
                                     </button>
                                 </div>
                             </div>
@@ -87,7 +210,7 @@
                 </div>
             </div>
 
-            {# Coluna Lateral: Dicas de Autocuidado (Com Lógica da Dica Dinâmica) #}
+            {# Coluna Lateral: Dicas de Autocuidado #}
             <div class="col-lg-5">
                 <div class="card shadow-lg mb-4 rounded-4 border-top border-2 border-danger">
                     <div class="card-body">
@@ -95,13 +218,9 @@
                         
                         {% if dica_do_dia %}
                             <div class="p-3 border rounded-3 bg-light" style="border-left: 5px solid #dc3545 !important;">
-                                {# Nome da Dica #}
-                                <h3 class="h5 font-weight-bold text-danger">{{ dica_do_dia.nomeDica }}</h3> 
-                                
-                                {# Descrição da Dica #}
+                                <h3 class="h5 font-weight-bold text-danger">{{ dica_do_dia.nomeDica }}</h3>
                                 <p class="text-dark mt-2">{{ dica_do_dia.descricaoDica|linebreaksbr }}</p>
                             
-                                {# Mostrar o humor relacionado #}
                                 <div class="mt-3 text-end">
                                     <span class="badge bg-danger text-white rounded-pill p-2">
                                         Recomendado para: {{ dica_do_dia.humor_relacionado.estado }}
@@ -110,15 +229,15 @@
                             </div>
                         {% else %}
                             <div class="text-center p-3 bg-light border border-2 border-dashed rounded-4">
-                                <p class="text-muted">Nenhuma dica encontrada para o seu humor atual ou todas as dicas foram vistas (a lista será reiniciada na próxima sessão).</p>
+                                <p class="text-muted">Nenhuma dica encontrada para o seu humor atual ou todas as dicas foram vistas.</p>
                             </div>
                         {% endif %}
                     </div>
                 </div>
             </div>
         </div>
-
-        {# Histórico de Humor (Ocupa a largura total abaixo das colunas) #}
+        
+        {# Histórico de Humor #}
         <div class="row mt-4">
             <div class="col-12">
                 <div class="card shadow-lg mb-4 rounded-4 border-top border-2 border-success">
@@ -128,10 +247,10 @@
                         {% if humores_recentes %}
                             <div class="list-group">
                                 {% for humor_registro in humores_recentes %}
-                                    <div class="list-group-item d-flex justify-content-between align-items-center bg-light mb-2 rounded-3 humor-list-item-hover" id="humor-{{ humor_registro.idhumor }}">
+                                    <div class="list-group-item d-flex justify-content-between align-items-center bg-light mb-2 rounded-3 humor-list-item-hover" id="humor-{{ humor_registro.pk }}">
                                         <div class="d-flex align-items-center flex-grow-1">
-                                            <div class="flex-shrink-0 me-3 humor-image">
-                                                <img src="{% static humor_registro.estado.icone %}" alt="{{ humor_registro.estado.estado }}" class="img-fluid" />
+                                            <div class="flex-shrink-0 humor-image me-3">
+                                                <img src="{% static humor_registro.estado.icone %}" alt="{{ humor_registro.estado.estado }}" width="40" height="40" class="img-fluid"/>
                                             </div>
 
                                             <div>
@@ -139,24 +258,33 @@
                                                 <h3 class="h6 font-weight-bold text-dark mb-0">{{ humor_registro.estado.estado }}</h3>
 
                                                 {% if humor_registro.descricaohumor %}
-                                                    {# Nota: Descrição filtrada pela view (descricaohumor agora contém apenas a descrição do usuário) #}
                                                     <p class="text-sm text-secondary mb-0 text-truncate" style="max-width: 350px;">{{ humor_registro.descricaohumor|default:'Nenhuma descrição.' }}</p>
                                                 {% endif %}
                                             </div>
                                         </div>
 
                                         <div class="d-flex align-items-center">
-                                            {# Botão Alterar #}
-                                            {% if humor_registro.idhumor %}
-                                                <a href="{% url 'alterarHumor' humor_registro.idhumor %}" class="btn btn-sm btn-warning ms-3 shadow-sm rounded-pill btn-alterar">Alterar</a>
+                                            {# Botão Alterar Histórico #}
+                                            {% if humor_registro.pk %}
+                                                <button type="button" class="btn btn-sm btn-warning ms-3 shadow-sm rounded-pill btn-alterar"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#registroOuAlteracaoModal"
+                                                    data-mode="alteracao"
+                                                    data-humor-id="{{ humor_registro.pk }}"
+                                                    data-humor-estado="{{ humor_registro.estado.pk }}"
+                                                    data-humor-data="{{ humor_registro.data|date:'Y-m-d' }}"
+                                                    data-humor-descricao="{{ humor_registro.descricaohumor|default:'' }}"
+                                                    >
+                                                    <i class="bi bi-pencil-square"></i> Alterar
+                                                </button>
                                                 
-                                                {# Botão de Excluir Histórico que chama o Modal #}
+                                                {# Botão de Excluir Histórico #}
                                                 <button type="button" class="btn btn-sm btn-danger ms-2 shadow-sm rounded-pill"
-                                                        data-bs-toggle="modal" 
+                                                        data-bs-toggle="modal"
                                                         data-bs-target="#excluirHumorModal"
-                                                        data-humor-id="{{ humor_registro.idhumor }}"
+                                                        data-humor-id="{{ humor_registro.pk }}"
                                                         data-humor-data="{{ humor_registro.data|date:'d/m/Y' }}">
-                                                    Excluir
+                                                    <i class="bi bi-trash-fill"></i> Excluir
                                                 </button>
                                             {% endif %}
                                         </div>
@@ -180,7 +308,75 @@
             </div>
         </div>
     </div>
-    
+
+    {# ======================================================================= #}
+    {# MODAL ÚNICO DE REGISTRO E ALTERAÇÃO DE HUMOR #}
+    {# ======================================================================= #}
+    <div class="modal fade" id="registroOuAlteracaoModal" tabindex="-1" aria-labelledby="registroOuAlteracaoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content rounded-4 shadow-lg border-0">
+                
+                <form method="POST" id="form-registro-alteracao-humor">
+                    {% csrf_token %}
+                    <div class="modal-header text-white border-0" id="modal-header">
+                        <h5 class="modal-title" id="registroOuAlteracaoModalLabel"></h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    
+                    <div class="modal-body p-4">
+                        {# Input Hidden para o ID do Humor (necessário para Alteração) #}
+                        <input type="hidden" name="humor_id" id="humor_id_modal" value="" />
+
+                        {# 1. Campo de Data #}
+                        <div class="mb-4">
+                            <label for="id_data_modal" class="form-label h5 fw-semibold text-secondary mb-2">Data:</label>
+                            <input type="date" id="id_data_modal" name="data" class="form-control form-control-lg" required />
+                        </div>
+
+                        {# 2. Seleção de Humor (Usando os humores_disponiveis) #}
+                        <div class="mb-4">
+                            <label class="form-label h5 fw-semibold text-secondary mb-3">Como você está se sentindo?</label>
+
+                            {# Input Hidden Real para o Estado (PK) - Este valor é que o Django recebe #}
+                            <input type="hidden" name="estado" id="id_estado_modal" value="" required />
+
+                            {# Grade de Seleção Visual de Humor (CRÍTICO: Depende da variável 'humores_disponiveis') #}
+                            <div class="d-flex flex-wrap justify-content-center gap-3 humor-grid" role="radiogroup">
+                                {% for tipo in humores_disponiveis %}
+                                {% with image_path=tipo.icone|default:'img/icon/adchumor.png' %}
+                                <div class="humor-option-card" data-humor-container data-humor-value="{{ tipo.pk }}"
+                                    onclick="selectHumorModal('{{ tipo.pk }}', this)" tabindex="0" role="radio" aria-checked="false">
+                                    <img src="{% static image_path %}" alt="{{ tipo.estado }}" width="40" height="40"/>
+                                    <span class="humor-label">{{ tipo.estado }}</span>
+                                </div>
+                                {% endwith %}
+                                {% empty %}
+                                    <p class="text-danger">⚠️ **Erro de Contexto:** Os humores não foram carregados. Verifique sua view.</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        {# 3. Campo 'descricaohumor' #}
+                        <div class="mb-4">
+                            <label for="id_descricaohumor_modal"
+                                class="form-label h5 fw-semibold text-secondary mb-2">Descrição (Opcional):</label>
+                            <textarea id="id_descricaohumor_modal" name="descricaohumor" rows="4"
+                                placeholder="Descreva brevemente o que motivou seu humor hoje..."
+                                class="form-control rounded-3"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer border-top-0">
+                        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" id="btn-modal-salvar" class="btn btn-success fw-bold rounded-pill">SALVAR</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {# FIM DO MODAL DE REGISTRO/ALTERAÇÃO #}
+
+
     {# MODAL DE CONFIRMAÇÃO PARA EXCLUSÃO DE HUMOR #}
     <div class="modal fade" id="excluirHumorModal" tabindex="-1" aria-labelledby="excluirHumorModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -194,7 +390,7 @@
                     <div class="modal-body p-4">
                         <p class="mb-3">Tem certeza de que deseja **excluir** o registro de humor da data:</p>
                         <p class="fw-bold text-danger text-center h5 p-2 bg-light border rounded" id="humor-data-confirmacao"></p>
-                        <p class="mt-3 text-muted small">Esta ação não pode ser desfeita e você terá que registrar o humor novamente.</p>
+                        <p class="mt-3 text-muted small">Esta ação não pode ser desfeita.</p>
                     </div>
                     <div class="modal-footer border-top-0">
                         <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancelar</button>
@@ -204,7 +400,9 @@
             </div>
         </div>
     </div>
-    {# FIM DO MODAL #}
+    {# FIM DO MODAL DE EXCLUSÃO #}
+
+
     <div class="d-flex justify-content-between mt-5">
         <button onclick="window.history.back()" class="btn btn-outline-secondary btn-lg shadow-sm">
             <i class="bi bi-arrow-left me-2"></i> Voltar à Página Anterior
@@ -213,32 +411,121 @@
 
 {% endblock content_logado %}
 
+{# -------------------------------------------------------------------------------- #}
+{# BLOCO DE SCRIPTS (Para o DOMContentLoaded e Listeners do Bootstrap) #}
+{# -------------------------------------------------------------------------------- #}
 {% block scripts %}
 <script>
+    // =======================================================================
+    // DOM CONTENT LOADED (Listeners e Inicialização)
+    // =======================================================================
     document.addEventListener('DOMContentLoaded', function () {
-        // Lógica para o Modal de Exclusão de Humor
-        var excluirHumorModal = document.getElementById('excluirHumorModal');
-        if (excluirHumorModal) {
-            // Evento para preencher o modal antes de abrir
-            excluirHumorModal.addEventListener('show.bs.modal', function (event) {
-                var button = event.relatedTarget; // Botão que disparou o modal
-                var humorId = button.getAttribute('data-humor-id');
-                var humorData = button.getAttribute('data-humor-data');
-                
-                var modalDataHumor = excluirHumorModal.querySelector('#humor-data-confirmacao');
-                var modalForm = excluirHumorModal.querySelector('#form-excluir-humor');
+        
+        // --- Referências de Elementos do Modal de Registro/Alteração ---
+        const registroAlteracaoModalElement = document.getElementById('registroOuAlteracaoModal');
+        const humorForm = document.getElementById('form-registro-alteracao-humor');
+        const humorIdModalInput = document.getElementById('humor_id_modal');
+        const dataInput = document.getElementById('id_data_modal');
+        const estadoHumorInput = document.getElementById('id_estado_modal'); 
+        const descInput = document.getElementById('id_descricaohumor_modal'); 
+        const modalTitle = document.getElementById('registroOuAlteracaoModalLabel');
+        const modalHeader = document.getElementById('modal-header');
+        const btnModalSalvar = document.getElementById('btn-modal-salvar');
+        
+        // --- LÓGICA DE REGISTRO E ALTERAÇÃO (show.bs.modal) ---
+        if (registroAlteracaoModalElement) {
+            registroAlteracaoModalElement.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget; 
+                const mode = button ? button.getAttribute('data-mode') : null;
 
-                // 1. Atualiza a exibição da data
-                modalDataHumor.textContent = humorData;
+                // 1. Limpa Destaques e Reseta Form
+                if (humorForm) humorForm.reset();
+                document.querySelectorAll('.humor-option-card').forEach(card => 
+                    card.classList.remove('selected', 'border', 'border-4', 'border-primary', 'active')
+                );
                 
-                // humor.html: Lógica do Modal de Exclusão
-                // Usamos um placeholder único (999999999) no template Django para garantir que a URL seja reversível.
-                // O JavaScript substitui esse placeholder pelo ID real na abertura do modal.
-                var urlBase = "{% url 'delete_humor' 999999999 %}"; 
-                // Substitui o placeholder no JS pelo ID real
-                modalForm.setAttribute('action', urlBase.replace('999999999', humorId));
+                if (mode === 'alteracao') {
+                    // 2. Preenche os campos para alteração
+                    const humorId = button.getAttribute('data-humor-id');
+                    const dataStr = button.getAttribute('data-humor-data');
+                    const estadoId = button.getAttribute('data-humor-estado');
+                    // CRÍTICO: Decodifica a URL antes de preencher o campo
+                    const descricao = decodeURIComponent(button.getAttribute('data-humor-descricao') || ''); 
+                    
+                    if (humorIdModalInput) humorIdModalInput.value = humorId;
+                    if (dataInput) dataInput.value = dataStr;
+                    if (estadoHumorInput) estadoHumorInput.value = estadoId;
+                    if (descInput) descInput.value = descricao;
+                    
+                    // 3. Define a action do formulário para a alteração (CRÍTICO)
+                    if (humorForm && humorId) {
+                        const finalAlteracaoUrl = URL_ALTERACAO_BASE.replace('0', humorId);
+                        humorForm.action = finalAlteracaoUrl;
+                    }
+
+                    // 4. Destaque o humor selecionado
+                    const selectedCard = document.querySelector(`.humor-option-card[data-humor-value="${estadoId}"]`);
+                    if (selectedCard) {
+                        selectedCard.classList.add('active', 'selected', 'border', 'border-4', 'border-primary');
+                        selectedCard.setAttribute('aria-checked', 'true');
+                    }
+                    
+                    // 5. Atualiza Título e Cor
+                    if (modalTitle) modalTitle.textContent = `Alterar Registro (${dataStr})`;
+                    if (modalHeader) {
+                        modalHeader.classList.remove('bg-success'); 
+                        modalHeader.classList.add('bg-warning');
+                    }
+                    if (btnModalSalvar) btnModalSalvar.textContent = 'ATUALIZAR';
+
+                } else if (mode === 'registro') {
+                    // Lógica para Novo Registro
+                    if (humorIdModalInput) humorIdModalInput.value = ''; 
+                    const hoje = new Date().toISOString().split('T')[0];
+                    if (dataInput) dataInput.value = hoje;
+                    if (estadoHumorInput) estadoHumorInput.value = '';
+                    if (descInput) descInput.value = '';
+
+                    // 3. Define a action do formulário para o registro (CRÍTICO)
+                    if (humorForm) {
+                        humorForm.action = URL_REGISTRO;
+                    }
+                    
+                    // 5. Atualiza Título e Cor
+                    if (modalTitle) modalTitle.textContent = 'Selecione seu Humor de Hoje'; 
+                    if (modalHeader) {
+                        modalHeader.classList.remove('bg-warning');
+                        modalHeader.classList.add('bg-success');
+                    }
+                    if (btnModalSalvar) btnModalSalvar.textContent = 'SALVAR';
+                }
             });
         }
-    });
+        
+        // --- Referências de Elementos do Modal de Exclusão ---
+        const excluirModalElement = document.getElementById('excluirHumorModal');
+        const excluirForm = document.getElementById('form-excluir-humor');
+        const humorDataConfirmacao = document.getElementById('humor-data-confirmacao');
+
+        // --- LÓGICA DE EXCLUSÃO (show.bs.modal) ---
+        if (excluirModalElement) {
+            excluirModalElement.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const humorId = button.getAttribute('data-humor-id');
+                const humorData = button.getAttribute('data-humor-data'); // Ex: '23/11/2025'
+                
+                // 1. Preenche a data para confirmação
+                if (humorDataConfirmacao) {
+                    humorDataConfirmacao.textContent = humorData;
+                }
+                
+                // 2. Define a action do formulário para exclusão (CRÍTICO)
+                if (excluirForm && humorId) {
+                    const finalDeleteUrl = URL_DELETE_TEMPLATE.replace('0', humorId);
+                    excluirForm.action = finalDeleteUrl;
+                }
+            });
+        }
+    }); 
 </script>
 {% endblock scripts %}

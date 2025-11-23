@@ -3,14 +3,73 @@ from datetime import date, timedelta, datetime
 from django.utils import timezone
 from decimal import Decimal
 import calendar
-from django.db import models # Necessário para o Q object no mock de Habito
-
-# Importa os Models reais apenas para fins de tipagem e mapeamento,
-# mas as classes mockadas são usadas para simular o comportamento do ORM.
+import re
+from django.db import models 
 from ..models import StatusDiario, HumorTipo 
+from datetime import date, timedelta, datetime
+from django.utils import timezone
+from decimal import Decimal
+import calendar
+import re
+from django.db import models 
 
 # -------------------------------------------------------------------
 # LÓGICA AUXILIAR PRINCIPAL
+# -------------------------------------------------------------------
+
+# VARIÁVEL DE REGEX CORRIGIDA:
+# Agora captura o ID (Grupo 1) e o restante da descrição do usuário (Grupo 2)
+# ^: Início da string | \s*: Captura zero ou mais espaços após a tag
+DICA_DELIMITADOR_REGEX = r'^\[DICA ID:(\d+)\]\s*(.*)$'
+
+# Função para extrair a informação da dica do campo descricaohumor
+def extract_dica_info(descricaohumor):
+    """
+    Tenta extrair o ID da dica ([DICA ID:X]) e retorna a descrição limpa do usuário.
+    
+    Args:
+        descricaohumor (str): O campo 'descricaohumor' do modelo Humor.
+        
+    Returns:
+        tuple: (dica_id_salva: int|None, descricao_usuario_original: str)
+    """
+    if not descricaohumor:
+        return None, ""
+        
+    descricaohumor = descricaohumor.strip()
+    # Usa o regex robusto para casar o padrão do início ao fim
+    match = re.match(DICA_DELIMITADOR_REGEX, descricaohumor)
+    
+    if match:
+        dica_id_salva = int(match.group(1)) # Grupo 1: O ID da dica (X em [DICA ID:X])
+        # Grupo 2: O restante da descrição (já limpo pelo regex)
+        descricao_usuario_original = match.group(2).strip()
+    else:
+        dica_id_salva = None
+        # Se não houver a tag, toda a string é a descrição original do usuário
+        descricao_usuario_original = descricaohumor
+        
+    return dica_id_salva, descricao_usuario_original
+
+def rebuild_descricaohumor(dica_id, descricao_usuario):
+    """
+    Reconstrói o campo 'descricaohumor' adicionando a tag [DICA ID:X] de volta.
+    
+    Args:
+        dica_id (int|None): O ID da dica a ser persistida.
+        descricao_usuario (str): A descrição fornecida pelo usuário.
+        
+    Returns:
+        str: O novo campo 'descricaohumor' formatado.
+    """
+    descricao_usuario = descricao_usuario.strip()
+    if dica_id:
+        # Garante o formato: [DICA ID:X] <Descrição do Usuário>
+        return f"[DICA ID:{dica_id}] {descricao_usuario}"
+    return descricao_usuario
+
+# -------------------------------------------------------------------
+# LÓGICA AUXILIAR DIVERSA (Mantida para evitar erros de dependência)
 # -------------------------------------------------------------------
 
 def _get_report_date_range(request, hoje, default_periodo=None):
@@ -61,32 +120,34 @@ def _get_report_date_range(request, hoje, default_periodo=None):
     # 5. RETORNO FINAL
     return data_inicio, data_fim, data_referencia, periodo, mes_param, ano_param
 
-# -------------------------------------------------------------------
-# LÓGICA AUXILIAR PARA HUMOR (Mantida do original)
-# -------------------------------------------------------------------
-
 def get_humor_map():
-    """Retorna um dicionário mapeando o nome do humor (estado) para o caminho do ícone.
-    (Em um projeto real, esta função consultaria o modelo HumorTipo.)
     """
-    # MOCK: Simula a busca de tipos de humor
-    return {
-        'Feliz': 'img/icon/feliz.png',
-        'Calmo': 'img/icon/calmo.png',
-        'Ansioso': 'img/icon/ansioso.png',
-        'Triste': 'img/icon/triste.png',
-        'Irritado': 'img/icon/raiva.png',
-    }
+    Retorna um dicionário mapeando o ID do HumorTipo para o caminho do ícone.
+    Útil para preencher contextos de formulário e templates.
+    """
+    # MOCK: Substitua por HumorTipo.objects.all() no código real
+    try:
+        # Tenta usar o modelo HumorTipo, se estiver disponível
+        from ..models import HumorTipo
+        humor_map = {
+            humor.pk: humor.icone
+            for humor in HumorTipo.objects.all()
+        }
+    except Exception:
+        # Fallback para um mapa mockado ou vazio
+        humor_map = {1: 'img/icon/feliz.png', 2: 'img/icon/triste.png'}
+        
+    return humor_map
 
 def _get_humor_cor_classe(estado):
     """Mapeia o estado do HumorTipo para uma classe CSS para colorir (relatórios)."""
     # Mapeamento do nome do estado (string) para a classe CSS (para estilização)
     mapping = {
         'Feliz': 'img/icon/feliz.png',
-        'Calmo': 'img/icon/calmo.png',
+        'Calmo': 'img/icon/calmo.png', 
         'Ansioso': 'img/icon/ansioso.png',
         'Triste': 'img/icon/triste.png',
-        'Irritado': 'img/icon/raiva.png',        
+        'Irritado': 'img/icon/raiva.png',     
     }
     return mapping.get(estado, 'bg-light')
 
@@ -108,6 +169,8 @@ def _get_checked_days_for_last_7_days(habito_obj):
     # MOCK: Simula a busca de conclusões
     completions = []
     # Simulando 3 dias de conclusão para um hábito com ID 1
+    class HabitoMockID:
+         id = 1
     if habito_obj.id == 1: 
         completions = [today, today - timedelta(days=1), today - timedelta(days=3)]
     
@@ -214,89 +277,3 @@ class HumorManager:
 
 # Instância do gerenciador mock de Humor
 Humor_mock = HumorManager()
-
-def extract_dica_info(dica_raw: str) -> dict:
-    """
-    Extrai informações estruturadas de uma string de "dica" em formato raw (bruto).
-
-    Esta função assume que a string de dica está formatada da seguinte forma:
-    "<Título ou Categoria>:<Conteúdo da Dica>"
-    
-    Exemplo: "Saúde:Beba pelo menos 2 litros de água por dia."
-
-    Args:
-        dica_raw (str): A string de dica bruta a ser processada.
-
-    Returns:
-        dict: Um dicionário com as chaves 'categoria' e 'conteudo'.
-    """
-    try:
-        # Tenta dividir a string no primeiro ':' encontrado.
-        # Isto é comum em logs ou dados semi-estruturados.
-        if ':' in dica_raw:
-            categoria, conteudo = dica_raw.split(':', 1)
-            return {
-                "categoria": categoria.strip(),
-                "conteudo": conteudo.strip()
-            }
-        else:
-            # Se não houver delimitador, assume-se que toda a string é o conteúdo
-            return {
-                "categoria": "Geral",
-                "conteudo": dica_raw.strip()
-            }
-    except Exception as e:
-        print(f"Erro ao extrair informação da dica '{dica_raw}': {e}")
-        return {
-            "categoria": "Erro",
-            "conteudo": dica_raw
-        }
-
-def rebuild_descricaohumor(descricao: str, humor: str) -> str:
-    """
-    Reconstrói e formata uma string final combinando uma descrição de evento/situação
-    com um rótulo de humor (sentiment) associado.
-
-    O objetivo é criar uma saída legível e padronizada.
-
-    Args:
-        descricao (str): A descrição principal do evento ou situação.
-        humor (str): O rótulo de humor ou sentimento associado (e.g., "Alegre", "Triste", "Sarcástico").
-
-    Returns:
-        str: A string formatada final.
-    """
-    # Garante que o rótulo de humor esteja em maiúsculas e entre parênteses retos
-    humor_formatado = f"[{humor.upper()}]"
-    
-    # Combina a descrição e o humor formatado.
-    # Exemplo: "O dia está ótimo, o sol brilha" [ALEGRE]
-    return f"{descricao.strip()} {humor_formatado}"
-
-# --- Exemplos de Uso ---
-if __name__ == '__main__':
-    print("--- Teste de extract_dica_info ---")
-    dica1 = "Produtividade:Use a técnica Pomodoro para manter o foco."
-    dica2 = "Lazer:Tire um tempo para caminhar ao ar livre."
-    dica3 = "Apenas uma frase de dica sem categoria."
-
-    info1 = extract_dica_info(dica1)
-    info2 = extract_dica_info(dica2)
-    info3 = extract_dica_info(dica3)
-
-    print(f"Dica 1 (Original: '{dica1}'): {info1}")
-    print(f"Dica 2 (Original: '{dica2}'): {info2}")
-    print(f"Dica 3 (Original: '{dica3}'): {info3}")
-    
-    print("\n--- Teste de rebuild_descricaohumor ---")
-    desc1 = "Recebi a notícia de que o projeto foi aprovado."
-    humor1 = "alegre"
-    
-    desc2 = "Demorou mais tempo do que o esperado para terminar esta tarefa."
-    humor2 = "frustrado"
-
-    resultado1 = rebuild_descricaohumor(desc1, humor1)
-    resultado2 = rebuild_descricaohumor(desc2, humor2)
-
-    print(f"Resultado 1: {resultado1}")
-    print(f"Resultado 2: {resultado2}")

@@ -79,7 +79,7 @@ urlpatterns = [
     path('humor/registrar/', registrar_humor, name='registrarHumor'),
     path('api/humor/load/', load_humor_by_date, name='load_humor_by_date'),
     path('humor/alterar/<int:humor_id>/', alterar_humor, name='alterarHumor'),
-    path('humor/delete/<int:humor_id>/', delete_humor, name='delete_humor'),
+    path('humor/delete/<int:humor_id>/', delete_humor, name='deleteHumor'),
     
     # GRATIDÃO
     path('gratidao/', gratidao, name='gratidao'),

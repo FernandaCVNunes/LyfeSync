@@ -6,12 +6,12 @@
 from ._aux_logic import (
     _get_report_date_range,
     get_humor_map,
+    _get_humor_cor_classe,
     _get_checked_days_for_last_7_days,
     get_habitos_e_acompanhamento,
     Humor_mock,
-    _get_humor_cor_classe, 
     extract_dica_info, 
-    rebuild_descricaohumor 
+    rebuild_descricaohumor, 
 )
 
 # -------------------------------------------------------------------
@@ -27,7 +27,7 @@ from .public_views import (
 # 2. VIEWS DE CONFIGURAÇÃO (Conta e Segurança)
 # -------------------------------------------------------------------
 from .config_views import (
-    conta, # Atalho
+    conta, 
     configuracoes_conta,
     excluir_conta
 )
@@ -74,9 +74,8 @@ from .selfcare_views import (
 )
 
 from .crud_views import (
-    is_staff_user, # Função de teste de autorização
+    is_staff_user, 
     autocuidado,
-    extract_dica_info,
     
     # Humor
     humor,
@@ -84,7 +83,6 @@ from .crud_views import (
     alterar_humor,
     delete_humor,
     load_humor_by_date,
-    rebuild_descricaohumor,
     
     # Dicas
     registrar_dica,

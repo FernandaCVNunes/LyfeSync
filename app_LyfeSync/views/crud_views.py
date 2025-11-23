@@ -11,7 +11,6 @@ from django.views.decorators.http import require_POST
 from django.template.loader import render_to_string 
 from ..forms import GratidaoForm, AfirmacaoForm, HumorForm, DicasForm
 from ..models import Gratidao, Afirmacao, Humor, HumorTipo, Dicas, Habito, StatusDiario 
-# Importando a função utilitária do arquivo auxiliar
 from ._aux_logic import get_humor_map, _get_humor_cor_classe, extract_dica_info, rebuild_descricaohumor 
 
 # Configuração de locale para formatação de data/mês em português
@@ -23,40 +22,9 @@ except locale.Error:
     except:
         pass
 
-# -------------------------------------------------------------------
-# FUNÇÕES AUXILIARES DE MANIPULAÇÃO DE DICA (Refatoração de Regex)
-# -------------------------------------------------------------------
 
 # Variável de regex global para ser usada em todas as views, capturando o ID da dica: [DICA ID:X]
 DICA_DELIMITADOR = r"\[DICA ID:(\d+)\]"
-
-def extract_dica_info(descricaohumor):
-    """
-    Extrai o ID da Dica e a descrição original do usuário do campo descricaohumor.
-    Retorna uma tupla: (dica_id: int/None, descricao_usuario_original: str)
-    """
-    if not descricaohumor:
-        return None, ""
-    
-    match = re.match(DICA_DELIMITADOR, descricaohumor)
-    
-    if match:
-        dica_id = int(match.group(1))
-        # Remove o delimitador para obter a descrição original
-        descricao_usuario_original = re.sub(DICA_DELIMITADOR, '', descricaohumor).strip()
-        return dica_id, descricao_usuario_original
-    else:
-        # Se não tem a tag, a descrição original é o campo completo
-        return None, descricaohumor.strip()
-
-def rebuild_descricaohumor(dica_id, user_description):
-    """
-    Constrói o valor final do campo descricaohumor, prefixando a tag de dica se houver um ID.
-    """
-    user_description_cleaned = user_description.strip()
-    if dica_id:
-        return f"[DICA ID:{dica_id}] {user_description_cleaned}"
-    return user_description_cleaned
 
 # -------------------------------------------------------------------
 # FUNÇÃO DE TESTE DE AUTORIZAÇÃO (para Dicas)
@@ -204,7 +172,7 @@ def humor(request):
     context = {
         'humor_do_dia': humor_do_dia,
         'humores_recentes': humores_recentes_list, 
-        'tipos_de_humor': tipos_de_humor,
+        'humores_disponiveis': tipos_de_humor,
         'dica_do_dia': dica_do_dia, 
     }
     return render(request, 'app_LyfeSync/humor/humor.html', context)
@@ -244,93 +212,42 @@ def registrar_humor(request):
     return render(request, 'app_LyfeSync/humor/registrarHumor.html', context)
 
 @login_required(login_url='login')
-def alterar_humor(request, humor_id): 
-    """Permite alterar um Humor existente, preservando a tag [DICA ID:X] se ela existir."""
+def alterar_humor(request, humor_id):
+    # 1. Busca a instância do Humor
+    instance = get_object_or_404(Humor, pk=humor_id, usuario=request.user)
     
-    # Simulação de modelos e funções necessárias para o contexto
-    # Substitua pelas suas importações reais
-    class HumorTipo:
-        objects = [] # Simulação
-        
-    class Humor:
-        objects = [] # Simulação
-        
-    def extract_dica_info(desc):
-        # Simulação da função auxiliar
-        if "[DICA ID:" in desc:
-            return 123, desc.split("[DICA ID:")[0].strip()
-        return None, desc
-
-    def rebuild_descricaohumor(dica_id, new_desc):
-        # Simulação da função auxiliar
-        if dica_id:
-            return f"{new_desc} [DICA ID:{dica_id}]"
-        return new_desc
-        
-    class HumorForm:
-        # Simulação de um Django Form
-        def __init__(self, data=None, instance=None, initial=None):
-            self.data = data
-            self.instance = instance
-            self.is_bound = data is not None
-            self.cleaned_data = {}
-            if self.is_bound and self.instance:
-                self.cleaned_data = {'descricaohumor': data.get('descricaohumor'), 'estado': data.get('estado'), 'data': data.get('data')}
-            
-            # Simulação de campos para renderização
-            self.data = type('Field', (object,), {'id_for_label': 'id_data', 'label': 'Data', 'value': (instance.data if instance and instance.data else (initial.get('data') if initial and 'data' in initial else timezone.localdate())), 'errors': []})()
-            self.estado = type('Field', (object,), {'id_for_label': 'id_estado', 'label': 'Estado', 'errors': []})()
-            self.descricaohumor = type('Field', (object,), {'id_for_label': 'id_descricaohumor', 'label': 'Descrição do Humor', 'value': (instance.descricaohumor if instance and instance.descricaohumor else (initial.get('descricaohumor') if initial and 'descricaohumor' in initial else '')), 'errors': []})()
-
-        def is_valid(self):
-            # Simulação de validação
-            return self.is_bound
-        
-        def save(self, commit=True):
-            # Simulação de save
-            return self.instance or type('HumorObj', (object,), {'usuario': request.user, 'data': timezone.localdate(), 'save': lambda: None})()
-            
-    # Fim da Simulação (Use suas imports reais acima)
+    # Guarda o ID do estado antigo ANTES do POST
+    old_estado_pk = instance.estado.pk
     
-    # humores_disponiveis = HumorTipo.objects.all()
-    humores_disponiveis = [{'pk': 1, 'estado': 'Feliz', 'icone': 'img/icon/feliz.png'}, 
-                           {'pk': 2, 'estado': 'Calmo', 'icone': 'img/icon/calmo.png'},
-                           {'pk': 3, 'estado': 'Ansioso', 'icone': 'img/icon/ansioso.png'},
-                           {'pk': 4, 'estado': 'Triste', 'icone': 'img/icon/triste.png'},
-                           {'pk': 5, 'estado': 'Irritado', 'icone': 'img/icon/raiva.png'},                           ]
-
-    # Simulação da instância (substituir por sua lógica real)
-    instance = type('HumorInstance', (object,), {
-        'pk': humor_id,
-        'usuario': request.user,
-        'data': timezone.localdate(),
-        'estado': type('Estado', (object,), {'pk': 1, 'estado': 'Feliz'}),
-        'descricaohumor': 'Me sentindo ótimo! [DICA ID:123]'
-    })()
-
-    # Pré-processamento: Limpa a descrição para o formulário (USANDO FUNÇÃO AUXILIAR)
+    # Pré-processamento: Limpa a descrição, mas guarda o ID da dica existente
     dica_id_existente, desc_original_limpa = extract_dica_info(instance.descricaohumor)
 
     if request.method == 'POST':
-        # Instancia o form com os dados POST e a instância atual
         form = HumorForm(request.POST, instance=instance)
         
         if form.is_valid():
             humor_obj = form.save(commit=False)
             
-            nova_descricao_usuario = request.POST.get('descricaohumor', '') # form.cleaned_data.get('descricaohumor', '')
+            # CRÍTICO: VERIFICA SE O TIPO DE HUMOR MUDOU!
+            new_estado_pk = form.cleaned_data['estado'].pk # 'estado' é o campo do formulário
             
-            # Reconstroi o campo descricaohumor, garantindo a persistência da tag da dica
+            if old_estado_pk != new_estado_pk:
+                # Se o tipo de humor mudou, zera a dica existente para FORÇAR a rotação na view principal.
+                dica_id_existente = None 
+                
+            nova_descricao_usuario = form.cleaned_data.get('descricaohumor', '') 
+            
+            # Reconstroi o campo descricaohumor, com o novo (ou antigo/zerado) dica_id_existente
             humor_obj.descricaohumor = rebuild_descricaohumor(dica_id_existente, nova_descricao_usuario)
 
-            # humor_obj.save() # Use sua chamada real
+            humor_obj.save() 
             
             messages.success(request, 'Humor alterado com sucesso! 🎉')
-            return redirect('humor') 
+            return redirect('humor')
+            
         else:
             messages.error(request, 'Erro na validação do formulário. Verifique os campos.')
     else:
-        # Inicializa o formulário com a descrição LIMPA
         initial_data = {'descricaohumor': desc_original_limpa}
         form = HumorForm(instance=instance, initial=initial_data)
         
@@ -392,7 +309,7 @@ def load_humor_by_date(request):
             'estado_id': humor_registro.estado.pk,
             'nome_humor': humor_registro.estado.estado, 
             'icone_path': humor_registro.estado.icone, 
-            'descricaohumor': cleaned_descricao, # Corrigido: Envia a descrição limpa
+            'descricaohumor': cleaned_descricao,  
         }
         return JsonResponse(data)
         

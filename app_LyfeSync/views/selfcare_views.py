@@ -12,11 +12,10 @@ import json
 from django.views.decorators.http import require_POST
 from ..forms import GratidaoForm, AfirmacaoForm, HumorForm, DicasForm, GratidaoFormSet, AfirmacaoFormSet, AfirmacaoForm
 from ..models import Gratidao, Afirmacao, Humor, HumorTipo, Dicas 
-from ._aux_logic import get_humor_map
+# Importação das lógicas auxiliares, incluindo as novas funções
+from ._aux_logic import get_humor_map, extract_dica_info, rebuild_descricaohumor, DICA_DELIMITADOR_REGEX
 
 # Configuração de locale para formatação de data/mês em português
-# NOTA: Esta configuração é dependente do ambiente (servidor). Se o ambiente não tiver 'pt_BR.utf8' ou 'pt_BR',
-# ela falhará silenciosamente ou usará o padrão.
 try:
     locale.setlocale(locale.LC_ALL, 'pt_BR.utf8')
 except locale.Error:
@@ -54,22 +53,13 @@ def autocuidado(request):
 # -------------------------------------------------------------------
 # VIEWS DE HUMOR
 # -------------------------------------------------------------------
-# Variável de regex para ser usada em todas as views, capturando o ID da dica: [DICA ID:X]
-DICA_DELIMITADOR = r"\[DICA ID:(\d+)\]"
+# NOTA: O DICA_DELIMITADOR agora está importado de _aux_logic.py para centralização.
 
 @login_required(login_url='login')
 def humor(request):
     """
     View principal: Exibe o humor de hoje, a dica rotativa (se houver), 
     e o histórico de humor das últimas 2 semanas.
-    
-    CRÍTICA DE ARQUITETURA: 
-    A lógica de persistência da Dica Rotativa (usando DICA_DELIMITADOR) dentro do 
-    campo 'descricaohumor' é funcional, mas acopla dados de sistema (ID da Dica) 
-    com dados de usuário (descrição). A melhor prática seria adicionar um campo 
-    ForeignKey (e.g., 'dica_id') diretamente ao modelo Humor para armazenar a dica,
-    removendo a necessidade de regex. O código abaixo mantém a lógica original,
-    mas esta é uma área para refatoração futura.
     """
     usuario = request.user
     data_hoje = timezone.localdate()
@@ -89,24 +79,16 @@ def humor(request):
     # --- Variáveis para Dica ---
     dica_do_dia = None
     dica_id_salva = None
-    descricao_usuario_original = "" # Inicializa como string vazia
+    descricao_usuario_original = "" 
     # ---------------------------
 
     # 2. Lógica da Dica Rotativa e Persistência (SE JÁ HOUVER REGISTRO DE HUMOR)
     if humor_do_dia:
         humor_tipo_id = humor_do_dia.estado.pk
         
-        # A. Tenta extrair o ID da dica e a descrição do usuário do campo descricaohumor
-        if humor_do_dia.descricaohumor:
-            match = re.match(DICA_DELIMITADOR, humor_do_dia.descricaohumor)
-            if match:
-                dica_id_salva = int(match.group(1)) # ID da dica (X em [DICA ID:X])
-                # Remove o delimitador para obter a descrição original
-                descricao_usuario_original = re.sub(DICA_DELIMITADOR, '', humor_do_dia.descricaohumor).strip()
-            else:
-                # Se não tem a tag, a descrição original é o campo completo
-                descricao_usuario_original = humor_do_dia.descricaohumor.strip()
-
+        # A. Usa a função auxiliar para extrair o ID da dica e a descrição limpa
+        dica_id_salva, descricao_usuario_original = extract_dica_info(humor_do_dia.descricaohumor)
+        
         # Adiciona a descrição limpa para uso no template de hoje
         humor_do_dia.descricao_usuario_original = descricao_usuario_original
         
@@ -115,7 +97,6 @@ def humor(request):
             try:
                 dica_do_dia = Dicas.objects.get(pk=dica_id_salva)
             except Dicas.DoesNotExist:
-                # Dica não existe mais, prossegue para a lógica de rotação (C)
                 pass 
         
         # C. Rotação: Se não há dica salva ou a dica salva foi deletada, faz a rotação
@@ -146,10 +127,8 @@ def humor(request):
 
         # D. Persistência Final (Salva o ID da nova dica no banco de dados, se ainda não estiver lá)
         if dica_do_dia and not dica_id_salva: 
-            # Novo valor do descricaohumor: [DICA ID:X] + descrição original do usuário (se houver)
-            novo_desc = f"[DICA ID:{dica_do_dia.pk}] {descricao_usuario_original}"
-            
-            humor_do_dia.descricaohumor = novo_desc
+            # Usa a função auxiliar para reconstruir a descrição (incluindo a tag)
+            humor_do_dia.descricaohumor = rebuild_descricaohumor(dica_do_dia.pk, descricao_usuario_original)
             humor_do_dia.save(update_fields=['descricaohumor'])
             
     # 3. Lógica do Histórico (Últimas 2 Semanas)
@@ -166,18 +145,10 @@ def humor(request):
     for registro in humores_recentes_qs:
         registro.image_path = registro.estado.icone 
         
-        # CÓDIGO DO HISTÓRICO: Extrai a dica salva e a descrição do usuário
-        dica_registro_id = None
-        desc_original_reg = registro.descricaohumor
+        # CÓDIGO DO HISTÓRICO: Usa a função auxiliar para extrair a dica salva e a descrição do usuário
+        dica_registro_id, desc_original_reg = extract_dica_info(registro.descricaohumor)
         
-        if registro.descricaohumor:
-            match = re.match(DICA_DELIMITADOR, registro.descricaohumor)
-            if match:
-                dica_registro_id = int(match.group(1))
-                # Remove o delimitador para obter a descrição original do histórico
-                desc_original_reg = re.sub(DICA_DELIMITADOR, '', registro.descricaohumor).strip()
-            
-            registro.descricaohumor = desc_original_reg # Altera para exibir apenas a descrição do usuário no histórico
+        registro.descricaohumor = desc_original_reg # Altera para exibir apenas a descrição do usuário no histórico
         
         # Busca o objeto Dicas (e atribui ao registro)
         if dica_registro_id:
@@ -236,67 +207,54 @@ def registrar_humor(request):
     return render(request, 'app_LyfeSync/humor/registrarHumor.html', context)
 
 @login_required
-
 def alterar_humor(request, humor_id):
-
-    """Permite alterar um Humor existente. Requer login."""
-
-   
-
-    humor_map = get_humor_map()
-
-   
-
-    # 1. Tenta obter a instância do Humor
-
-    instance = get_object_or_404(Humor, idhumor=humor_id, usuario=request.user)
-
-   
-
-    # 2. Lógica de formulário
+    # 1. Busca a instância do Humor
+    instance = get_object_or_404(Humor, pk=humor_id, usuario=request.user)
+    
+    # Guarda o ID do estado antigo ANTES do POST
+    old_estado_pk = instance.estado.pk
+    
+    # Pré-processamento: Limpa a descrição, mas guarda o ID da dica existente
+    dica_id_existente, desc_original_limpa = extract_dica_info(instance.descricaohumor)
 
     if request.method == 'POST':
-
-        # Instancia o formulário com os dados POST e a instância existente (para alteração)
-
         form = HumorForm(request.POST, instance=instance)
-
-       
-
+        
         if form.is_valid():
+            humor_obj = form.save(commit=False)
+            
+            # CRÍTICO: VERIFICA SE O TIPO DE HUMOR MUDOU!
+            new_estado_pk = form.cleaned_data['estado'].pk # 'estado' é o campo do formulário
+            
+            if old_estado_pk != new_estado_pk:
+                # Se o tipo de humor mudou, zera a dica existente para FORÇAR a rotação na view principal.
+                dica_id_existente = None 
+                
+            nova_descricao_usuario = form.cleaned_data.get('descricaohumor', '') 
+            
+            # Reconstroi o campo descricaohumor, com o novo (ou antigo/zerado) dica_id_existente
+            humor_obj.descricaohumor = rebuild_descricaohumor(dica_id_existente, nova_descricao_usuario)
 
-            form.save()
-
+            humor_obj.save() 
+            
             messages.success(request, 'Humor alterado com sucesso! 🎉')
-
             return redirect('humor')
-
+            
         else:
-
             messages.error(request, 'Erro na validação do formulário. Verifique os campos.')
-
     else:
-
-        # GET: Inicializa o formulário com os dados da instância
-
-        form = HumorForm(instance=instance)
-
-       
-
+        initial_data = {'descricaohumor': desc_original_limpa}
+        form = HumorForm(instance=instance, initial=initial_data)
+        
     context = {
-
         'form': form,
-
-        'humor_icon_class_map': humor_map,
-
-        'humor_id': humor_id,
-
+        'humores_disponiveis': humores_disponiveis,
+        'humor_id': humor_id, 
+        'humor_atual': instance,
     }
-
-   
-
+    
     return render(request, 'app_LyfeSync/humor/alterarHumor.html', context)
-
+    
 @require_POST
 @login_required(login_url='login')
 def delete_humor(request, humor_id):
@@ -338,8 +296,9 @@ def load_humor_by_date(request):
         humor_registro = Humor.objects.select_related('estado').get(usuario =request.user, data=selected_date)
         
         # CORREÇÃO CRÍTICA: Limpar a descrição removendo a tag [DICA ID:X] antes de enviar ao JS
-        cleaned_descricao = re.sub(DICA_DELIMITADOR, '', humor_registro.descricaohumor or "").strip()
-        
+        # Usa o auxiliar para garantir que a lógica seja a mesma em todos os lugares.
+        _, cleaned_descricao = extract_dica_info(humor_registro.descricaohumor or "")
+
         data = {
             'exists': True,
             'id': humor_registro.pk, 
@@ -613,8 +572,8 @@ def registrar_afirmacao(request):
     if request.method == 'POST':
         # Instancia o Formset com os dados do POST
         formset = AfirmacaoFormSet(request.POST, 
-                                   queryset=Afirmacao.objects.none(), # Formset para novas entradas
-                                   prefix='afirmacao')
+                                 queryset=Afirmacao.objects.none(), # Formset para novas entradas
+                                 prefix='afirmacao')
         
         if formset.is_valid():
             
