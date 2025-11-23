@@ -7,21 +7,12 @@
 {% block title %}Meus Hábitos{% endblock %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'app_LyfeSync/css/habito.css' %}">
+  <link rel="stylesheet" href="{% static 'css/habito.css' %}">
 {% endblock %}
 
 {% block content_logado %}
 <style>
-    /* Estilo para a linha de hábito selecionada */
-    .habit-row.selected {
-        background-color: #e6f7ff !important; /* Azul claro para seleção */
-        box-shadow: 0 1px 6px rgba(0, 123, 255, 0.1);
-        transition: background-color 0.2s ease;
-    }
-    .habit-row:hover {
-        background-color: #f7f7f7;
-        cursor: pointer;
-    }
+    
 </style>
 
 <div class="container-fluid py-4">

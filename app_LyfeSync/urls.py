@@ -50,11 +50,6 @@ urlpatterns = [
     path('', home, name='home'),
     path('sobre-nos/', sobre_nos, name='sobre_nos'),
     path('contatos/', contatos, name='contatos'),
-    #path('cadastro/', cadastro, name='cadastro'),
-    
-    # Views customizadas de Login/Logout - REMOVIDO: Views customizadas de Login/Logout para evitar conflito com 'allauth'
-    #path('login/', login_view, name='login'),
-    #path('logout/', logout_view, name='logout'), 
     
     # Dashboard (Página Inicial Logada)
     path('home-lyfesync/', home_lyfesync, name='homeLyfesync'),
@@ -126,4 +121,6 @@ urlpatterns = [
     # INTEGRAÇÃO COM ALLAUTH (Se aplicável)
     # -------------------------------------------------------------------
     path('accounts/', include('allauth.urls')),
+
+    
 ]

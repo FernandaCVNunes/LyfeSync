@@ -22,24 +22,60 @@
     border-color: var(--lyfesync-green, #48BB78) !important;
 }
 
-.text-primary-sync { color: #3b82f6 !important; }
-.text-success-sync { color: #10b981 !important; }
-.text-danger-sync { color: #ef4444 !important; }
-.text-warning-sync { color: #f59e0b !important; }
-.bg-primary-sync { background-color: #3b82f6 !important; }
-.bg-success-sync { background-color: #10b981 !important; }
-.bg-danger-sync { background-color: #ef4444 !important; }
-.bg-warning-sync { background-color: #f59e0b !important; }
-.border-primary-sync { border-color: #3b82f6 !important; }
-.border-success-sync { border-color: #10b981 !important; }
-.border-danger-sync { border-color: #ef4444 !important; }
-.border-warning-sync { border-color: #f59e0b !important; }
+.text-primary-sync {
+    color: #3b82f6 !important;
+}
+
+.text-success-sync {
+    color: #10b981 !important;
+}
+
+.text-danger-sync {
+    color: #ef4444 !important;
+}
+
+.text-warning-sync {
+    color: #f59e0b !important;
+}
+
+.bg-primary-sync {
+    background-color: #3b82f6 !important;
+}
+
+.bg-success-sync {
+    background-color: #10b981 !important;
+}
+
+.bg-danger-sync {
+    background-color: #ef4444 !important;
+}
+
+.bg-warning-sync {
+    background-color: #f59e0b !important;
+}
+
+.border-primary-sync {
+    border-color: #3b82f6 !important;
+}
+
+.border-success-sync {
+    border-color: #10b981 !important;
+}
+
+.border-danger-sync {
+    border-color: #ef4444 !important;
+}
+
+.border-warning-sync {
+    border-color: #f59e0b !important;
+}
 
 /* Estilo do Card (Substituindo section-card) */
 .section-card {
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
 }
+
 .section-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
@@ -56,27 +92,48 @@
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 1000;
     overflow-y: auto;
-    align-items: center; /* Centraliza o conteúdo verticalmente */
-    justify-content: center; /* Centraliza o conteúdo horizontalmente */
+    align-items: center;
+    /* Centraliza o conteúdo verticalmente */
+    justify-content: center;
+    /* Centraliza o conteúdo horizontalmente */
 }
+
 .modal-content-custom {
     margin: 10vh auto;
     max-width: 90%;
     min-width: 320px;
     animation: fadeIn 0.3s;
 }
+
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Utilidades de Contexto para as listas */
-.bg-success-subtle-light { background-color: rgba(16, 185, 129, 0.05) !important; }
-.bg-primary-subtle-light { background-color: rgba(59, 130, 246, 0.05) !important; }
-.bg-warning-subtle-light { background-color: rgba(245, 158, 11, 0.05) !important; }
+.bg-success-subtle-light {
+    background-color: rgba(16, 185, 129, 0.05) !important;
+}
+
+.bg-primary-subtle-light {
+    background-color: rgba(59, 130, 246, 0.05) !important;
+}
+
+.bg-warning-subtle-light {
+    background-color: rgba(245, 158, 11, 0.05) !important;
+}
 
 /* Ajuste para ícones Lucide no BS */
-i[data-lucide] { vertical-align: middle; }
+i[data-lucide] {
+    vertical-align: middle;
+}
 
 
 /* ========================================================= */
@@ -137,9 +194,26 @@ i[data-lucide] { vertical-align: middle; }
     border-radius: 0.5rem !important;
 }
 
-/* Botão de Salvar (Gratidão) - Remapeado para .btn-salvar-padrao no HTML */
-/* .btn-salvar-gratidao (REMOVER E USAR .btn-salvar-padrao) */
+/* Estilo para o cartão de item de gratidão ser clicável */
+.gratidao-item-card {
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
 
+.gratidao-item-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.gratidao-icon-size {
+    width: 1.1rem;
+    height: 1.1rem;
+    vertical-align: middle;
+}
+
+.gratidao-no-records {
+    border-color: #ffc107 !important;
+}
 
 /* ========================================================= */
 /* --- ESTILOS PÁGINA REGISTRAR AFIRMAÇÃO --- */

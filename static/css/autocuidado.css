@@ -1,7 +1,5 @@
 /* autocuidado.css (Gratidão e Afirmação) */
 
-
-
 /* ========================================================= */
 /* --- ESTILOS DE AUTOCUIDADO GERAL --- */
 /* ========================================================= */
@@ -22,30 +20,20 @@
     border-color: var(--lyfesync-green, #48BB78) !important;
 }
 
-.text-primary-sync { color: #3b82f6 !important; }
-.text-success-sync { color: #10b981 !important; }
-.text-danger-sync { color: #ef4444 !important; }
-.text-warning-sync { color: #f59e0b !important; }
-.bg-primary-sync { background-color: #3b82f6 !important; }
-.bg-success-sync { background-color: #10b981 !important; }
-.bg-danger-sync { background-color: #ef4444 !important; }
-.bg-warning-sync { background-color: #f59e0b !important; }
-.border-primary-sync { border-color: #3b82f6 !important; }
-.border-success-sync { border-color: #10b981 !important; }
-.border-danger-sync { border-color: #ef4444 !important; }
-.border-warning-sync { border-color: #f59e0b !important; }
-
 /* Estilo do Card (Substituindo section-card) */
 .section-card {
+    /* Equivalente a shadow-xl (Tailwind) / box-shadow padrão do BS */
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
 }
+
 .section-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 /* Estilos do Modal (Substituindo classes de Tailwind) */
+/* OBS: Esta parte é customizada e não depende de Bootstrap, mantida como está */
 .modal-custom {
     display: none;
     position: fixed;
@@ -56,90 +44,145 @@
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 1000;
     overflow-y: auto;
-    align-items: center; /* Centraliza o conteúdo verticalmente */
-    justify-content: center; /* Centraliza o conteúdo horizontalmente */
+    align-items: center;
+    /* Centraliza o conteúdo verticalmente */
+    justify-content: center;
+    /* Centraliza o conteúdo horizontalmente */
 }
+
 .modal-content-custom {
     margin: 10vh auto;
     max-width: 90%;
     min-width: 320px;
     animation: fadeIn 0.3s;
 }
+
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Utilidades de Contexto para as listas */
-.bg-success-subtle-light { background-color: rgba(16, 185, 129, 0.05) !important; }
-.bg-primary-subtle-light { background-color: rgba(59, 130, 246, 0.05) !important; }
-.bg-warning-subtle-light { background-color: rgba(245, 158, 11, 0.05) !important; }
+/* OBS: Mantido se forem cores *muito* específicas. O BS oferece *-subtle para cores claras. */
+.bg-success-subtle-light {
+    background-color: rgba(16, 185, 129, 0.05) !important;
+}
+
+.bg-primary-subtle-light {
+    background-color: rgba(59, 130, 246, 0.05) !important;
+}
+
+.bg-warning-subtle-light {
+    background-color: rgba(245, 158, 11, 0.05) !important;
+}
 
 /* Ajuste para ícones Lucide no BS */
-i[data-lucide] { vertical-align: middle; }
-
-
-/* ========================================================= */
-/* --- ESTILOS PÁGINA REGISTRAR GRATIDÃO --- */
-/* ========================================================= */
-
-/* Ícones pequenos (Gratidão) (30px) */
-.gratidao-icon-size {
-    width: 30px;
-    height: 30px;
-    object-fit: contain;
+i[data-lucide] {
+    vertical-align: middle;
 }
 
-.gratidao-page-container {
-    min-height: 100vh;
-}
-
-.gratidao-main-title {
-    font-size: 2.25rem;
-}
-
-.gratidao-textarea {
-    font-size: 1.15rem !important;
-    resize: none !important;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    min-height: 180px !important;
-}
-
-.gratidao-date-container {
-    margin-bottom: 0rem !important;
-}
-
-.gratidao-date-label {
-    font-size: 1.125rem;
-}
-
-.gratidao-date-input {
-    width: 150px;
+/* .form-control é a classe padrão do Bootstrap, mas você a está sobrescrevendo aqui: */
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
     border-radius: 0.5rem;
-    background-color: #E9ECEF !important;
-    border: 1px solid #E9ECEF !important;
-    box-shadow: none !important;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
-.gratidao-title-color {
-    color: var(--lyfesync-red-salvar);
+.form-control:focus {
+    border-color: #6366f1;
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
 }
 
-.gratidao-question-color {
-    color: var(--lyfesync-green);
+/* ========================================================= */
+/* --- ESTILOS DE TABELA DE GRATIDÃO HOJE (Pedido do Usuário) --- */
+/* ========================================================= */
+
+/* Garante que a tabela tenha bordas arredondadas e que a cor de fundo preencha as linhas */
+.table-responsive table {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    /* Importante para que as bordas arredondadas funcionem com o thead */
 }
 
-.gratidao-field-bg {
-    background-color: #C6F6D5 !important;
-    border: 1px solid #C6F6D5 !important;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06) !important;
-    padding: 1.5rem !important;
-    border-radius: 0.5rem !important;
+.table thead.bg-success th {
+    /* Cor de fundo mais escura para o cabeçalho */
+    background-color: #0A9BB8!important;
+    color: white !important;
+    font-size: 1rem;
+    font-weight: 700;
+    vertical-align: middle;
 }
 
-/* Botão de Salvar (Gratidão) - Remapeado para .btn-salvar-padrao no HTML */
-/* .btn-salvar-gratidao (REMOVER E USAR .btn-salvar-padrao) */
+/* Estilo para as linhas de dados (tbody) - Fundo verde escuro e Texto branco/grande */
+/* Cor de fundo para as linhas (Tbody), um verde escuro legível */
+.gratidao-tabela-row {
+    background-color:#0A9BB8;
+    /* Verde escuro do Bootstrap (Success) */
+    color: white !important;
+    /* Texto branco em toda a linha */
+    transition: background-color 0.3s ease;
+}
 
+/* Efeito Hover na linha - Um tom um pouco mais escuro ou opaco */
+.gratidao-tabela-row:hover {
+    background-color: #0A9BB8;
+    /* Darker green on hover */
+    color: white !important;
+}
+
+/* Força o texto das células a ser branco e a frase a ser grande */
+.gratidao-tabela-row td {
+    color: #0A9BB8 !important;
+}
+
+/* Coluna da Frase - Texto grande (fs-5) */
+.gratidao-tabela-row td:nth-child(2) {
+    font-size: 1.25rem;
+    /* Fonte grande, equivalente a h5 ou fs-5 do BS */
+    font-weight: 600;
+    /* Mais negrito */
+}
+
+/* Coluna de Ações - Botões Alterar e Excluir */
+.gratidao-tabela-row td:nth-child(3) .btn-sm {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Inverte as cores dos botões de Alterar e Excluir para ficarem brancos (outline) dentro do fundo escuro */
+.gratidao-tabela-row .btn-outline-success {
+    color: #0A9BB8 !important;
+    border-color: #0A9BB8 !important;
+}
+
+.gratidao-tabela-row .btn-outline-success:hover {
+    background-color: #0A9BB8 !important;
+    color: white !important;
+}
+
+.gratidao-tabela-row .btn-outline-danger {
+    color: #dc3545 !important;
+    border-color: #dc3545 !important;
+}
+
+.gratidao-tabela-row .btn-outline-danger:hover {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+.gratidao-title{
+    color: #0A9BB8;
+}
 
 /* ========================================================= */
 /* --- ESTILOS PÁGINA REGISTRAR AFIRMAÇÃO --- */

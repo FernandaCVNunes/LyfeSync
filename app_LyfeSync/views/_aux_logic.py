@@ -1,52 +1,248 @@
-# app_LyfeSync/views/_aux.logic.py
-from datetime import date, timedelta, datetime
-from django.utils import timezone
-from decimal import Decimal
-import calendar
+# app_LyfeSync/views/_aux_logic.py
 import re
-from django.db import models 
-from ..models import StatusDiario, HumorTipo 
-from datetime import date, timedelta, datetime
-from django.utils import timezone
-from decimal import Decimal
 import calendar
-import re
-from django.db import models 
+from datetime import timedelta, date
+from decimal import Decimal
+
+# Imports Django
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.contrib import messages
+from django.forms.models import modelformset_factory
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.utils import timezone 
+
+# ===================================================================
+# MOCKS DE CLASSES E FUNÇÕES (Necessário para Views de Exportação)
+# Estes mocks simulam a existência dos seus modelos e forms reais.
+# ===================================================================
+
+# --- Mock de Usuário (Necessário para @login_required) ---
+class MockUser:
+    """Simulação de um objeto User para testes sem autenticação."""
+    def __init__(self, username="mock_user"):
+        self.username = username
+        # Simula o ID do usuário para o MockManager
+        self.id = 1 if username == "user1" else 2 
+
+    @property
+    def is_authenticated(self):
+        return True
+
+    def __repr__(self):
+        return f"MockUser('{self.username}')"
+
+
+# --- Mock do Modelo Gratidao ---
+class Gratidao:
+    # Gerenciador será mockado abaixo
+    objects = None 
+    DoesNotExist = Exception # Exceção padrão do Django
+
+    def __init__(self, idgratidao=None, descricaogratidao="", usuario=None, data=None):
+        self.idgratidao = idgratidao
+        # Nome do campo ajustado para corresponder ao uso em crud_views.py
+        self.descricaogratidao = descricaogratidao 
+        self.usuario = usuario.username if hasattr(usuario, 'username') else usuario
+        self.data = data or timezone.localdate()
+        self.pk = idgratidao # Campo primário
+
+    def save(self):
+        # Simula a persistência
+        print(f"Salvando Gratidão ID: {self.pk}, Descrição: {self.descricaogratidao}")
+    
+    def delete(self):
+        # Simula a exclusão
+        print(f"Deletando Gratidão ID: {self.pk}")
+
+    # Método de representação para debug
+    def __repr__(self):
+        return f"Gratidao(id={self.idgratidao}, data={self.data}, user={self.usuario})"
+
+# --- Mock do Formulário GratidaoForm ---
+# Simula a funcionalidade básica para fins de teste de view
+class GratidaoForm:
+    def __init__(self, data=None, instance=None, **kwargs):
+        self.data = data or {}
+        self.instance = instance
+        # Adiciona o objeto instance como 'instance' do formulário para formsets
+        if instance:
+            # Popula os dados iniciais do formulário para o formset
+            self.data['descricaogratidao'] = instance.descricaogratidao
+            if instance.data:
+                self.data['data'] = instance.data.isoformat()
+        
+    def is_valid(self):
+        # Validação simples: a descrição deve existir e não ser vazia (para FormSet)
+        descricao = self.data.get('descricaogratidao', self.data.get('descricaogratidao_0'))
+        return bool(descricao)
+    
+    @property
+    def changed_data(self):
+        # Mock para simular se houve alteração (importante para formset.save)
+        return ['descricaogratidao']
+
+    @property
+    def instance(self):
+        return self._instance
+
+    @instance.setter
+    def instance(self, value):
+        self._instance = value
+
+    def save(self, commit=True):
+        # O mock aqui precisa ser robusto para FormSet (criação e atualização)
+        
+        # 1. Recupera os dados do POST (o FormSet injeta os dados nos campos)
+        # Assumimos que o nome do campo é 'descricaogratidao' e 'data'
+        descricao = self.data.get('descricaogratidao')
+        data_str = self.data.get('data')
+
+        if data_str:
+            try:
+                data_obj = date.fromisoformat(data_str)
+            except ValueError:
+                data_obj = timezone.localdate()
+        else:
+            data_obj = timezone.localdate() # Valor padrão
+
+        if self.instance and self.instance.pk:
+            # Atualização
+            self.instance.descricaogratidao = descricao or self.instance.descricaogratidao
+            self.instance.data = data_obj or self.instance.data
+            if commit:
+                self.instance.save()
+            return self.instance
+        else:
+            # Criação
+            new_instance = Gratidao(
+                descricaogratidao=descricao,
+                data=data_obj,
+                # O usuário será definido na view (commit=False)
+                idgratidao=None 
+            )
+            if commit:
+                new_instance.save()
+            return new_instance
+
+# --- Mock do QuerySet e Gerenciador de Gratidão (ORM) ---
+class GratidaoQuerySet:
+    def __init__(self, items):
+        self.items = list(items)
+
+    def filter(self, **kwargs):
+        filtered_items = self.items
+        
+        # Filtragem por Usuário
+        if 'usuario' in kwargs:
+            filter_user_or_obj = kwargs['usuario']
+            user_identifier = filter_user_or_obj.username if hasattr(filter_user_or_obj, 'username') else filter_user_or_obj
+            filtered_items = [i for i in filtered_items if i.usuario == user_identifier]
+
+        # Filtragem por Data
+        if 'data' in kwargs:
+            # Assumindo que 'data' é um objeto date puro
+            filtered_items = [i for i in filtered_items if i.data == kwargs['data']]
+            
+        # Retorna uma nova instância de QuerySet com os itens filtrados
+        return GratidaoQuerySet(filtered_items)
+
+    def order_by(self, *args):
+        # Mock de ordenação simples (o código real faria a ordenação)
+        # Se for ordenado por data descendente, inverte a lista (simples)
+        if args and '-data' in args:
+            self.items.sort(key=lambda x: x.data, reverse=True)
+        return self
+
+    def first(self):
+        return self.items[0] if self.items else None
+
+    def __len__(self):
+        return len(self.items)
+
+    # Permite iteração (for item in queryset)
+    def __iter__(self):
+        return iter(self.items)
+    
+    # Permite slice e indexação
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            return self.items[key.start:key.stop:key.step]
+        return self.items[key]
+
+# Gerenciador que simula Gratidao.objects
+class GratidaoManager:
+    def __init__(self):
+        self.mock_data = self._initialize_data()
+
+    def _initialize_data(self):
+        hoje = timezone.localdate()
+        yesterday = hoje - timedelta(days=1)
+        two_days_ago = hoje - timedelta(days=2)
+        
+        data = [
+            # Registros de Hoje (em ordem de criação para teste de 'first()')
+            Gratidao(idgratidao=4, descricaogratidao="Gratidão 4 de Hoje (Mais Recente)", usuario="user1", data=hoje),
+            Gratidao(idgratidao=3, descricaogratidao="Gratidão 3 de Hoje", usuario="user1", data=hoje),
+            Gratidao(idgratidao=2, descricaogratidao="Gratidão 2 de Hoje", usuario="user1", data=hoje),
+
+            # Registros Antigos
+            Gratidao(idgratidao=1, descricaogratidao="Gratidão 1 de Ontem", usuario="user1", data=yesterday),
+            Gratidao(idgratidao=5, descricaogratidao="Gratidão 5 de Dois Dias Atrás", usuario="user1", data=two_days_ago),
+            Gratidao(idgratidao=6, descricaogratidao="Gratidão de Outro Usuário", usuario="user2", data=hoje),
+        ]
+        # Garante que os IDs são únicos
+        current_max_id = max(item.idgratidao for item in data) if data else 0
+
+        # Ajusta os IDs dos mocks para que novas criações não gerem conflitos
+        for item in data:
+            if item.idgratidao is None:
+                current_max_id += 1
+                item.idgratidao = current_max_id
+                item.pk = current_max_id
+                
+        return data
+
+    def filter(self, **kwargs):
+        qs = GratidaoQuerySet(self.mock_data)
+        return qs.filter(**kwargs)
+
+    def get(self, pk, usuario):
+        # Ajuste do Mock: Determina o identificador (username)
+        user_identifier = usuario.username if hasattr(usuario, 'username') else usuario
+        
+        for item in self.mock_data:
+            if item.idgratidao == pk and item.usuario == user_identifier:
+                return item
+        raise Gratidao.DoesNotExist(f"Gratidão ID {pk} não encontrada.")
+
+# Associa o mock ao Modelo
+Gratidao.objects = GratidaoManager()
 
 # -------------------------------------------------------------------
 # LÓGICA AUXILIAR PRINCIPAL
 # -------------------------------------------------------------------
 
 # VARIÁVEL DE REGEX CORRIGIDA:
-# Agora captura o ID (Grupo 1) e o restante da descrição do usuário (Grupo 2)
-# ^: Início da string | \s*: Captura zero ou mais espaços após a tag
 DICA_DELIMITADOR_REGEX = r'^\[DICA ID:(\d+)\]\s*(.*)$'
 
-# Função para extrair a informação da dica do campo descricaohumor
 def extract_dica_info(descricaohumor):
     """
     Tenta extrair o ID da dica ([DICA ID:X]) e retorna a descrição limpa do usuário.
-    
-    Args:
-        descricaohumor (str): O campo 'descricaohumor' do modelo Humor.
-        
-    Returns:
-        tuple: (dica_id_salva: int|None, descricao_usuario_original: str)
+    (Função mantida com nome original 'humor' para compatibilidade com o trecho do usuário.)
     """
     if not descricaohumor:
         return None, ""
         
     descricaohumor = descricaohumor.strip()
-    # Usa o regex robusto para casar o padrão do início ao fim
     match = re.match(DICA_DELIMITADOR_REGEX, descricaohumor)
     
     if match:
         dica_id_salva = int(match.group(1)) # Grupo 1: O ID da dica (X em [DICA ID:X])
-        # Grupo 2: O restante da descrição (já limpo pelo regex)
-        descricao_usuario_original = match.group(2).strip()
+        descricao_usuario_original = match.group(2).strip() # Grupo 2: O restante da descrição
     else:
         dica_id_salva = None
-        # Se não houver a tag, toda a string é a descrição original do usuário
         descricao_usuario_original = descricaohumor
         
     return dica_id_salva, descricao_usuario_original
@@ -54,13 +250,6 @@ def extract_dica_info(descricaohumor):
 def rebuild_descricaohumor(dica_id, descricao_usuario):
     """
     Reconstrói o campo 'descricaohumor' adicionando a tag [DICA ID:X] de volta.
-    
-    Args:
-        dica_id (int|None): O ID da dica a ser persistida.
-        descricao_usuario (str): A descrição fornecida pelo usuário.
-        
-    Returns:
-        str: O novo campo 'descricaohumor' formatado.
     """
     descricao_usuario = descricao_usuario.strip()
     if dica_id:
@@ -68,8 +257,22 @@ def rebuild_descricaohumor(dica_id, descricao_usuario):
         return f"[DICA ID:{dica_id}] {descricao_usuario}"
     return descricao_usuario
 
+# --- Correção de Referência ---
+def extract_dica_gratidao_info(descricaogratidao):
+    """
+    Extrai o ID da dica ([DICA ID:X]) e a descrição limpa do usuário do campo de Gratidão.
+    """
+    return extract_dica_info(descricaogratidao) 
+
+def rebuild_descricaogratidao(dica_id, descricao_usuario):
+    """
+    CORRIGIDO: Reconstrói o campo 'descricaogratidao' chamando a função auxiliar correta.
+    (O original tinha um erro de recursão/referência incorreta)
+    """
+    return rebuild_descricaohumor(dica_id, descricao_usuario)
+
 # -------------------------------------------------------------------
-# LÓGICA AUXILIAR DIVERSA (Mantida para evitar erros de dependência)
+# LÓGICA AUXILIAR DIVERSA (Manter para evitar erros de dependência)
 # -------------------------------------------------------------------
 
 def _get_report_date_range(request, hoje, default_periodo=None):
@@ -77,13 +280,11 @@ def _get_report_date_range(request, hoje, default_periodo=None):
     Calcula o intervalo de datas (inicio e fim) com base nos parâmetros GET.
     """
     
-    # 1. Definir o período (PRIORIZE ESTA LÓGICA DE DEFINIÇÃO DO PERÍODO)
     if default_periodo in ['mensal', 'semanal', 'anual']:
         periodo = default_periodo
     else:
         periodo = request.GET.get('periodo', 'mensal') 
 
-    # 2. Obter mês e ano para referência
     try:
         mes_param = int(request.GET.get('mes', hoje.month))
     except (ValueError, TypeError):
@@ -94,13 +295,11 @@ def _get_report_date_range(request, hoje, default_periodo=None):
     except (ValueError, TypeError):
         ano_param = hoje.year
 
-    # 3. Criar a data de referência (CORREÇÃO DO ERRO 'utcoffset')
     try:
         data_referencia = date(year=ano_param, month=mes_param, day=1)
     except ValueError:
         data_referencia = hoje
     
-    # 4. Cálculo do Intervalo (NÃO PODE HAVER RECURSÃO AQUI)
     if periodo == 'semanal':
         inicio_semana = hoje - timedelta(days=hoje.weekday())
         data_inicio = inicio_semana
@@ -110,34 +309,41 @@ def _get_report_date_range(request, hoje, default_periodo=None):
         data_inicio = data_referencia.replace(month=1, day=1)
         data_fim = data_referencia.replace(month=12, day=31)
         
-    # 'elif periodo == 'mensal': ou fallback
-    else: 
+    else: # 'mensal' ou fallback
         _, ultimo_dia_mes = calendar.monthrange(data_referencia.year, data_referencia.month)
         data_inicio = data_referencia.replace(day=1)
         data_fim = data_referencia.replace(day=ultimo_dia_mes)
         periodo = 'mensal'
 
-    # 5. RETORNO FINAL
     return data_inicio, data_fim, data_referencia, periodo, mes_param, ano_param
 
+# Mocks para Humor (mantidos)
+class HumorTipo:
+    def __init__(self, pk, icone):
+        self.pk = pk
+        self.icone = icone
+
+    @staticmethod
+    def objects_all():
+        return [
+            HumorTipo(1, 'img/icon/feliz.png'),
+            HumorTipo(2, 'img/icon/triste.png')
+        ]
+
+
 def get_humor_map():
-    """
-    Retorna um dicionário mapeando o ID do HumorTipo para o caminho do ícone.
-    Útil para preencher contextos de formulário e templates.
-    """
-    # MOCK: Substitua por HumorTipo.objects.all() no código real
+    """Retorna um dicionário mapeando o ID do HumorTipo para o caminho do ícone."""
     try:
-        # Tenta usar o modelo HumorTipo, se estiver disponível
-        from ..models import HumorTipo
+        # Tenta usar o modelo HumorTipo mockado
         humor_map = {
             humor.pk: humor.icone
-            for humor in HumorTipo.objects.all()
+            for humor in HumorTipo.objects_all()
         }
     except Exception:
-        # Fallback para um mapa mockado ou vazio
         humor_map = {1: 'img/icon/feliz.png', 2: 'img/icon/triste.png'}
         
     return humor_map
+
 
 def _get_humor_cor_classe(estado):
     """Mapeia o estado do HumorTipo para uma classe CSS para colorir (relatórios)."""

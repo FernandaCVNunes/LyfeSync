@@ -56,61 +56,57 @@ class GratidaoForm(forms.ModelForm):
     """
     Formulário para a criação de registros de Gratidão.
     """
-    conteudo = forms.CharField(
+
+    descricaogratidao = forms.CharField( 
         label='Minha Gratidão',
-        # Ajustei a classe do widget para ser a mesma usada no FormSet/Template para consistência
         widget=forms.Textarea(attrs={'rows': 6, 'placeholder': 'Escreva aqui sua gratidão...', 'class': 'gratidao-field-bg form-control p-4 text-dark shadow-sm gratidao-textarea'}),
-        max_length=500, # Limite razoável para a descrição
+        max_length=500,
         required=True
     )
     
     data = forms.DateField(
         label='Data',
-        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control gratidao-date-input'}),
-        initial=timezone.localdate(),
         required=True
     )
-       
+        
     class Meta:
         model = Gratidao
-        fields = ['conteudo', 'data'] 
+        # Use o nome do campo do formulário que você definiu acima
+        fields = ['descricaogratidao', 'data'] 
         
     def __init__(self, *args, **kwargs):
-        # ... (código __init__ aqui) ...
-        instance = kwargs.get('instance')
-        if instance and instance.descricaogratidao:
-            initial = kwargs.get('initial', {})
-            initial['conteudo'] = instance.descricaogratidao
-            kwargs['initial'] = initial
-            
         super().__init__(*args, **kwargs)
+
+        if self.instance is None or self.instance.pk is None:
+            self.fields['data'].initial = timezone.localdate()
         
     def save(self, commit=True):
-        # ... (código save aqui) ...
+        # 1. Deixa o ModelForm fazer a atribuição dos campos mapeados (descricaogratidao e data)
         gratidao = super().save(commit=False)
-        gratidao.descricaogratidao = self.cleaned_data.get('conteudo')
         
+        # 2. Lógica para preencher 'nomegratidao' com o início do campo principal
         if not gratidao.nomegratidao:
+            # Assumindo que 'descricaogratidao' é o campo principal que você acabou de preencher
             gratidao.nomegratidao = gratidao.descricaogratidao[:100]
             
         if commit:
             gratidao.save()
         return gratidao
-pass
 
 # 2. Definição do FormSet (Corrigido para o nível do módulo)
 GratidaoFormSet = modelformset_factory(
-   Gratidao, 
-   form=GratidaoForm, 
-   extra=3,
-   max_num=3,
-   # É redundante definir 'fields' e 'widgets' aqui, pois o FormSet usa o GratidaoForm
-   # Se você quiser garantir que o widget do FormSet é o que você deseja, mantenha a definição
-   fields=['conteudo', 'data'],
-   widgets={
-      'conteudo': forms.Textarea(attrs={'rows': 6, 'placeholder': 'Escreva aqui sua gratidão...', 'class': 'gratidao-field-bg form-control p-4 text-dark shadow-sm gratidao-textarea'}),
+    Gratidao, 
+    form=GratidaoForm, 
+    extra=3,
+    max_num=3,
+
+
+    fields=['descricaogratidao', 'data'],
+    widgets={
+
+      'descricaogratidao': forms.Textarea(attrs={'rows': 6, 'placeholder': 'Escreva aqui sua gratidão...', 'class': 'gratidao-field-bg form-control p-4 text-dark shadow-sm gratidao-textarea'}),
       'data': forms.DateInput(attrs={'type': 'date', 'class': 'form-control gratidao-date-input'}),
-   }
+    }
 )
    
 # -------------------------------------------------------------------
