@@ -128,7 +128,6 @@ class Gratidao(models.Model):
     """Modelo para registro diário de gratidões."""
     idgratidao = models.AutoField(db_column='idGratidao', primary_key=True)
     data = models.DateField(blank=True, null=True, verbose_name="Data da Gratidão")
-    nomegratidao = models.CharField(db_column='nomeGratidao', max_length=100, blank=True, null=True, verbose_name="Título")
     descricaogratidao = models.TextField(db_column='descricaoGratidao', blank=True, null=True, verbose_name="Descrição")
     
     # Chave Estrangeira para o modelo de usuário
@@ -142,7 +141,7 @@ class Gratidao(models.Model):
     ) 
 
     def __str__(self):
-        return self.nomegratidao or f"Gratidão {self.idgratidao}"
+        return f"Gratidão {self.idgratidao}"
 
     class Meta:
         db_table = 'gratidao'

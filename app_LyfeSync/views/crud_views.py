@@ -1,28 +1,24 @@
 # app_LyfeSync/views/crud_views.py
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.utils import timezone
-from datetime import timedelta
-import locale
-import re
+from django.urls import reverse
 from django.views.decorators.http import require_POST
+from django.http import JsonResponse, HttpResponse
+from django.contrib import messages
+from django.db import transaction, IntegrityError 
+from django.utils import timezone
 from django.template.loader import render_to_string 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.forms.models import modelformset_factory
-from django.db import IntegrityError # Importação adicional para melhor tratamento de erro
-
-# -------------------------------------------------------------------
-# IMPORTAÇÕES DE MOCKS/FUNÇÕES AUXILIARES (Design para Portabilidade)
-# -------------------------------------------------------------------
+from datetime import timedelta, date, datetime
+import locale
+import re
 
 try:
     # Tenta importar mocks se estiver em um ambiente de exportação/teste
-    from ._aux_logic import Gratidao, Afirmacao, Humor, HumorTipo, Dicas, Habito, StatusDiario, MockUser, GratidaoForm, AfirmacaoForm, HumorForm, DicasForm, get_humor_map, extract_dica_info, rebuild_descricaohumor, extract_dica_gratidao_info, rebuild_descricaogratidao
+    from ._aux_logic import Afirmacao, Humor, HumorTipo, Dicas, Habito, StatusDiario, MockUser, AfirmacaoForm, HumorForm, DicasForm, get_humor_map, extract_dica_info, rebuild_descricaohumor
 except ImportError:
-    # Se falhar, importa os modelos e forms reais do Django
-    from ..forms import GratidaoForm, AfirmacaoForm, HumorForm, DicasForm
+    from ..forms import GratidaoCreateForm, GratidaoUpdateForm, AfirmacaoForm, HumorForm, DicasForm
     from ..models import Gratidao, Afirmacao, Humor, HumorTipo, Dicas, Habito, StatusDiario
     
     # Funções auxiliares (stubs, se não estiverem em _aux_logic)
@@ -40,9 +36,6 @@ except ImportError:
             return f"[DICA ID:{dica_id}] {desc}"
         return desc
 
-    # Manter as stubs para Gratidão, mesmo que não estejam sendo usadas para a tag no momento.
-    def extract_dica_gratidao_info(desc): return None, desc
-    def rebuild_descricaogratidao(dica_id, desc): return desc
     
     # MockUser de fallback para contexto (apesar de não ser usado nas views decoradas)
     class MockUser:
@@ -50,10 +43,6 @@ except ImportError:
         @property
         def is_authenticated(self): return True
 
-
-# -------------------------------------------------------------------
-# CONFIGURAÇÃO DE LOCALE
-# -------------------------------------------------------------------
 
 # Configuração de locale para formatação de data/mês em português
 try:
@@ -455,206 +444,145 @@ def excluir_dica(request, dica_id):
 # VIEWS DE GRATIDÃO (CRUD e Listagem)
 # -------------------------------------------------------------------
 
-# --- REGRAS DE PAGINAÇÃO ---
-REGISTROS_POR_PAGINA = 15
+MAX_GRATITUDE_LIST_COUNT = 60 # Limite total de gratidões na listagem
+GRATITUDE_PER_PAGE = 15 # Gratidões por página
 
-@login_required(login_url='login')
+@login_required
 def gratidao(request):
     """
-    View principal que lida com:
-    1. CRUD diário (via ModelFormSet, máximo de 3 gratidões por dia).
-    2. Listagem paginada do histórico.
-    3. Destaque da gratidão mais recente do dia.
+    Exibe o Diário de Gratidão, lida com a exibição de gratidões do dia
+    e lista as gratidões antigas com paginação.
     """
-    # 1. AUTENTICAÇÃO E DATA (CORREÇÃO: Removemos a lógica do MockUser, pois @login_required garante request.user)
     usuario = request.user
-    data_hoje = timezone.localdate()
+    hoje = date.today()
+    
+    # 1. Buscar Gratidões do Dia Atual (em destaque)
+    # Ordena para garantir que, se houver mais de 3, as 3 primeiras apareçam.
+    gratidoes_hoje = Gratidao.objects.filter(usuario=usuario, data=hoje).order_by('idgratidao')[:3]
+    
+    # 2. Configurar o Formulário de Inclusão
+    if gratidoes_hoje.exists():
+        # Se houver gratidões de hoje, sugere o formulário de Inclusão Tardia (com data de ontem)
+        create_form = GratidaoCreateForm(initial={'data': hoje - timedelta(days=1)})
+    else:
+        # Se não houver, sugere o formulário de Inclusão de Hoje (com data de hoje)
+        create_form = GratidaoCreateForm(initial={'data': hoje})
+    
+    # 3. Listagem Paginada de Gratidões Antigas (Max 60, excluindo as de hoje)
+    
+    todas_gratidoes = Gratidao.objects.filter(usuario=usuario).exclude(data=hoje).order_by('-data', '-idgratidao')[:MAX_GRATITUDE_LIST_COUNT]
 
-    # QuerySet de todas as gratidões do usuário (para paginação)
-    todas_gratidoes_qs = Gratidao.objects.filter(
-        usuario=usuario
-    ).order_by('-data', '-idgratidao')
-
-    # QuerySet das gratidões do dia
-    gratidao_do_dia_qs = todas_gratidoes_qs.filter(data=data_hoje)
-
-    # Destaque (a mais recente do dia, se houver)
-    gratidao_do_dia_destaque = gratidao_do_dia_qs.first()
-
-    # 2. Definição Dinâmica do FormSet
-    GratidaoFormSet = modelformset_factory(
-        Gratidao,
-        form=GratidaoForm,
-        extra=max(0, 3 - gratidao_do_dia_qs.count()), # Adiciona o necessário para chegar a 3 (min 0)
-        max_num=3,
-        can_delete=False
-    )
-
-    formset = None
-
-    if request.method == 'POST':
-        # Instancia o FormSet com os dados POST e o QuerySet EXISTENTE do dia
-        formset = GratidaoFormSet(request.POST, queryset=gratidao_do_dia_qs) 
-
-        if formset.is_valid():
-            # Itera sobre as instâncias a serem salvas (novas ou alteradas)
-            instances = formset.save(commit=False)
-            
-            # Garante que as novas instâncias tenham o usuário atribuído
-            for instance in instances:
-                if not instance.pk: 
-                    instance.usuario = usuario
-                instance.save()
-                
-            # Salva os objetos que foram marcados para exclusão (se can_delete fosse True, mas aqui não é)
-            # formset.save_m2m() # Apenas se houver campos ManyToManyField no GratidaoForm
-
-            # Mensagens de feedback
-            messages.success(
-                request, 'Gratidões registradas/atualizadas com sucesso! 🎉')
-            return redirect('gratidao')
-        else:
-            # Erro de validação. O formset com erros será passado para o template.
-            messages.error(
-                request, 'Houve um erro ao registrar sua gratidão. Verifique os campos e se o formulário está preenchido corretamente.')
-
-    # Se GET ou POST com erro, inicializa o formset com os dados do dia
-    if formset is None:
-        formset = GratidaoFormSet(queryset=gratidao_do_dia_qs)
-        
-    # 3. PAGINAÇÃO DO HISTÓRICO
-    gratidoes_para_paginar = todas_gratidoes_qs
-
-    paginator = Paginator(gratidoes_para_paginar, REGISTROS_POR_PAGINA)
-    page_number = request.GET.get('page', 1)
-
-    try:
-        gratidoes_paginadas = paginator.page(page_number)
-    except PageNotAnInteger:
-        gratidoes_paginadas = paginator.page(1)
-    except EmptyPage:
-        gratidoes_paginadas = paginator.page(paginator.num_pages)
-
-    # 4. Contexto e Renderização
-    data_hoje_local = timezone.localdate()
-    try:
-        # Tenta formatar o nome do mês em português
-        mes_atual_extenso = data_hoje_local.strftime('%B').capitalize()
-    except:
-        # Fallback se o locale falhar
-        mes_atual_extenso = data_hoje_local.strftime('%B')
+    # Paginação
+    paginator = Paginator(todas_gratidoes, GRATITUDE_PER_PAGE)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Formulário de Update vazio (será preenchido via JS no modal)
+    update_form = GratidaoUpdateForm()
 
     context = {
-        'gratidao_do_dia': gratidao_do_dia_qs, 
-        'gratidao_do_dia_destaque': gratidao_do_dia_destaque,
-        'gratidoes_paginadas': gratidoes_paginadas,
-        'mes_atual': mes_atual_extenso,
-        'ano_atual': data_hoje.year,
-        'formset': formset,
+        'hoje': hoje,
+        'gratidoes_hoje': gratidoes_hoje,  # Gratidões em destaque no topo
+        'create_form': create_form,       # Form para Inclusão (Hoje ou Tardia)
+        'update_form': update_form,       # Form para Alteração
+        'page_obj': page_obj,             # Lista paginada de gratidões antigas
     }
-
+    
     return render(request, 'app_LyfeSync/autocuidado/gratidao.html', context)
 
-
-@login_required(login_url='login')
+@login_required
+@require_POST
 def registrar_gratidao(request):
     """
-    Processa a inclusão de novas gratidões (múltiplas, até 3) em qualquer data
-    escolhida pelo usuário no modal de inclusão.
+    Processa a criação de até 3 gratidões de uma vez.
+    Utiliza o método save() do GratidaoCreateForm para criar os objetos em lote.
     """
+    form = GratidaoCreateForm(request.POST)
     usuario = request.user
     
-    # 1. Definição do FormSet para CRIAÇÃO
-    GratidaoFormSet = modelformset_factory(
-        Gratidao,
-        form=GratidaoForm,
-        extra=3, 
-        max_num=3,
-        can_delete=False
-    )
-
-    if request.method == 'POST':
-        # Instanciamos o formset SEM um queryset, garantindo que será sempre uma CRIAÇÃO
-        formset = GratidaoFormSet(request.POST) 
-
-        if formset.is_valid():
+    if form.is_valid():
+        try:
+            gratidoes_criadas_objs = form.save(user=usuario)
+            gratidoes_criadas = len(gratidoes_criadas_objs)
+            data = form.cleaned_data['data'] # A data é sempre extraída do form limpo
             
-            instances = formset.save(commit=False)
+            messages.success(request, f'Sucesso! {gratidoes_criadas} gratidão(ões) registrada(s) para {data.strftime("%d/%m/%Y")}.')
+
+        except Exception as e:
+            # Captura qualquer erro que possa ocorrer durante a transação ou salvamento.
+            messages.error(request, f'Ocorreu um erro ao salvar as gratidões: {e}. Tente novamente.')
             
-            registros_criados = 0
-            # formset.new_objects contém apenas os objetos criados (forms com dados)
-            for instance in formset.new_objects:
-                # O ModelFormSet cuida de forms vazios; aqui só precisamos garantir o usuário e salvar.
-                instance.usuario = usuario
-                instance.save()
-                registros_criados += 1
+    else:
+        # Erros de validação
+        messages.error(request, 'Erro: O formulário contém erros. Verifique os campos e tente novamente.')
 
-            if registros_criados > 0:
-                messages.success(
-                    request, f'{registros_criados} gratidão(ões) registrada(s) com sucesso! 😊')
-            else:
-                messages.info(request, 'Nenhuma gratidão preenchida para salvar.')
-                    
-            return redirect('gratidao')
-        else:
-            # Se o formset não for válido, exibe as mensagens de erro
-            messages.error(
-                request, 'Houve um erro ao registrar sua gratidão. Verifique se a data e o conteúdo foram preenchidos corretamente.')
-            return redirect('gratidao')
+    return redirect(reverse('gratidao'))
 
-    # Se for GET, simplesmente redireciona, pois esta view é apenas para POST do modal.
-    return redirect('gratidao')
-
-
-@login_required(login_url='login')
-def alterar_gratidao(request, gratidao_id):
-    """Permite alterar um registro de gratidão existente (tipicamente via modal)."""
-    usuario = request.user
-
-    # Busca a instância da gratidão, garantindo que pertence ao usuário logado
-    gratidao_instance = get_object_or_404(
-        Gratidao, pk=gratidao_id, usuario=usuario) 
-
+@login_required
+def alterar_gratidao(request, pk):
+    """
+    Processa a alteração de uma única gratidão
+    """
+    gratidao_obj = get_object_or_404(Gratidao, idgratidao=pk, usuario=request.user)
+    
     if request.method == 'POST':
-        form = GratidaoForm(request.POST, instance=gratidao_instance)
-
+        form = GratidaoUpdateForm(request.POST, instance=gratidao_obj)
+        
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Gratidão alterada com sucesso! ❤️')
-            return redirect('gratidao')
+            try:
+                # 1. Salva o objeto na memória sem fazer commit no banco (apenas atualiza o campo descricaogratidao)
+                gratidao_instance = form.save(commit=False)
+                new_description = form.cleaned_data['descricaogratidao']
+                
+                # 2. Lógica para regenerar o nome/título curto (usando os primeiros caracteres da primeira linha)
+                first_line = new_description.split('\n')[0].strip()
+                name = re.sub(r'\s+', ' ', first_line) # Remove múltiplos espaços
+                
+                if len(name) > 100:
+                    name = name[:97].strip() + '...'
+                                
+                # 4. Salva a instância no banco de dados
+                gratidao_instance.save() 
+                
+                # CORREÇÃO 2: Usa a variável 'name' (o título curto gerado) na mensagem de sucesso,
+                # em vez da descrição completa, que seria muito longa.
+                messages.success(request, f'Gratidão "{name}" alterada com sucesso!')
+            
+            except Exception as e:
+                messages.error(request, f'Erro ao alterar a gratidão: {e}')
         else:
-            messages.error(
-                request, 'Falha na alteração da gratidão. Verifique os dados.')
-            # Redireciona mesmo com erro para manter a simplicidade (erros são exibidos via messages)
-            return redirect('gratidao')
+            messages.error(request, 'Erro na alteração: Os dados fornecidos são inválidos.')
+            # Adiciona o erro do formulário para garantir que a mensagem de erro seja vista
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'Erro no campo {field}: {error}')
+            
+    return redirect(reverse('gratidao'))
 
-    # Se for GET, simplesmente redireciona, pois a alteração é esperada via POST
-    return redirect('gratidao')
-
-
+@login_required
 @require_POST
-@login_required(login_url='login')
-def delete_gratidao(request, gratidao_id):
-    """Exclui um registro de Gratidão específico (via POST)."""
-    usuario = request.user
-
+def delete_gratidao(request, pk):
+    """
+    Processa a exclusão de uma gratidão específica.
+    """
+    gratidao_obj = get_object_or_404(Gratidao, idgratidao=pk, usuario=request.user)
+    
     try:
-        # Garante que apenas o proprietário pode excluir
-        gratidao_obj = Gratidao.objects.get(pk=gratidao_id, usuario=usuario)
-    except Gratidao.DoesNotExist:
-        messages.error(
-            request, 'Registro não encontrado ou você não tem permissão.')
-        return redirect('gratidao')
-
-    try:
+        # CORREÇÃO 3: Recupera o título/nome curto antes de deletar para usá-lo na mensagem
+        # Assumindo que você ainda está gerando o nome curto a partir da descrição para fins de feedback.
+        first_line = gratidao_obj.descricaogratidao.split('\n')[0].strip()
+        name_for_feedback = re.sub(r'\s+', ' ', first_line)
+        if len(name_for_feedback) > 100:
+            name_for_feedback = name_for_feedback[:97].strip() + '...'
+            
         gratidao_obj.delete()
-        messages.success(
-            request, 'O registro de gratidão foi excluído com sucesso! 💔')
+        # Usa a variável 'name_for_feedback' corrigida na mensagem de sucesso
+        messages.success(request, f'Gratidão "{name_for_feedback}" excluída com sucesso.')
+        
     except Exception as e:
-        messages.error(
-            request, f'Erro ao excluir o registro de gratidão: {e}')
+        messages.error(request, f'Erro ao excluir a gratidão: {e}')
 
-    return redirect('gratidao')
+    return redirect(reverse('gratidao'))
 
 # -------------------------------------------------------------------
 # VIEWS DE AFIRMAÇÃO (CRUD e Listagem)

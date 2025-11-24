@@ -9,7 +9,7 @@ from django.template.loader import render_to_string
 
 # Importando os Models reais necessários para as views de exportação
 from ..models import Gratidao, Afirmacao, Humor, HumorTipo
-from ..forms import GratidaoForm, AfirmacaoForm, HumorForm, DicasForm
+from ..forms import AfirmacaoForm, HumorForm, DicasForm
 
 # Importando a lógica auxiliar e os Mocks necessários
 from ._aux_logic import (

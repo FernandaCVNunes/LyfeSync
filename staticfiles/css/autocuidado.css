@@ -1,133 +1,37 @@
-/* autocuidado.css (Gratidão e Afirmação) */
+/* autocuidado.css (Gratidão e Afirmação) - Adaptado para Bootstrap 5 */
 
-
+/* VARIÁVEIS DE COR CUSTOMIZADAS */
+:root {
+    --gratidao-blue: #0A9BB8;
+    --gratidao-light-blue: #E6F3F5;
+}
 
 /* ========================================================= */
-/* --- ESTILOS DE AUTOCUIDADO GERAL --- */
+/* --- ESTILOS DE AUTOCUIDADO GERAL (Utilidades) --- */
 /* ========================================================= */
 
-/* Título H2 do Menu de Autocuidado: Cor verde #48BB78 */
-.autocuidado-link-title {
-    color: var(--lyfesync-green, #48BB78);
+/* Cor principal LyfeSync Green (#48BB78) para títulos e links */
+.text-lyfesync-green {
+    color: var(--lyfesync-green) !important;
 }
 
-/* Título de Card de Dica */
-.dica-card-title {
-    color: var(--lyfesync-green, #48BB78);
+/* Cor de fundo LyfeSync Light Green (#ECFDF5) */
+.bg-lyfesync-light {
+    background-color: var(--lyfesync-light-green) !important;
 }
 
-/* Fundo verde claro para o card de dica */
-.dica-card-green {
-    background-color: #ECFDF5;
-    border-color: var(--lyfesync-green, #48BB78) !important;
-}
-
-.text-primary-sync {
-    color: #3b82f6 !important;
-}
-
-.text-success-sync {
-    color: #10b981 !important;
-}
-
-.text-danger-sync {
-    color: #ef4444 !important;
-}
-
-.text-warning-sync {
-    color: #f59e0b !important;
-}
-
-.bg-primary-sync {
-    background-color: #3b82f6 !important;
-}
-
-.bg-success-sync {
-    background-color: #10b981 !important;
-}
-
-.bg-danger-sync {
-    background-color: #ef4444 !important;
-}
-
-.bg-warning-sync {
-    background-color: #f59e0b !important;
-}
-
-.border-primary-sync {
-    border-color: #3b82f6 !important;
-}
-
-.border-success-sync {
-    border-color: #10b981 !important;
-}
-
-.border-danger-sync {
-    border-color: #ef4444 !important;
-}
-
-.border-warning-sync {
-    border-color: #f59e0b !important;
-}
-
-/* Estilo do Card (Substituindo section-card) */
-.section-card {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+/* Estilo de Card com Shadow e Hover Customizados (Antigo .section-card) */
+/* Substitui shadow-xl e adiciona o efeito de hover que o BS não tem por padrão */
+.custom-shadow-hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    /* Equivalente a shadow-lg */
     transition: all 0.3s ease;
 }
 
-.section-card:hover {
+.custom-shadow-hover:hover {
     transform: translateY(-2px);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-/* Estilos do Modal (Substituindo classes de Tailwind) */
-.modal-custom {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-    overflow-y: auto;
-    align-items: center;
-    /* Centraliza o conteúdo verticalmente */
-    justify-content: center;
-    /* Centraliza o conteúdo horizontalmente */
-}
-
-.modal-content-custom {
-    margin: 10vh auto;
-    max-width: 90%;
-    min-width: 320px;
-    animation: fadeIn 0.3s;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Utilidades de Contexto para as listas */
-.bg-success-subtle-light {
-    background-color: rgba(16, 185, 129, 0.05) !important;
-}
-
-.bg-primary-subtle-light {
-    background-color: rgba(59, 130, 246, 0.05) !important;
-}
-
-.bg-warning-subtle-light {
-    background-color: rgba(245, 158, 11, 0.05) !important;
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.2) !important;
+    /* Sombra mais forte no hover */
 }
 
 /* Ajuste para ícones Lucide no BS */
@@ -135,117 +39,54 @@ i[data-lucide] {
     vertical-align: middle;
 }
 
+/* Destaque de Mensagem (Antigo .highlight-card) - Fundo esverdeado claro e borda */
+.highlight-card {
+    background-color: #f0fdf4 !important;
+    /* emerald-50 */
+    border-left: 5px solid #10b981 !important;
+    /* emerald-500 */
+}
 
 /* ========================================================= */
-/* --- ESTILOS PÁGINA REGISTRAR GRATIDÃO --- */
+/* --- ESTILOS DE TABELA DE GRATIDÃO (Cor Customizada) --- */
 /* ========================================================= */
 
-/* Ícones pequenos (Gratidão) (30px) */
-.gratidao-icon-size {
-    width: 30px;
-    height: 30px;
-    object-fit: contain;
+/* Título e elementos na cor Gratidão Blue (#0A9BB8) */
+.text-gratidao-blue {
+    color: var(--gratidao-blue) !important;
 }
 
-.gratidao-page-container {
-    min-height: 100vh;
+.border-gratidao-blue {
+    border-color: var(--gratidao-blue) !important;
 }
 
-.gratidao-main-title {
-    font-size: 2.25rem;
-}
-
-.gratidao-textarea {
-    font-size: 1.15rem !important;
-    resize: none !important;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    min-height: 180px !important;
-}
-
-.gratidao-date-container {
-    margin-bottom: 0rem !important;
-}
-
-.gratidao-date-label {
-    font-size: 1.125rem;
-}
-
-.gratidao-date-input {
-    width: 150px;
-    border-radius: 0.5rem;
-    background-color: #E9ECEF !important;
-    border: 1px solid #E9ECEF !important;
-    box-shadow: none !important;
-}
-
-.gratidao-title-color {
-    color: var(--lyfesync-red-salvar);
-}
-
-.gratidao-question-color {
-    color: var(--lyfesync-green);
-}
-
-.gratidao-field-bg {
-    background-color: #C6F6D5 !important;
-    border: 1px solid #C6F6D5 !important;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06) !important;
-    padding: 1.5rem !important;
-    border-radius: 0.5rem !important;
-}
-
-/* Estilo para o cartão de item de gratidão ser clicável */
-.gratidao-item-card {
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.gratidao-item-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-}
-
-.gratidao-icon-size {
-    width: 1.1rem;
-    height: 1.1rem;
+/* Cabeçalho de Tabela Customizado */
+.table-gratidao-header th {
+    background-color: var(--gratidao-blue) !important;
+    color: white !important;
+    font-size: 1rem;
+    font-weight: 700;
     vertical-align: middle;
 }
 
-.gratidao-no-records {
-    border-color: #ffc107 !important;
+/* Linha da Tabela (Fundo claro para hover) */
+.gratidao-list-item-hover:hover {
+    background-color: var(--gratidao-light-blue) !important;
+    border-color: var(--gratidao-blue) !important;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+}
+
+/* Estilo para inputs de data no modal - Adaptação para .form-control */
+.gratidao-date-input.form-control {
+    font-size: 1.25rem;
+    padding: 0.75rem 1rem;
 }
 
 /* ========================================================= */
-/* --- ESTILOS PÁGINA REGISTRAR AFIRMAÇÃO --- */
+/* --- ESTILOS PÁGINA REGISTRAR AFIRMAÇÃO (Customizados) --- */
 /* ========================================================= */
-
-.afirmacao-page-container {
-    min-height: 100vh;
-}
-
-.afirmacao-main-title {
-    font-size: 2.25rem;
-}
-
-.afirmacao-date-label {
-    font-size: 1.125rem;
-}
-
-.afirmacao-date-input {
-    width: 150px;
-    background-color: #BDBDBD !important;
-    border-radius: 0.5rem;
-    border: none !important;
-    color: #4A5568 !important;
-}
-
-.afirmacao-text-container {
-    max-width: 500px;
-}
-
-.afirmacao-circle-group {
-    margin-bottom: 5rem !important;
-}
 
 /* Definição do formato circular */
 .affirmation-circle {
@@ -290,18 +131,4 @@ i[data-lucide] {
     box-shadow: none !important;
     text-align: center;
     transition: all 0.3s ease;
-}
-
-/* Responsividade */
-@media (max-width: 768px) {
-    .affirmation-circles-wrapper {
-        flex-direction: column;
-    }
-}
-
-.afirmacao-error-message {
-    left: 50%;
-    transform: translateX(-50%);
-    white-space: nowrap;
-    position: absolute;
 }

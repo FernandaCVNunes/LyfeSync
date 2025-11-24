@@ -150,7 +150,6 @@
           <thead>
             <tr class="text-uppercase">
               <th scope="col" class="gratidao-col-data">Data</th>
-              <th scope="col" class="gratidao-col-nome" style="min-width: 250px;">Gratidão (nomeGratidao)</th>
               <th scope="col" style="min-width: 400px;">Descrição (descricaoGratidao)</th>
             </tr>
           </thead>
@@ -161,10 +160,6 @@
               <!-- Coluna Data -->
               <td class="gratidao-col-data">
                 {{ gratidao.data|date:"d/m/Y" }}
-              </td>
-              <!-- Coluna Nome da Gratidão -->
-              <td class="text-start gratidao-col-nome text-wrap-content">
-                {{ gratidao.nomegratidao|default:"-- Sem Título --" }}
               </td>
               <!-- Coluna Descrição -->
               <td class="text-start text-wrap-content">

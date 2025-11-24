@@ -49,7 +49,7 @@ class HumorAdmin(admin.ModelAdmin):
 @admin.register(Gratidao)
 class GratidaoAdmin(admin.ModelAdmin):
     # CORREÇÃO DEFINITIVA: Usando 'descricaogratidao' (tudo minúsculo) e 'data' (não existe data_registro)
-    list_display = ('idgratidao', 'usuario', 'data', 'nomegratidao', 'descricaogratidao')
+    list_display = ('idgratidao', 'usuario', 'data', 'descricaogratidao')
     list_filter = ('data',)
     # Usando 'descricaogratidao' na busca.
     search_fields = ('descricaogratidao', 'usuario__username') 

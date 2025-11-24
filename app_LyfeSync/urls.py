@@ -79,8 +79,8 @@ urlpatterns = [
     # GRATIDÃO
     path('gratidao/', gratidao, name='gratidao'),
     path('gratidao/registrar/', registrar_gratidao, name='registrar_gratidao'),
-    path('gratidao/alterar/<int:gratidao_id>/', alterar_gratidao, name='alterar_gratidao'),
-    path('gratidao/excluir/<int:gratidao_id>/', delete_gratidao, name='delete_gratidao'), 
+    path('gratidao/alterar/<int:pk>/', alterar_gratidao, name='alterar_gratidao'),
+    path('gratidao/excluir/<int:pk>/', delete_gratidao, name='delete_gratidao'), 
     
     # AFIRMAÇÃO
     path('afirmacao/', afirmacao, name='afirmacao'),

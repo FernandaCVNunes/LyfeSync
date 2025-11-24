@@ -1,86 +1,37 @@
-/* autocuidado.css (Gratidão e Afirmação) */
+/* autocuidado.css (Gratidão e Afirmação) - Adaptado para Bootstrap 5 */
+
+/* VARIÁVEIS DE COR CUSTOMIZADAS */
+:root {
+    --gratidao-blue: #0A9BB8;
+    --gratidao-light-blue: #E6F3F5;
+}
 
 /* ========================================================= */
-/* --- ESTILOS DE AUTOCUIDADO GERAL --- */
+/* --- ESTILOS DE AUTOCUIDADO GERAL (Utilidades) --- */
 /* ========================================================= */
 
-/* Título H2 do Menu de Autocuidado: Cor verde #48BB78 */
-.autocuidado-link-title {
-    color: var(--lyfesync-green, #48BB78);
+/* Cor principal LyfeSync Green (#48BB78) para títulos e links */
+.text-lyfesync-green {
+    color: var(--lyfesync-green) !important;
 }
 
-/* Título de Card de Dica */
-.dica-card-title {
-    color: var(--lyfesync-green, #48BB78);
+/* Cor de fundo LyfeSync Light Green (#ECFDF5) */
+.bg-lyfesync-light {
+    background-color: var(--lyfesync-light-green) !important;
 }
 
-/* Fundo verde claro para o card de dica */
-.dica-card-green {
-    background-color: #ECFDF5;
-    border-color: var(--lyfesync-green, #48BB78) !important;
-}
-
-/* Estilo do Card (Substituindo section-card) */
-.section-card {
-    /* Equivalente a shadow-xl (Tailwind) / box-shadow padrão do BS */
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+/* Estilo de Card com Shadow e Hover Customizados (Antigo .section-card) */
+/* Substitui shadow-xl e adiciona o efeito de hover que o BS não tem por padrão */
+.custom-shadow-hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    /* Equivalente a shadow-lg */
     transition: all 0.3s ease;
 }
 
-.section-card:hover {
+.custom-shadow-hover:hover {
     transform: translateY(-2px);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-/* Estilos do Modal (Substituindo classes de Tailwind) */
-/* OBS: Esta parte é customizada e não depende de Bootstrap, mantida como está */
-.modal-custom {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-    overflow-y: auto;
-    align-items: center;
-    /* Centraliza o conteúdo verticalmente */
-    justify-content: center;
-    /* Centraliza o conteúdo horizontalmente */
-}
-
-.modal-content-custom {
-    margin: 10vh auto;
-    max-width: 90%;
-    min-width: 320px;
-    animation: fadeIn 0.3s;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Utilidades de Contexto para as listas */
-/* OBS: Mantido se forem cores *muito* específicas. O BS oferece *-subtle para cores claras. */
-.bg-success-subtle-light {
-    background-color: rgba(16, 185, 129, 0.05) !important;
-}
-
-.bg-primary-subtle-light {
-    background-color: rgba(59, 130, 246, 0.05) !important;
-}
-
-.bg-warning-subtle-light {
-    background-color: rgba(245, 158, 11, 0.05) !important;
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.2) !important;
+    /* Sombra mais forte no hover */
 }
 
 /* Ajuste para ícones Lucide no BS */
@@ -88,133 +39,66 @@ i[data-lucide] {
     vertical-align: middle;
 }
 
-/* .form-control é a classe padrão do Bootstrap, mas você a está sobrescrevendo aqui: */
-.form-control {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.5rem;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-}
-
-.form-control:focus {
-    border-color: #6366f1;
-    outline: 0;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+/* Destaque de Mensagem (Antigo .highlight-card) - Fundo esverdeado claro e borda */
+.highlight-card {
+    background-color: #f0fdf4 !important;
+    /* emerald-50 */
+    border-left: 5px solid #10b981 !important;
+    /* emerald-500 */
 }
 
 /* ========================================================= */
-/* --- ESTILOS DE TABELA DE GRATIDÃO HOJE (Pedido do Usuário) --- */
+/* --- ESTILOS DE TABELA DE GRATIDÃO (Cor Customizada) --- */
 /* ========================================================= */
 
-/* Garante que a tabela tenha bordas arredondadas e que a cor de fundo preencha as linhas */
-.table-responsive table {
-    border-radius: 0.5rem;
-    overflow: hidden;
-    /* Importante para que as bordas arredondadas funcionem com o thead */
+/* Título e elementos na cor Gratidão Blue (#0A9BB8) */
+.text-gratidao-blue {
+    color: var(--gratidao-blue) !important;
 }
 
-.table thead.bg-success th {
-    /* Cor de fundo mais escura para o cabeçalho */
-    background-color: #0A9BB8!important;
+.border-gratidao-blue {
+    border-color: var(--gratidao-blue) !important;
+}
+
+/* Cabeçalho de Tabela Customizado */
+.table-gratidao-header th {
+    background-color: var(--gratidao-blue) !important;
     color: white !important;
     font-size: 1rem;
     font-weight: 700;
     vertical-align: middle;
 }
 
-/* Estilo para as linhas de dados (tbody) - Fundo verde escuro e Texto branco/grande */
-/* Cor de fundo para as linhas (Tbody), um verde escuro legível */
-.gratidao-tabela-row {
-    background-color:#0A9BB8;
-    /* Verde escuro do Bootstrap (Success) */
-    color: white !important;
-    /* Texto branco em toda a linha */
-    transition: background-color 0.3s ease;
+/* Linha da Tabela (Fundo claro para hover) */
+.gratidao-list-item-hover:hover {
+    background-color: var(--gratidao-light-blue) !important;
+    border-color: var(--gratidao-blue) !important;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
 }
 
-/* Efeito Hover na linha - Um tom um pouco mais escuro ou opaco */
-.gratidao-tabela-row:hover {
-    background-color: #0A9BB8;
-    /* Darker green on hover */
-    color: white !important;
-}
-
-/* Força o texto das células a ser branco e a frase a ser grande */
-.gratidao-tabela-row td {
-    color: #0A9BB8 !important;
-}
-
-/* Coluna da Frase - Texto grande (fs-5) */
-.gratidao-tabela-row td:nth-child(2) {
+/* Estilo para inputs de data no modal - Adaptação para .form-control */
+.gratidao-date-input.form-control {
     font-size: 1.25rem;
-    /* Fonte grande, equivalente a h5 ou fs-5 do BS */
+    padding: 0.75rem 1rem;
+}
+
+.gratidao-item-history {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.gratidao-date {
+    flex-shrink: 0;
     font-weight: 600;
-    /* Mais negrito */
-}
-
-/* Coluna de Ações - Botões Alterar e Excluir */
-.gratidao-tabela-row td:nth-child(3) .btn-sm {
-    font-size: 0.8rem;
-    padding: 0.25rem 0.5rem;
-}
-
-/* Inverte as cores dos botões de Alterar e Excluir para ficarem brancos (outline) dentro do fundo escuro */
-.gratidao-tabela-row .btn-outline-success {
-    color: #0A9BB8 !important;
-    border-color: #0A9BB8 !important;
-}
-
-.gratidao-tabela-row .btn-outline-success:hover {
-    background-color: #0A9BB8 !important;
-    color: white !important;
-}
-
-.gratidao-tabela-row .btn-outline-danger {
-    color: #dc3545 !important;
-    border-color: #dc3545 !important;
-}
-
-.gratidao-tabela-row .btn-outline-danger:hover {
-    background-color: #dc3545 !important;
-    color: white !important;
-}
-
-.gratidao-title{
-    color: #0A9BB8;
+    color: var(--bs-primary);
 }
 
 /* ========================================================= */
-/* --- ESTILOS PÁGINA REGISTRAR AFIRMAÇÃO --- */
+/* --- ESTILOS PÁGINA REGISTRAR AFIRMAÇÃO (Customizados) --- */
 /* ========================================================= */
-
-.afirmacao-page-container {
-    min-height: 100vh;
-}
-
-.afirmacao-main-title {
-    font-size: 2.25rem;
-}
-
-.afirmacao-date-label {
-    font-size: 1.125rem;
-}
-
-.afirmacao-date-input {
-    width: 150px;
-    background-color: #BDBDBD !important;
-    border-radius: 0.5rem;
-    border: none !important;
-    color: #4A5568 !important;
-}
-
-.afirmacao-text-container {
-    max-width: 500px;
-}
-
-.afirmacao-circle-group {
-    margin-bottom: 5rem !important;
-}
 
 /* Definição do formato circular */
 .affirmation-circle {
@@ -259,18 +143,4 @@ i[data-lucide] {
     box-shadow: none !important;
     text-align: center;
     transition: all 0.3s ease;
-}
-
-/* Responsividade */
-@media (max-width: 768px) {
-    .affirmation-circles-wrapper {
-        flex-direction: column;
-    }
-}
-
-.afirmacao-error-message {
-    left: 50%;
-    transform: translateX(-50%);
-    white-space: nowrap;
-    position: absolute;
 }

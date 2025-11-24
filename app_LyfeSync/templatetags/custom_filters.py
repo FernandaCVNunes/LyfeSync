@@ -41,3 +41,14 @@ def get_item(dictionary, key):
 def add_class(field, css):
     # Lógica para adicionar a classe
     return field.as_widget(attrs={"class": css})
+
+@register.filter
+def get_field_by_name(form, field_name):
+    """
+    Permite acessar um campo de formulário usando seu nome dinamicamente.
+    Uso: {{ form|get_field_by_name:"nomebase_"|add:"1" }}
+    """
+    try:
+        return form[field_name]
+    except KeyError:
+        return None
