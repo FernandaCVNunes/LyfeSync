@@ -1,18 +1,27 @@
 # app_LyfeSync/views/reports_views.py
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.urls import reverse
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse, HttpResponse, Http404
+from django.contrib import messages
+from django.db import transaction, IntegrityError 
 from django.utils import timezone
-from django.db import models
+from django.template.loader import render_to_string 
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.forms.models import modelformset_factory
+from datetime import timedelta, date, datetime
+from io import BytesIO
+import csv
 import calendar
-from datetime import date
-
+import locale
+import re
 # Importando os Models reais necessários para as views de relatório
 from ..models import Gratidao, Afirmacao, Habito, StatusDiario, Humor, HumorTipo 
-from ..forms import HumorForm, DicasForm
+from ..forms import HumorForm, DicasForm, RelatorioHumorForm# Importando a lógica auxiliar
+from ._aux_logic import _get_report_date_range, get_humor_map, _get_humor_cor_classe, get_humor_icone, get_habitos_e_acompanhamento
 
-# Importando a lógica auxiliar
-from ._aux_logic import _get_report_date_range, _get_humor_cor_classe 
-
+def get_humor_map(): return {}
 
 # -------------------------------------------------------------------
 # VIEWS DE RELATÓRIOS
@@ -34,6 +43,10 @@ def relatorio(request):
     """Placeholder para a view de relatório (singular/detalhado)."""
     # Geralmente redireciona para a listagem ou um relatório padrão.
     return redirect('relatorios')
+
+# -------------------------------------------------------------------
+# RELATÓRIO DE HABITO - PDF/CSV
+# -------------------------------------------------------------------
 
 @login_required(login_url='login')
 def relatorio_habito(request):
@@ -117,6 +130,129 @@ def relatorio_habito(request):
     }
     return render(request, 'app_LyfeSync/relatorios/relatorioHabito.html', context)
 
+
+@login_required(login_url='login')
+def exportar_habito_csv(request):
+    """
+    Exporta o relatório de acompanhamento de Hábitos do período selecionado
+    para um arquivo CSV, detalhando o status diário de cada hábito.
+    
+    NOTA: Usa a função mock get_habitos_e_acompanhamento para buscar os dados.
+    """
+    hoje = timezone.localdate()
+    # Usa a função auxiliar para definir o intervalo de datas
+    data_inicio, data_fim, data_referencia, periodo, mes_param, ano_param = _get_report_date_range(request, hoje)
+
+    # 1. Busca os Hábitos e o Acompanhamento no período (Usando MOCK)
+    habitos_processados = get_habitos_e_acompanhamento(request.user, data_inicio, data_fim)
+    
+    # Lista de todas as datas no período
+    delta = data_fim - data_inicio
+    dias_periodo = [data_inicio + timedelta(days=i) for i in range(delta.days + 1)]
+
+    # 2. Configura a resposta HTTP para CSV
+    filename = f"habitos_{periodo}_{data_inicio.strftime('%Y%m%d')}_{data_fim.strftime('%Y%m%d')}.csv"
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    # Adiciona o BOM para garantir que caracteres especiais funcionem no Excel (Português)
+    response.write(u'\ufeff'.encode('utf8'))
+
+    # Usa ponto e vírgula como delimitador para melhor compatibilidade com o Excel pt-BR
+    writer = csv.writer(response, delimiter=';')
+
+    # 3. Escreve o cabeçalho: 'Hábito' + todas as datas formatadas
+    #header_dates = [d.strftime('%d/%m/%Y') for d in dias_periodo]
+    writer.writerow(['ID', 'Data', 'Descrição'])
+
+    # 4. Escreve os dados
+    for habito in habitos_processados:
+        row = [habito['id'], habito['nome']]
+        
+        for dia in dias_periodo:
+            status = habito['acompanhamento'].get(dia)
+            
+            if status is True:
+                row.append('Concluído')
+            elif status is False:
+                row.append('Não Concluído')
+            else:
+                row.append('Sem Registro') # Dia sem registro de acompanhamento
+        
+        writer.writerow(row)
+
+    return response
+
+
+@login_required(login_url='login')
+def exportar_habito_pdf(request):
+    """
+    Gera um relatório PDF (simulado via HTML formatado para impressão)
+    do acompanhamento de Hábitos do período selecionado.
+    
+    NOTA: Usa a função mock get_habitos_e_acompanhamento para buscar os dados.
+    """
+    hoje = timezone.localdate()
+    data_inicio, data_fim, data_referencia, periodo, mes_param, ano_param = _get_report_date_range(request, hoje)
+
+    # Busca os Hábitos e o Acompanhamento no período (Usando MOCK)
+    habitos_processados = get_habitos_e_acompanhamento(request.user, data_inicio, data_fim)
+
+    # Lista de todas as datas no período (necessário para o cabeçalho da tabela)
+    delta = data_fim - data_inicio
+    dias_periodo = [data_inicio + timedelta(days=i) for i in range(delta.days + 1)]
+    
+    # Converte a lista de dicionários para uma estrutura mais simples para o template
+    habitos_para_template = []
+    for h in habitos_processados:
+        acompanhamento_map = h['acompanhamento']
+        
+        # NOVO: Cria uma lista de status ordenados para o template
+        status_ordenado = []
+        for dia in dias_periodo:
+            status = acompanhamento_map.get(dia)
+            status_ordenado.append(status)
+
+        habitos_para_template.append({
+            'nome': h['nome'],
+            'status_diario': status_ordenado, # NOVO CAMPO: Lista ordenada
+        })
+        
+    # Determinação da string do período
+    if periodo == 'mensal':
+        mes_extenso = data_referencia.strftime('%B').capitalize() 
+        periodo_str = f"Mensal: {mes_extenso} / {data_referencia.year}"
+    elif periodo == 'semanal':
+        periodo_str = f"Semanal: {data_inicio.strftime('%d/%m/%Y')} a {data_fim.strftime('%d/%m/%Y')}"
+    elif periodo == 'quinzenal':
+        periodo_str = f"Quinzenal: {data_inicio.strftime('%d/%m/%Y')} a {data_fim.strftime('%d/%m/%Y')}"
+    else:
+        periodo_str = f"Período Personalizado: {data_inicio.strftime('%d/%m/%Y')} a {data_fim.strftime('%d/%m/%Y')}"
+
+    context = {
+        'habitos': habitos_para_template,
+        'dias_periodo': dias_periodo,
+        'periodo_str': periodo_str,
+        'data_geracao': timezone.localtime(timezone.now()).strftime('%d/%m/%Y %H:%M'),
+        'total_habitos': len(habitos_processados),
+        'usuario': request.user.username if request.user.is_authenticated else 'Usuário Não Autenticado',
+    }
+    
+    # Renderiza o template HTML (otimizado para PDF/impressão)
+    html_content = render_to_string('app_LyfeSync/relatorios/pdf_habito.html', context)
+
+    # Retorna o HTML com o Content-Type como PDF
+    filename = f"relatorio_habitos_{data_inicio.strftime('%Y%m%d')}_{data_fim.strftime('%Y%m%d')}.pdf"
+
+    response = HttpResponse(html_content, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+    return response
+
+# -------------------------------------------------------------------
+# RELATÓRIO DE GRATIDÃO - PDF/CSV
+# -------------------------------------------------------------------
+
 @login_required(login_url='login')
 def relatorio_gratidao(request):
     """Página de Relatório Específico de Gratidão.
@@ -160,6 +296,92 @@ def relatorio_gratidao(request):
     }
     return render(request, 'app_LyfeSync/relatorios/relatorioGratidao.html', context)
 
+@login_required(login_url='login')
+def exportar_gratidao_csv(request):
+    """Exporta os registros de gratidão do período selecionado para um arquivo CSV."""
+    hoje = timezone.localdate()
+    # Usa a função auxiliar para definir o intervalo de datas
+    data_inicio, data_fim, data_referencia, periodo, mes_param, ano_param = _get_report_date_range(request, hoje)
+
+    # Busca os Registros de Gratidão (Query real)
+    gratidoes = Gratidao.objects.filter(
+        usuario=request.user,
+        data__gte=data_inicio,
+        data__lte=data_fim
+    ).order_by('-data', '-idgratidao')
+
+    # 1. Configura a resposta HTTP para CSV
+    filename = f"gratidao_{periodo}_{data_inicio.strftime('%Y%m%d')}_{data_fim.strftime('%Y%m%d')}.csv"
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    # Adiciona o BOM para garantir que caracteres especiais funcionem no Excel
+    response.write(u'\ufeff'.encode('utf8'))
+
+    writer = csv.writer(response, delimiter=';') # Use semicolon for better compatibility with pt-BR Excel
+
+    # 2. Escreve o cabeçalho
+    writer = csv.writer(response)
+    writer.writerow(['ID', 'Data', 'Descrição'])
+
+    for g in gratidoes:
+        writer.writerow([
+            g.idgratidao,
+            g.data.strftime('%Y-%m-%d'), # <-- CAMPO CORRIGIDO: de data_registro para data
+            g.descricaogratidao
+        ])
+        
+    return response
+
+@login_required(login_url='login')
+def exportar_gratidao_pdf(request):
+    """Gera um relatório PDF (simulado via HTML formatado para impressão)
+    dos registros de gratidão do período selecionado.
+    """
+    hoje = timezone.localdate()
+    data_inicio, data_fim, data_referencia, periodo, mes_param, ano_param = _get_report_date_range(request, hoje)
+
+    # Busca os Registros de Gratidão (Query real)
+    gratidoes = Gratidao.objects.filter(
+        usuario=request.user,
+        data__gte=data_inicio,
+        data__lte=data_fim
+    ).order_by('-data', '-idgratidao')
+
+    # Determinação da string do período
+    if periodo == 'mensal':
+        mes_extenso = data_referencia.strftime('%B').capitalize()
+        periodo_str = f"Mensal: {mes_extenso} / {data_referencia.year}"
+    elif periodo == 'semanal':
+        periodo_str = f"Semanal: {data_inicio.strftime('%d/%m/%Y')} a {data_fim.strftime('%d/%m/%Y')}"
+    elif periodo == 'quinzenal':
+        periodo_str = f"Quinzenal: {data_inicio.strftime('%d/%m/%Y')} a {data_fim.strftime('%d/%m/%Y')}"
+    else:
+        periodo_str = "Período Inválido"
+
+    context = {
+        'gratidoes': gratidoes,
+        'periodo_str': periodo_str,
+        'data_geracao': timezone.localtime(timezone.now()).strftime('%d/%m/%Y %H:%M'),
+        'total_gratidoes': gratidoes.count(),
+        'usuario': request.user.username,
+        'data_inicio': data_inicio.strftime('%d/%m/%Y'),
+        'data_fim': data_fim.strftime('%d/%m/%Y'),
+    }
+
+    # Renderiza o template HTML (otimizado para PDF/impressão)
+    html_content = render_to_string('app_LyfeSync/relatorios/pdf_gratidao.html', context)
+
+    # Retorna o HTML com o Content-Type como PDF
+    filename = f"relatorio_gratidao_{data_inicio.strftime('%Y%m%d')}_{data_fim.strftime('%Y%m%d')}.pdf"
+    response = HttpResponse(html_content, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+    return response
+
+# -------------------------------------------------------------------
+# RELATÓRIO DE AFIRMAÇÃO - PDF/CSV
+# -------------------------------------------------------------------
 
 @login_required(login_url='login')
 def relatorio_afirmacao(request):
@@ -205,70 +427,290 @@ def relatorio_afirmacao(request):
     return render(request, 'app_LyfeSync/relatorios/relatorioAfirmacao.html', context)
 
 @login_required(login_url='login')
-def relatorio_humor(request):
-    """Página de Relatório Específico de Humor, usando a estrutura Mood Tracker."""
+def exportar_afirmacao_csv(request):
+    """Exporta os registros de afirmação do período selecionado para um arquivo CSV."""
     hoje = timezone.localdate()
-    
-    # 1. Definição do Intervalo de Tempo (Sempre Mensal para este relatório)
-    data_inicio, data_fim, data_referencia, periodo, mes_param, ano_param = _get_report_date_range(request, hoje, default_periodo='mensal')
-    
-    # 2. Busca dos Tipos de Humor (necessário para as 5 linhas da tabela)
-    # Garante 5 tipos: Excelente(5.0) a Péssimo(1.0). Se necessário, adicione um campo de ordenação.
-    humor_tipos = HumorTipo.objects.all().order_by('id_tipo_humor') # Use a ordem que desejar
-    
-    # 3. Busca dos Registros de Humor do período
-    # Usamos select_related para buscar o tipo de humor junto, otimizando o acesso ao .estado.icone
-    registros_humor = Humor.objects.select_related('estado').filter(
+    # Usa a função auxiliar para definir o intervalo de datas
+    data_inicio, data_fim, data_referencia, periodo, mes_param, ano_param = _get_report_date_range(request, hoje)
+
+    # Busca os Registros de Afirmação (Query real)
+    afirmacoes = Afirmacao.objects.filter(
         usuario=request.user,
         data__gte=data_inicio,
         data__lte=data_fim
-    ).order_by('data')
+    ).order_by('-data', '-idafirmacao')
 
-    # Mapeamento do dia do mês para o registro de humor (evita duplicidade de dias)
-    humor_por_dia = {}
-    for r in registros_humor:
-        if r.data.day not in humor_por_dia:
-            humor_por_dia[r.data.day] = r
-            
-    # 4. Processamento dos Dados para a Tabela
-    total_dias_marcados = len(humor_por_dia)
-    dados_relatorio = []
+    # 1. Configura a resposta HTTP para CSV
+    filename = f"afirmacoes_{periodo}_{data_inicio.strftime('%Y%m%d')}_{data_fim.strftime('%Y%m%d')}.csv"
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
     
-    for humor_tipo in humor_tipos: # Itera sobre todos os tipos de humor (5 linhas)
-        
-        # Lista dos dias em que ESTE tipo de humor foi marcado
-        dias_marcados = [
-            dia for dia, registro in humor_por_dia.items() 
-            if registro.estado.id_tipo_humor == humor_tipo.id_tipo_humor
-        ]
-        
-        num_marcacoes = len(dias_marcados)
-        porcentagem = 0.0
-        if total_dias_marcados > 0:
-            porcentagem = round((num_marcacoes / total_dias_marcados) * 100, 1)
+    # Adiciona o BOM para garantir que caracteres especiais funcionem no Excel
+    response.write(u'\ufeff'.encode('utf8'))
 
-        dados_relatorio.append({
-            'tipo': humor_tipo, 
-            # ADICIONE A PROPRIEDADE 'cor_classe' AO SEU MODELO HumorTipo (ou mapeie aqui)
-            # Como você não forneceu a classe no modelo, vou mapear a partir do 'estado'
-            'cor_classe': _get_humor_cor_classe(humor_tipo.estado), 
-            'dias_marcados': dias_marcados,
-            'porcentagem': f"{porcentagem:.1f}",
-        })
+    writer = csv.writer(response, delimiter=';') # Use semicolon for better compatibility with pt-BR Excel
 
-    # 5. Formatação do Contexto
-    ultimo_dia = calendar.monthrange(data_referencia.year, data_referencia.month)[1]
-    mes_extenso = data_referencia.strftime('%B').capitalize()
+    # 2. Escreve o cabeçalho
+    writer.writerow(['ID', 'Data', 'Nome da Afirmação', 'Afirmação', 'Data de Registro'])
+
+    # 3. Escreve os dados
+    for a in afirmacoes:
+        writer.writerow([
+            a.idafirmacao,
+            a.data.strftime('%d/%m/%Y'),
+            a.descricaoafirmacao or '',
+            timezone.localtime(a.data_registro).strftime('%d/%m/%Y %H:%M:%S')
+        ])
+
+    return response
+
+@login_required(login_url='login')
+def exportar_afirmacao_pdf(request):
+
+    """Gera um relatório PDF (simulado via HTML formatado para impressão)
+    dos registros de afirmação do período selecionado.
+    """
+    hoje = timezone.localdate()
+    data_inicio, data_fim, data_referencia, periodo, mes_param, ano_param = _get_report_date_range(request, hoje)
+
+    # Busca os Registros de Afirmação (Query real)
+    afirmacoes = Afirmacao.objects.filter(
+        usuario=request.user,
+        data__gte=data_inicio,
+        data__lte=data_fim
+    ).order_by('-data', '-idafirmacao')
+    
+    # Determinação da string do período
+    if periodo == 'mensal':
+        mes_extenso = data_referencia.strftime('%B').capitalize()
+        periodo_str = f"Mensal: {mes_extenso} / {data_referencia.year}"
+    elif periodo == 'semanal':
+        periodo_str = f"Semanal: {data_inicio.strftime('%d/%m/%Y')} a {data_fim.strftime('%d/%m/%Y')}"
+    elif periodo == 'quinzenal':
+        periodo_str = f"Quinzenal: {data_inicio.strftime('%d/%m/%Y')} a {data_fim.strftime('%d/%m/%Y')}"
+    else:
+        periodo_str = "Período Inválido"
 
     context = {
-        'hoje': hoje,
-        'meses': [(i, calendar.month_name[i].capitalize()) for i in range(1, 13)],
-        'mes_extenso': mes_extenso,
-        'mes_selecionado': mes_param,
-        'ano_selecionado': ano_param,
-        'ultimo_dia': ultimo_dia,
-        'dias_do_mes': list(range(1, ultimo_dia + 1)),
-        'dados_relatorio': dados_relatorio,
-        'total_dias_marcados': total_dias_marcados,
+        'afirmacoes': afirmacoes,
+        'periodo_str': periodo_str,
+        'data_geracao': timezone.localtime(timezone.now()).strftime('%d/%m/%Y %H:%M'),
+        'total_afirmacoes': afirmacoes.count(),
+        'usuario': request.user.username,
+        'data_inicio': data_inicio.strftime('%d/%m/%Y'),
+        'data_fim': data_fim.strftime('%d/%m/%Y'),
     }
+
+    # Renderiza o template HTML (otimizado para PDF/impressão)
+    html_content = render_to_string('app_LyfeSync/relatorios/pdf_afirmacao.html', context)
+
+    # Retorna o HTML com o Content-Type como PDF
+    filename = f"relatorio_afirmacao_{data_inicio.strftime('%Y%m%d')}_{data_fim.strftime('%Y%m%d')}.pdf"
+    response = HttpResponse(html_content, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+    return response
+
+# -------------------------------------------------------------------
+# RELATÓRIO DE HUMOR - PDF/CSV
+# -------------------------------------------------------------------
+
+def _get_report_context(usuario, mes, ano):
+    """
+    Função auxiliar para obter e processar os dados do relatório de humor.
+    """
+    try:
+        data_inicial = date(ano, mes, 1)
+        
+        # Encontra o último dia do mês
+        _, ultimo_dia_do_mes = calendar.monthrange(ano, mes)
+        
+        data_final = date(ano, mes, ultimo_dia_do_mes)
+    except ValueError:
+        # Erro de data, retorna 404
+        raise Http404("Mês ou ano inválido.")
+
+    # 1. Obter todos os tipos de humor cadastrados
+    tipos_humor = list(HumorTipo.objects.all().order_by('estado'))
+    
+    # 2. Obter os registros de humor para o usuário no período
+    registros_do_mes = Humor.objects.filter(
+        usuario=usuario,
+        data__gte=data_inicial,
+        data__lte=data_final
+    ).select_related('estado')
+
+    # Mapear o dia do mês para o ID do tipo de humor registrado.
+    registros_por_dia = {
+        registro.data.day: registro.estado.id_tipo_humor 
+        for registro in registros_do_mes
+    }
+
+    # 3. Construir a estrutura de dados para o template (a grade)
+    report_data = []
+    dias_do_mes = range(1, ultimo_dia_do_mes + 1)
+    
+    # Inicializa a contagem total de dias para cada humor
+    contagem_total = {tipo.id_tipo_humor: 0 for tipo in tipos_humor}
+
+    for tipo in tipos_humor:
+        estado_nome = tipo.estado
+        
+        icone_path = get_humor_icone(estado_nome)
+        
+        cor_fundo = _get_humor_cor_classe(estado_nome) 
+        
+        # Se você ainda precisar de cor_texto (assumindo que seja branco ou preto para contraste)
+        cor_texto = '#000000' # Exemplo: Cor de texto padrão
+
+        registro_diario = {}
+        contagem_do_humor = 0
+        
+        for dia in dias_do_mes:
+            # Verifica se o humor deste tipo foi registrado no dia
+            humor_registrado = (registros_por_dia.get(dia) == tipo.id_tipo_humor)
+            registro_diario[dia] = humor_registrado
+            if humor_registrado:
+                contagem_do_humor += 1
+                
+        contagem_total[tipo.id_tipo_humor] = contagem_do_humor
+
+        report_data.append({
+            'tipo': tipo,
+            'cor_fundo': cor_fundo,    # <-- Usando a cor retornada
+            'cor_texto': cor_texto,    # <-- Cor do texto
+            'icone_path': icone_path,  # <-- Adicionando o caminho do ícone
+            'dias': registro_diario, # {1: True, 2: False, ...}
+            'total': contagem_do_humor
+        })
+
+    # Calcular o total de dias registrados no mês
+    total_dias_registrados = registros_do_mes.count()
+
+    context = {
+        'form': RelatorioHumorForm(initial={'mes': mes, 'ano': ano}),
+        'mes_extenso': data_inicial.strftime('%B de %Y').capitalize(),
+        'dias_do_mes': dias_do_mes,
+        'report_data': report_data,
+        'ultimo_dia_do_mes': ultimo_dia_do_mes,
+        'mes': mes,
+        'ano': ano,
+        'total_dias_registrados': total_dias_registrados,
+        'data_hoje': timezone.now(),
+    }
+    return context
+
+@login_required
+def relatorio_humor(request):
+    """
+    Exibe o relatório de humor no formato de calendário.
+    """
+    mes = date.today().month
+    ano = date.today().year
+
+    if request.method == 'POST':
+        form = RelatorioHumorForm(request.POST)
+        if form.is_valid():
+            mes = int(form.cleaned_data['mes'])
+            ano = int(form.cleaned_data['ano'])
+    # Se GET, ou se o formulário for inválido, usa a data atual
+    # Para o caso de GET, o form é inicializado no contexto.
+    
+    try:
+        context = _get_report_context(request.user, mes, ano)
+    except Http404:
+        # Se houver erro de data/contexto, redireciona ou usa o mês atual
+        return redirect('relatorio_humor')
+
+    # Garante que o formulário está no contexto, mesmo após o POST inválido
+    if 'form' not in context:
+        context['form'] = RelatorioHumorForm(initial={'mes': mes, 'ano': ano})
+    
     return render(request, 'app_LyfeSync/relatorios/relatorioHumor.html', context)
+
+
+@login_required
+def exportar_humor_csv(request, mes, ano):
+    """
+    Exporta os dados de humor do mês/ano selecionado para CSV.
+    """
+    try:
+        mes = int(mes)
+        ano = int(ano)
+    except ValueError:
+        return HttpResponse("Parâmetros de data inválidos.", status=400)
+
+    try:
+        context = _get_report_context(request.user, mes, ano)
+    except Http404:
+        return HttpResponse("Dados não encontrados para o período.", status=404)
+
+    # 1. Configurar a resposta HTTP como CSV
+    nome_arquivo = f"relatorio_humor_{mes}_{ano}.csv"
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="{nome_arquivo}"'
+
+    writer = csv.writer(response, delimiter=';')
+    dias_do_mes = context['dias_do_mes']
+
+    # 2. Escrever o cabeçalho
+    header = ['Humor'] + [str(dia) for dia in dias_do_mes] + ['Total no Mês']
+    writer.writerow(header)
+
+    # 3. Escrever as linhas de dados
+    for data in context['report_data']:
+        row = [data['tipo'].estado]
+        for dia in dias_do_mes:
+            # Escreve 'X' se registrado, vazio se não
+            row.append('X' if data['dias'][dia] else '')
+        row.append(data['total'])
+        writer.writerow(row)
+
+    return response
+
+
+@login_required
+def exportar_humor_pdf(request, mes, ano):
+    """
+    Exporta o relatório de humor do mês/ano selecionado para PDF.
+    
+    ATENÇÃO: Este código assume o uso de 'xhtml2pdf'. 
+    Você precisará do import: from xhtml2pdf import pisa
+    e da instalação: pip install xhtml2pdf
+    """
+    try:
+        # Tenta importar pisa. Se falhar, avisa o usuário.
+        from xhtml2pdf import pisa
+    except ImportError:
+        return HttpResponse("A biblioteca 'xhtml2pdf' não está instalada no ambiente do servidor.", status=500)
+    
+    try:
+        mes = int(mes)
+        ano = int(ano)
+    except ValueError:
+        return HttpResponse("Parâmetros de data inválidos.", status=400)
+
+    try:
+        context = _get_report_context(request.user, mes, ano)
+    except Http404:
+        return HttpResponse("Dados não encontrados para o período.", status=404)
+
+    # Renderiza o template de PDF (relatorioHumor_pdf.html)
+    html = render(request, 'app_LyfeSync/relatorios/pdf_humor.html', context).content.decode('utf-8')
+    
+    # Cria o buffer para o PDF
+    buffer = BytesIO()
+    pisa_status = pisa.CreatePDF(
+        html,                    # O conteúdo HTML
+        dest=buffer              # O destino do arquivo (buffer de memória)
+    )
+    
+    if pisa_status.err:
+        # Se houve erro na geração do PDF, retorna uma mensagem de erro
+        return HttpResponse('Tivemos alguns erros ao gerar o PDF.', status=500)
+    
+    # Sucesso: Retorna o PDF no response
+    nome_arquivo = f"relatorio_humor_{mes}_{ano}.pdf"
+    response = HttpResponse(buffer.getvalue(), content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{nome_arquivo}"'
+    return response

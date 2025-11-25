@@ -144,10 +144,8 @@ def get_humor_map():
         
     return humor_map
 
-
-def _get_humor_cor_classe(estado):
-    """Mapeia o estado do HumorTipo para uma classe CSS para colorir (relatórios)."""
-    # Mapeamento do nome do estado (string) para a classe CSS (para estilização)
+def get_humor_icone(estado):
+    """Mapeia o nome do humor para o caminho do arquivo de ícone."""
     mapping = {
         'Feliz': 'img/icon/feliz.png',
         'Calmo': 'img/icon/calmo.png', 
@@ -155,6 +153,20 @@ def _get_humor_cor_classe(estado):
         'Triste': 'img/icon/triste.png',
         'Irritado': 'img/icon/raiva.png',     
     }
+    # Retorna o caminho do ícone, ou uma string vazia/padrão se não for encontrado
+    return mapping.get(estado, '')
+
+def _get_humor_cor_classe(estado):
+    """Mapeia o estado do HumorTipo para o código de cor Hexadecimal."""
+    mapping = {
+        # Cor de Fundo em Hexadecimal
+        'Feliz': '#24A979',
+        'Calmo': '#02F1A6',
+        'Ansioso': '#FEDC70',
+        'Triste': '#2293BE',
+        'Irritado': '#EF4421', 
+    }
+    # Retorna o código Hexadecimal da cor, ou uma cor padrão para 'bg-light'
     return mapping.get(estado, 'bg-light')
 
 

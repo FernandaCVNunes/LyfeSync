@@ -15,7 +15,7 @@ from ._aux_logic import (
 )
 
 # -------------------------------------------------------------------
-# 1. VIEWS PÚBLICAS
+#   VIEWS PÚBLICAS
 # -------------------------------------------------------------------
 from .public_views import (
     home,
@@ -24,24 +24,20 @@ from .public_views import (
 )
 
 # -------------------------------------------------------------------
-# 2. VIEWS DE CONFIGURAÇÃO (Conta e Segurança)
+#   VIEWS DE CONFIGURAÇÃO
 # -------------------------------------------------------------------
 from .config_views import (
+    registrar_dica as admin_registrar_dica, alterar_dica, excluir_dica,
     conta, 
     configuracoes_conta,
     excluir_conta
 )
 
 # -------------------------------------------------------------------
-# 3. VIEWS DE ADMIN (Dicas)
+#   VIEWS DE AUTOCUIDADO
 # -------------------------------------------------------------------
-# Dicas é uma função duplicada, vamos renomear a versão de admin para evitar conflito.
-from .admin_views import (
-    registrar_dica as admin_registrar_dica, alterar_dica, excluir_dica,
-)
 
-
-from .crud_views import (
+from .selfcare_views import (
     is_staff_user, 
     autocuidado,
     
@@ -72,7 +68,7 @@ from .crud_views import (
 )
 
 # -------------------------------------------------------------------
-# 5. VIEWS DE HÁBITOS E DASHBOARD
+#   VIEWS DE HÁBITOS E DASHBOARD
 # -------------------------------------------------------------------
 from .habit_views import (
     home_lyfesync,
@@ -85,9 +81,15 @@ from .habit_views import (
 )
 
 # -------------------------------------------------------------------
-# 6. VIEWS DE EXPORTAÇÃO
+#   VIEWS DE RELATÓRIO
 # -------------------------------------------------------------------
-from .exports_views import (
+from .reports_views import (
+    relatorios,
+    relatorio,
+    relatorio_habito,
+    relatorio_gratidao,
+    relatorio_afirmacao,
+    relatorio_humor,
     exportar_habito_csv,
     exportar_habito_pdf,
     exportar_gratidao_csv,
@@ -96,16 +98,4 @@ from .exports_views import (
     exportar_afirmacao_pdf,
     exportar_humor_csv,
     exportar_humor_pdf
-)
-
-# -------------------------------------------------------------------
-# 7. VIEWS DE RELATÓRIO
-# -------------------------------------------------------------------
-from .reports_views import (
-    relatorios,
-    relatorio,
-    relatorio_habito,
-    relatorio_gratidao,
-    relatorio_afirmacao,
-    relatorio_humor
 )

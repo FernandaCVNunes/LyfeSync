@@ -17,7 +17,7 @@ import re
 try:
     # Tenta importar mocks se estiver em um ambiente de exportação/teste
     from ._aux_logic import (Humor, HumorTipo, Dicas, Habito, StatusDiario, MockUser, HumorForm, DicasForm, 
-    get_humor_map, extract_dica_info, rebuild_descricaohumor)
+    get_humor_map, get_humor_icone, extract_dica_info, rebuild_descricaohumor)
 except ImportError:
     from ..forms import (GratidaoCreateForm, GratidaoUpdateForm, AfirmacaoBaseForm, AfirmacaoRegistroForm, AfirmacaoAlteracaoForm,
     HumorForm, DicasForm)

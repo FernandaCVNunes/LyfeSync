@@ -52,3 +52,14 @@ def get_field_by_name(form, field_name):
         return form[field_name]
     except KeyError:
         return None
+
+@register.filter(name='to_int')
+def to_int(value):
+    """
+    Converte o valor para inteiro. Útil para comparações no template.
+    """
+    try:
+        # Tenta converter para inteiro. Se for None ou falhar, retorna o valor original.
+        return int(value)
+    except (ValueError, TypeError):
+        return value

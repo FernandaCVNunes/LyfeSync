@@ -309,6 +309,39 @@ class HumorForm(forms.ModelForm):
       }
 
 # -------------------------------------------------------------------
+# RELATÓRIO DE HUMOR
+# -------------------------------------------------------------------
+
+class RelatorioHumorForm(forms.Form):
+    """
+    Formulário para selecionar o mês e ano do relatório de humor.
+    """
+    
+    # Geramos uma lista de anos para o selectbox, do ano atual até 5 anos no passado.
+    ANO_CHOICES = [(y, y) for y in range(date.today().year, date.today().year - 5, -1)]
+    
+    # Opções de meses (em Português)
+    MES_CHOICES = [
+        (1, 'Janeiro'), (2, 'Fevereiro'), (3, 'Março'), (4, 'Abril'),
+        (5, 'Maio'), (6, 'Junho'), (7, 'Julho'), (8, 'Agosto'),
+        (9, 'Setembro'), (10, 'Outubro'), (11, 'Novembro'), (12, 'Dezembro'),
+    ]
+
+    mes = forms.ChoiceField(
+        choices=MES_CHOICES,
+        label='Mês',
+        initial=date.today().month,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    
+    ano = forms.ChoiceField(
+        choices=ANO_CHOICES,
+        label='Ano',
+        initial=date.today().year,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+# -------------------------------------------------------------------
 # FORMULÁRIO DE DICAS
 # -------------------------------------------------------------------
 

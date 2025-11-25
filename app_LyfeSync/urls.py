@@ -92,22 +92,28 @@ urlpatterns = [
     # RELATÓRIOS
     # -------------------------------------------------------------------
     path('relatorios/', relatorios, name='relatorios'),
+    #Habito
     path('relatorios/habito/', relatorio_habito, name='relatorio_habito'),
-    path('relatorios/humor/', relatorio_humor, name='relatorio_humor'),
-    path('relatorios/gratidao/', relatorio_gratidao, name='relatorio_gratidao'),
-    path('relatorios/afirmacao/', relatorio_afirmacao, name='relatorio_afirmacao'),
-    #Exportar relatórios
-    path('relatorio/gratidao/exportar/csv/', exportar_gratidao_csv, name='exportar_gratidao_csv'),
-    path('relatorio/gratidao/exportar/pdf/', exportar_gratidao_pdf, name='exportar_gratidao_pdf'),
-    path('relatorio/afirmacao/exportar/csv/', exportar_afirmacao_csv, name='exportar_afirmacao_csv'),
-    path('relatorio/afirmacao/exportar/pdf/', exportar_afirmacao_pdf, name='exportar_afirmacao_pdf'),
     path('relatorio/habito/exportar/csv/', exportar_habito_csv, name='exportar_habito_csv'),
     path('relatorio/habito/exportar/pdf/', exportar_habito_pdf, name='exportar_habito_pdf'),
-    path('relatorio/humor/exportar/csv/', exportar_humor_csv, name='exportar_humor_csv'),
-    path('relatorio/humor/exportar/pdf/', exportar_humor_pdf, name='exportar_humor_pdf'),
 
+    #Humor
+    path('relatorios/humor/', relatorio_humor, name='relatorio_humor'),
+    path('relatorio/humor/exportar/csv/<int:mes>/<int:ano>/', exportar_humor_csv, name='exportar_humor_csv'),
+    path('relatorio/humor/exportar/pdf/<int:mes>/<int:ano>/', exportar_humor_pdf, name='exportar_humor_pdf'),
+
+    #Gratidão
+    path('relatorios/gratidao/', relatorio_gratidao, name='relatorio_gratidao'),
+    path('relatorio/gratidao/exportar/csv/', exportar_gratidao_csv, name='exportar_gratidao_csv'),
+    path('relatorio/gratidao/exportar/pdf/', exportar_gratidao_pdf, name='exportar_gratidao_pdf'),
+
+    #Afirmação
+    path('relatorios/afirmacao/', relatorio_afirmacao, name='relatorio_afirmacao'),    
+    path('relatorio/afirmacao/exportar/csv/', exportar_afirmacao_csv, name='exportar_afirmacao_csv'),
+    path('relatorio/afirmacao/exportar/pdf/', exportar_afirmacao_pdf, name='exportar_afirmacao_pdf'),
+    
     # -------------------------------------------------------------------
-    # CONTA E ADMIN
+    # CONTA E DICA
     # -------------------------------------------------------------------
     path('conta/', conta, name='conta'),
     path('configuracoes/', configuracoes_conta, name='configuracoes_conta'),
