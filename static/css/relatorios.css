@@ -69,6 +69,17 @@
     /* Roxo escuro para o período */
 }
 
+.btn-blue {
+    background-color: #C0CFF7;
+}
+
+.btn-pink {
+    background-color: #F7C0C0;
+}
+
+.btn-green-light {
+    background-color: #C0F7C9;
+}
 
 /* --------------------------------------
    Estilos da Tabela Geral (Compartilhados)

@@ -12,6 +12,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.forms.models import modelformset_factory
 from datetime import timedelta, date, datetime
 from io import BytesIO
+from xhtml2pdf import pisa
 import csv
 import calendar
 import locale
@@ -21,7 +22,45 @@ from ..models import Gratidao, Afirmacao, Habito, StatusDiario, Humor, HumorTipo
 from ..forms import HumorForm, DicasForm, RelatorioHumorForm# Importando a lógica auxiliar
 from ._aux_logic import _get_report_date_range, get_humor_map, _get_humor_cor_classe, get_humor_icone, get_habitos_e_acompanhamento
 
+
+# Na exportação em html no style em @page pode definir o formato do A4 por tamnho ou classe do xhtml2pdf
+# Retrato: 210mm x 297mm (ou 21cm x 29.7cm) - size: 21cm 29.7cm; -> size: A4 portrait;
+# Paisagem: 297mm x 210mm (ou 29.7cm x 21cm)- size: 29.7cm 21cm; -> size: A4 landscape;
+
+# -------------------------------------------------------------------
+# LÓGICA AUXILIAR 
+# -------------------------------------------------------------------
+
 def get_humor_map(): return {}
+
+def convert_html_to_pdf(source_html, filename, request):
+    """Auxiliar para converter o HTML em PDF usando xhtml2pdf."""
+    result = BytesIO()
+    
+    # Define a função de recurso (importante para carregar imagens e CSS externo)
+    # Embora seu CSS esteja em <style>, é uma boa prática
+    def fetch_resources(uri, rel):
+        # A uri será um path absoluto, convertemos para um path do sistema de arquivos
+        if uri.startswith(request.build_absolute_uri()):
+            # Lida com resources internos se necessário, no seu caso não
+            return uri
+        return uri 
+
+    pdf = pisa.CreatePDF(
+        BytesIO(source_html.encode("utf-8")),  # O conteúdo HTML a ser convertido
+        dest=result,                           # O arquivo de destino
+        link_callback=fetch_resources          # Função para buscar recursos (opcional, mas recomendado)
+    )
+
+    if not pdf.err:
+        return HttpResponse(
+            result.getvalue(), 
+            content_type='application/pdf',
+            headers={'Content-Disposition': f'attachment; filename="{filename}"'}
+        )
+    
+    # Se houver erro, retorna uma resposta de erro ou o log
+    return HttpResponse('Houve um erro na geração do PDF: %s' % pdf.err, status=500)
 
 # -------------------------------------------------------------------
 # VIEWS DE RELATÓRIOS
@@ -467,20 +506,17 @@ def exportar_afirmacao_csv(request):
 @login_required(login_url='login')
 def exportar_afirmacao_pdf(request):
 
-    """Gera um relatório PDF (simulado via HTML formatado para impressão)
-    dos registros de afirmação do período selecionado.
-    """
+    """Gera um relatório PDF utilizando xhtml2pdf (Pisa)."""
     hoje = timezone.localdate()
     data_inicio, data_fim, data_referencia, periodo, mes_param, ano_param = _get_report_date_range(request, hoje)
 
-    # Busca os Registros de Afirmação (Query real)
+    # 1. Busca dos Registros e Contexto (permanece igual)
     afirmacoes = Afirmacao.objects.filter(
         usuario=request.user,
         data__gte=data_inicio,
         data__lte=data_fim
     ).order_by('-data', '-idafirmacao')
     
-    # Determinação da string do período
     if periodo == 'mensal':
         mes_extenso = data_referencia.strftime('%B').capitalize()
         periodo_str = f"Mensal: {mes_extenso} / {data_referencia.year}"
@@ -491,25 +527,28 @@ def exportar_afirmacao_pdf(request):
     else:
         periodo_str = "Período Inválido"
 
+    data_rodape = timezone.localtime(timezone.now()).strftime('Gerado por LyfeSync em %d/%m/%Y %H:%M')
+
     context = {
         'afirmacoes': afirmacoes,
         'periodo_str': periodo_str,
-        'data_geracao': timezone.localtime(timezone.now()).strftime('%d/%m/%Y %H:%M'),
+        'now': timezone.now(), 
+        'rodape_content': data_rodape,
         'total_afirmacoes': afirmacoes.count(),
         'usuario': request.user.username,
         'data_inicio': data_inicio.strftime('%d/%m/%Y'),
         'data_fim': data_fim.strftime('%d/%m/%Y'),
+
     }
 
-    # Renderiza o template HTML (otimizado para PDF/impressão)
+    # 2. Renderiza o Template HTML
     html_content = render_to_string('app_LyfeSync/relatorios/pdf_afirmacao.html', context)
-
-    # Retorna o HTML com o Content-Type como PDF
+    
+    # 3. Define o nome do arquivo
     filename = f"relatorio_afirmacao_{data_inicio.strftime('%Y%m%d')}_{data_fim.strftime('%Y%m%d')}.pdf"
-    response = HttpResponse(html_content, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
-    return response
+    # 4. Converte o HTML em PDF e retorna a resposta
+    return convert_html_to_pdf(html_content, filename, request)
 
 # -------------------------------------------------------------------
 # RELATÓRIO DE HUMOR - PDF/CSV

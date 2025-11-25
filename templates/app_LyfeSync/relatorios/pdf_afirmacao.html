@@ -5,24 +5,31 @@
     <title>Relatório de Afirmações - {{ periodo_str }}</title>
     <!-- Inclui estilos otimizados para PDF/Impressão -->
     <style>
+        @page {
+            /* Mantenha apenas o tamanho e as margens */
+            size: A4 portrait; 
+            margin: 2cm; 
+        }
+
         /* Estilos globais e de corpo */
         body {
             font-family: 'Arial', sans-serif;
             font-size: 10pt;
             margin: 0;
             padding: 0;
-            color: #333;
+            color: #585f63;
         }
+
         /* Cabeçalho do Documento */
         .header {
             text-align: center;
             margin-bottom: 20px;
             padding: 10px;
             background-color: #f0f0f5; /* Cor de fundo suave */
-            border-bottom: 2px solid #6c757d;
+            border-bottom: 2px solid #ced4daff;
         }
         .header h1 {
-            color: #7952b3; /* Cor Roxo para Afirmação */
+            color: #ef4421; 
             margin: 5px 0;
             font-size: 16pt;
         }
@@ -31,6 +38,7 @@
             color: #555;
             margin: 0;
         }
+
         /* Resumo/Total */
         .summary {
             margin-bottom: 20px;
@@ -40,6 +48,7 @@
             text-align: center;
             font-size: 11pt;
         }
+
         /* Estilos da Tabela */
         table {
             width: 100%;
@@ -54,7 +63,7 @@
             word-wrap: break-word; /* Garante que textos longos quebrem a linha */
         }
         th {
-            background-color: #7952b3; /* Cor Roxo Escuro */
+            background-color: #ffb853; /* Cor Roxo Escuro */
             color: white;
             font-size: 10pt;
             text-transform: uppercase;
@@ -62,10 +71,11 @@
         tr:nth-child(even) {
             background-color: #f8f9fa;
         }
+
         /* Definição de Largura das Colunas */
-        .col-data { width: 10%; }
-        .col-nome { width: 30%; }
-        .col-descricao { width: 60%; }
+        .col-data { width: 20%; }
+        .col-descricao { width: 80%; }
+
         /* Rodapé */
         .footer {
             position: fixed;
@@ -95,7 +105,6 @@
             <thead>
                 <tr>
                     <th class="col-data">Data</th>
-                    <th class="col-nome">Nome da Afirmação</th>
                     <th class="col-descricao">Descrição da Afirmação</th>
                 </tr>
             </thead>
@@ -113,7 +122,7 @@
     {% endif %}
 
     <div class="footer">
-        Gerado por LyfeSync em {{ now|date:"d/m/Y H:i" }}
+        {{ rodape_content }}
     </div>
 
 </body>
