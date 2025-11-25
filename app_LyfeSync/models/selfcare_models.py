@@ -99,8 +99,8 @@ class Afirmacao(models.Model):
     """Modelo para as afirmações diárias do usuário."""
     idafirmacao = models.AutoField(db_column='idAfirmacao', primary_key=True)
     data = models.DateField(blank=True, null=True, verbose_name="Data da Afirmação")
-    nomeafirmacao = models.CharField(db_column='nomeAfirmacao', max_length=100, blank=True, null=True, verbose_name="Título")
     descricaoafirmacao = models.TextField(db_column='descricaoAfirmacao', blank=True, null=True, verbose_name="Conteúdo")
+    data_registro = models.DateTimeField(auto_now_add=True, null=True, verbose_name='Data Registro')
     
     # Chave Estrangeira para o modelo de usuário
     usuario = models.ForeignKey(
@@ -113,7 +113,7 @@ class Afirmacao(models.Model):
     ) 
 
     def __str__(self):
-        return self.nomeafirmacao or f"Afirmação {self.idafirmacao}"
+        return f"Afirmação {self.idafirmacao}"
 
     class Meta:
         db_table = 'afirmacao'
@@ -129,6 +129,7 @@ class Gratidao(models.Model):
     idgratidao = models.AutoField(db_column='idGratidao', primary_key=True)
     data = models.DateField(blank=True, null=True, verbose_name="Data da Gratidão")
     descricaogratidao = models.TextField(db_column='descricaoGratidao', blank=True, null=True, verbose_name="Descrição")
+    data_registro = models.DateTimeField(auto_now_add=True, null=True,verbose_name='Data Registro')
     
     # Chave Estrangeira para o modelo de usuário
     usuario = models.ForeignKey(

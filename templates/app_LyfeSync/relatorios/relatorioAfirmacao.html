@@ -151,7 +151,6 @@
           <thead>
             <tr class="text-uppercase">
               <th scope="col" class="afirmacao-col-data">Data</th>
-              <!-- <th scope="col" class="afirmacao-col-nome" style="min-width: 250px;">Nome (nomeAfirmacao)</th>-->
               <th scope="col" style="min-width: 400px;">Afirmação (descricaoAfirmacao)</th>
             </tr>
           </thead>
@@ -163,10 +162,6 @@
               <td class="afirmacao-col-data">
                 {{ afirmacao.data|date:"d/m/Y" }}
               </td>
-              <!-- Coluna Nome da Afirmação 
-              <td class="text-start afirmacao-col-nome text-wrap-content">
-                {{ afirmacao.nomeafirmacao|default:"-- Sem Título --" }}
-              </td>-->
               <!-- Coluna Descrição da Afirmação -->
               <td class="text-start text-wrap-content">
                 {{ afirmacao.descricaoafirmacao|default:"-- Sem descrição --" }}

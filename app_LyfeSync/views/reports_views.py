@@ -8,7 +8,7 @@ from datetime import date
 
 # Importando os Models reais necessários para as views de relatório
 from ..models import Gratidao, Afirmacao, Habito, StatusDiario, Humor, HumorTipo 
-from ..forms import AfirmacaoForm, HumorForm, DicasForm
+from ..forms import HumorForm, DicasForm
 
 # Importando a lógica auxiliar
 from ._aux_logic import _get_report_date_range, _get_humor_cor_classe 

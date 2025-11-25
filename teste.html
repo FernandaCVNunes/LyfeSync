@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autocuidado - Gratidão e Afirmação (Bootstrap 5)</title>
+    <!-- Link para o Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Link para Lucide Icons (usado no exemplo) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- CSS CUSTOMIZADO (Seu código) -->
+    <style>
+        /* VARIÁVEIS DE COR CUSTOMIZADAS - Adicionei as variáveis LyfeSync para referência */
+        :root {
+            --gratidao-blue: #0A9BB8;
+            --gratidao-light-blue: #E6F3F5;
+            /* Variáveis LyfeSync presumidas, necessárias para os utilitários */
+            --lyfesync-green: #48BB78;
+            --lyfesync-light-green: #ECFDF5;
+        }
+
+        /* ========================================================= */
+        /* --- ESTILOS DE AUTOCUIDADO GERAL (Utilidades) --- */
+        /* ========================================================= */
+
+        /* Cor principal LyfeSync Green (#48BB78) para títulos e links */
+        .text-lyfesync-green {
+            color: var(--lyfesync-green) !important;
+        }
+
+        /* Cor de fundo LyfeSync Light Green (#ECFDF5) */
+        .bg-lyfesync-light {
+            background-color: var(--lyfesync-light-green) !important;
+        }
+
+        /* Estilo de Card com Shadow e Hover Customizados (Antigo .section-card) */
+        /* Substitui shadow-xl e adiciona o efeito de hover que o BS não tem por padrão */
+        .custom-shadow-hover {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+            /* Equivalente a shadow-lg */
+            transition: all 0.3s ease;
+        }
+
+        .custom-shadow-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.2) !important;
+            /* Sombra mais forte no hover */
+        }
+
+        /* Ajuste para ícones Lucide no BS */
+        i[data-lucide] {
+            vertical-align: middle;
+        }
+
+        /* Destaque de Mensagem (Antigo .highlight-card) - Fundo esverdeado claro e borda */
+        .highlight-card {
+            background-color: #f0fdf4 !important;
+            /* emerald-50 */
+            border-left: 5px solid #10b981 !important;
+            /* emerald-500 */
+        }
+
+        /* ========================================================= */
+        /* --- ESTILOS DE TABELA DE GRATIDÃO (Cor Customizada) --- */
+        /* ========================================================= */
+
+        /* Título e elementos na cor Gratidão Blue (#0A9BB8) */
+        .text-gratidao-blue {
+            color: var(--gratidao-blue) !important;
+        }
+
+        .border-gratidao-blue {
+            border-color: var(--gratidao-blue) !important;
+        }
+
+        /* Cabeçalho de Tabela Customizado */
+        .table-gratidao-header th {
+            background-color: var(--gratidao-blue) !important;
+            color: white !important;
+            font-size: 1rem;
+            font-weight: 700;
+            vertical-align: middle;
+        }
+
+        /* Linha da Tabela (Fundo claro para hover) */
+        .gratidao-list-item-hover:hover {
+            background-color: var(--gratidao-light-blue) !important;
+            border-color: var(--gratidao-blue) !important;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+        }
+
+        /* Estilo para inputs de data no modal - Adaptação para .form-control */
+        .gratidao-date-input.form-control {
+            font-size: 1.25rem;
+            padding: 0.75rem 1rem;
+        }
+
+        .gratidao-item-history {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .gratidao-date {
+            flex-shrink: 0;
+            font-weight: 600;
+            color: var(--bs-primary);
+        }
+
+        /* ========================================================= */
+        /* --- ESTILOS PÁGINA REGISTRAR AFIRMAÇÃO (Customizados) --- */
+        /* ========================================================= */
+
+        /* Definição do formato circular */
+        .affirmation-circle {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+            margin: 0 auto; /* Centraliza o círculo no grid */
+        }
+
+        .affirmation-circle:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Cores específicas para os círculos */
+        .circle-blue {
+            background-color: #C0CFF7;
+        }
+
+        .circle-pink {
+            background-color: #F7C0C0;
+        }
+
+        .circle-green {
+            background-color: #C0F7C9;
+        }
+
+        /* Estilo para garantir que o textarea dentro do círculo se ajuste */
+        .afirmacao-textarea {
+            background: transparent;
+            border: none;
+            padding: 1rem;
+            resize: none;
+            width: 100%;
+            height: 100%;
+            font-size: 1.25rem;
+            font-style: italic;
+            color: #333;
+            box-shadow: none !important;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Aplicação de classes utilitárias gerais e de fundo -->
+    <div class="container py-5 bg-lyfesync-light">
+        <h1 class="mb-4 text-lyfesync-green">Área de Autocuidado</h1>
+        
+        <div class="row g-4">
+            
+            <!-- 1. Demonstração de Card com Sombra e Hover Customizados -->
+            <div class="col-md-6">
+                <div class="card p-3 h-100 custom-shadow-hover">
+                    <div class="card-body">
+                        <h5 class="card-title text-lyfesync-green">Cartão com Sombra Customizada</h5>
+                        <p class="card-text">
+                            Aplique a classe **custom-shadow-hover** no elemento `.card` para ter uma sombra mais forte e um efeito de levantamento ao passar o mouse.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Demonstração de Destaque de Mensagem (Highlight Card) -->
+            <div class="col-md-6">
+                <div class="p-4 highlight-card border rounded h-100 d-flex align-items-center">
+                    <div>
+                        <i data-lucide="check-circle" class="me-2 text-success"></i> 
+                        <span class="fw-semibold">
+                            Aplique **highlight-card** para caixas de mensagem ou alertas de sucesso.
+                        </span>
+                        <!-- A classe i[data-lucide] garante alinhamento do ícone -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Demonstração da Tabela de Gratidão -->
+            <div class="col-12 mt-5">
+                <h2 class="mb-3 text-gratidao-blue">Registro de Gratidão</h2>
+                
+                <div class="table-responsive border rounded border-gratidao-blue">
+                    <table class="table table-striped table-hover mb-0">
+                        <!-- Aplicação de Cabeçalho Customizado -->
+                        <thead class="table-gratidao-header">
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">O que Agradecer</th>
+                                <th scope="col">Data</th>
+                                <th scope="col">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Aplicação de Linha da Tabela com Hover Customizado -->
+                            <tr class="gratidao-list-item-hover">
+                                <th scope="row">1</th>
+                                <td>Poder ajudar você com seu CSS.</td>
+                                <td class="gratidao-date">25/11/2025</td>
+                                <td><a href="#" class="text-gratidao-blue">Ver Detalhes</a></td>
+                            </tr>
+                            <tr class="gratidao-list-item-hover">
+                                <th scope="row">2</th>
+                                <td>Ter um dia produtivo.</td>
+                                <td>24/11/2025</td>
+                                <td><a href="#" class="text-gratidao-blue">Ver Detalhes</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 4. Demonstração de Afirmações em Círculo -->
+            <div class="col-12 mt-5">
+                <h2 class="mb-4">Minhas Afirmações</h2>
+                <div class="row justify-content-center">
+                    
+                    <div class="col-lg-4 col-md-6 mb-4 text-center">
+                        <!-- Aplicação do Círculo e Cor Específica -->
+                        <div class="affirmation-circle circle-blue custom-shadow-hover">
+                            <textarea class="afirmacao-textarea" placeholder="Eu sou capaz...">Eu sou uma pessoa criativa e focada.</textarea>
+                        </div>
+                        <p class="mt-3 text-muted">Afirmação #1</p>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 mb-4 text-center">
+                        <div class="affirmation-circle circle-pink custom-shadow-hover">
+                            <textarea class="afirmacao-textarea" placeholder="Eu sou capaz...">Eu mereço felicidade e sucesso.</textarea>
+                        </div>
+                        <p class="mt-3 text-muted">Afirmação #2</p>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 mb-4 text-center">
+                        <div class="affirmation-circle circle-green custom-shadow-hover">
+                            <textarea class="afirmacao-textarea" placeholder="Eu sou capaz...">Sou grato pelas oportunidades.</textarea>
+                        </div>
+                        <p class="mt-3 text-muted">Afirmação #3</p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 5. Demonstração de Histórico de Itens (gratidao-item-history) -->
+            <div class="col-12 mt-5">
+                <h3>Detalhe do Item (Histórico)</h3>
+                <div class="p-3 border rounded">
+                    <div class="gratidao-item-history">
+                        <!-- gratidao-date e a estrutura flexível -->
+                        <div class="gratidao-date">25/11/2025</div>
+                        <div class="gratidao-content">
+                            <p class="mb-0">Descrição completa da gratidão que foi registrada neste dia.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    
+    <!-- Script do Bootstrap (necessário para modais e funcionalidades) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Inicializa os ícones Lucide
+        lucide.createIcons();
+    </script>
+</body>
+</html>

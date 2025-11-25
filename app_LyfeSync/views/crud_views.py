@@ -16,9 +16,11 @@ import re
 
 try:
     # Tenta importar mocks se estiver em um ambiente de exportação/teste
-    from ._aux_logic import Afirmacao, Humor, HumorTipo, Dicas, Habito, StatusDiario, MockUser, AfirmacaoForm, HumorForm, DicasForm, get_humor_map, extract_dica_info, rebuild_descricaohumor
+    from ._aux_logic import (Humor, HumorTipo, Dicas, Habito, StatusDiario, MockUser, HumorForm, DicasForm, 
+    get_humor_map, extract_dica_info, rebuild_descricaohumor)
 except ImportError:
-    from ..forms import GratidaoCreateForm, GratidaoUpdateForm, AfirmacaoForm, HumorForm, DicasForm
+    from ..forms import (GratidaoCreateForm, GratidaoUpdateForm, AfirmacaoBaseForm, AfirmacaoRegistroForm, AfirmacaoAlteracaoForm,
+    HumorForm, DicasForm)
     from ..models import Gratidao, Afirmacao, Humor, HumorTipo, Dicas, Habito, StatusDiario
     
     # Funções auxiliares (stubs, se não estiverem em _aux_logic)
@@ -588,80 +590,137 @@ def delete_gratidao(request, pk):
 # VIEWS DE AFIRMAÇÃO (CRUD e Listagem)
 # -------------------------------------------------------------------
 
-@login_required(login_url='login')
+# Constantes para Paginação
+AFIRMACOES_POR_PAGINA = 15 
+
+@login_required
 def afirmacao(request):
-    """Página de Afirmações. Lista as últimas afirmações do usuário."""
+    """
+    Página principal de afirmações, exibe o histórico e os modais.
+    """
+    user = request.user
     
+    # 1. Obter e Paginar o Histórico de Afirmações
+    # Ordenar por data (mais recente primeiro) e depois por ID (para estabilidade)
+    historico = Afirmacao.objects.filter(usuario=user).order_by('-data', '-idafirmacao')
     
-    ultimas_afirmacoes = Afirmacao.objects.filter(
-        usuario=request.user
-    ).order_by('-data')[:15]
+    paginator = Paginator(historico, AFIRMACOES_POR_PAGINA)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # 2. Formulários para Modais
+    registro_form = AfirmacaoRegistroForm()
+    alteracao_form = AfirmacaoAlteracaoForm()
     
     context = {
-        'ultimas_afirmacoes': ultimas_afirmacoes,
+        'page_obj': page_obj,
+        'registro_form': registro_form,
+        'alteracao_form': alteracao_form,
+        # Variáveis úteis para o template
+        'hoje': date.today().strftime('%Y-%m-%d'),
+        'css_base_class': 'autocuidado', # Classe base para o CSS
     }
+    
+    return render(request, 'app_LyfeSync/autocuidado/afirmacao.html', context)
 
-    return render(request, 'app_LyfeSync/afirmacao/afirmacao.html', context)
-
-
-@login_required(login_url='login')
+@login_required
 def registrar_afirmacao(request):
-    """Permite registrar uma nova Afirmação e redireciona para a listagem."""
+    """
+    Processa a inclusão de 1 a 3 afirmações positivas por dia.
+    """
     if request.method == 'POST':
-        form = AfirmacaoForm(request.POST)
+        form = AfirmacaoRegistroForm(request.POST)
         if form.is_valid():
-            afirmacao_obj = form.save(commit=False)
+            afirmacoes_para_salvar = []
+            user = request.user
+            data = form.cleaned_data['data']
             
-            afirmacao_obj.usuario = request.user
+            # Campos de descrição
+            descricoes = [
+                form.cleaned_data.get('descricao_1'),
+                form.cleaned_data.get('descricao_2'),
+                form.cleaned_data.get('descricao_3')
+            ]
             
-            if not afirmacao_obj.data:
-                afirmacao_obj.data = timezone.localdate()
+            # Filtrar descrições vazias (apenas as que o usuário preencheu)
+            descricoes_validas = [d for d in descricoes if d]
+            
+            if not descricoes_validas:
+                # Embora o form.clean() deva evitar isso, é um bom fallback
+                messages.error(request, 'Pelo menos uma afirmação é obrigatória.')
+                return redirect('afirmacao')
+
+            try:
+                # Usar transação para garantir que todas ou nenhuma sejam salvas
+                with transaction.atomic():
+                    for descricao in descricoes_validas:
+                        afirmacoes_para_salvar.append(
+                            Afirmacao(
+                                usuario=user,
+                                data=data,
+                                descricaoafirmacao=descricao
+                            )
+                        )
+                    
+                    Afirmacao.objects.bulk_create(afirmacoes_para_salvar)
+                    
+                    messages.success(request, f'{len(descricoes_validas)} Afirmação(ões) registrada(s) com sucesso para o dia {data.strftime("%d/%m/%Y")}!')
+            
+            except Exception as e:
+                messages.error(request, f'Erro ao registrar afirmação(ões): {e}')
                 
-            afirmacao_obj.save()
-            messages.success(request, 'Afirmação registrada com sucesso! ✨')
-            return redirect('afirmacao') 
         else:
-            messages.error(request, 'Houve um erro ao registrar a afirmação. Verifique os campos.')
-    else:
-        form = AfirmacaoForm(initial={'data': timezone.localdate()})
-        
-    context = {'form': form}
-    return render(request, 'app_LyfeSync/afirmacao/registrarAfirmacao.html', context)
-
-
-@login_required(login_url='login')
-def alterar_afirmacao(request, afirmacao_id):
-    """Permite alterar uma Afirmação existente. Requer login e ID da Afirmação."""
+            # Mensagem de erro de validação do formulário
+            messages.error(request, 'Erro de validação no formulário de registro. Verifique a data e os campos.')
     
-    # Busca o objeto pela Primary Key (pk)
-    afirmacao_instance = get_object_or_404(Afirmacao, pk=afirmacao_id, usuario=request.user) 
+    # Redireciona sempre para a página principal (afirmacao) após o processamento
+    return redirect('afirmacao')
+
+@login_required
+def alterar_afirmacao(request, afirmacao_id):
+    """
+    Processa a alteração de uma afirmação individual.
+    """
+    afirmacao_obj = get_object_or_404(Afirmacao, pk=afirmacao_id, usuario=request.user)
     
     if request.method == 'POST':
-        form = AfirmacaoForm(request.POST, instance=afirmacao_instance)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Afirmação alterada com sucesso! ✨')
-            return redirect('afirmacao') # Redireciona para a lista
-        else:
-            messages.error(request, 'Erro na validação do formulário. Verifique os campos.')
-    else:
-        form = AfirmacaoForm(instance=afirmacao_instance)
+        # Nota: Usamos AfirmacaoAlteracaoForm que tem apenas um campo de texto.
+        form = AfirmacaoAlteracaoForm(request.POST) 
         
-    context = {'form': form, 'afirmacao_id': afirmacao_id}
-    return render(request, 'app_LyfeSync/afirmacao/alterarAfirmacao.html', context)
+        if form.is_valid():
+            try:
+                nova_descricao = form.cleaned_data['descricaoafirmacao']
+                # Atualiza apenas o campo de descrição
+                afirmacao_obj.descricaoafirmacao = nova_descricao
+                afirmacao_obj.save()
+                
+                messages.success(request, f'Afirmação do dia {afirmacao_obj.data.strftime("%d/%m/%Y")} alterada com sucesso!')
+            
+            except Exception as e:
+                messages.error(request, f'Erro ao alterar a afirmação: {e}')
+        
+        else:
+            # Mensagem de erro de validação
+            messages.error(request, 'Erro de validação ao alterar afirmação. A descrição não pode ser vazia.')
+            
+    # Redireciona sempre
+    return redirect('afirmacao')
 
 
-@require_POST
-@login_required(login_url='login')
+@login_required
 def delete_afirmacao(request, afirmacao_id):
-    """Exclui um registro de Afirmação específico (via POST/AJAX)."""
-    try:
-        # Busca o objeto pela Primary Key (pk)
-        afirmacao_instance = get_object_or_404(Afirmacao, pk=afirmacao_id, usuario=request.user)
-        afirmacao_instance.delete()
-        # Retorna sucesso para o uso via AJAX, mas usa o messages para feedback
-        messages.success(request, f'Afirmação excluída com sucesso.')
-        return JsonResponse({'status': 'success', 'message': f'Afirmação ID {afirmacao_id} excluída.'})
-    except Exception as e:
-        messages.error(request, f'Erro ao excluir a afirmação: {e}')
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    """
+    Processa a exclusão de uma afirmação individual.
+    """
+    afirmacao_obj = get_object_or_404(Afirmacao, pk=afirmacao_id, usuario=request.user)
+    
+    if request.method == 'POST':
+        data_registro = afirmacao_obj.data.strftime("%d/%m/%Y")
+        try:
+            afirmacao_obj.delete()
+            messages.success(request, f'Afirmação do dia {data_registro} excluída com sucesso.')
+        except Exception as e:
+            messages.error(request, f'Erro ao excluir a afirmação: {e}')
+            
+    # Redireciona sempre
+    return redirect('afirmacao')

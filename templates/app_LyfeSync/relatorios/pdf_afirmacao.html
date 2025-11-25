@@ -103,7 +103,6 @@
                 {% for afirmacao in afirmacoes %}
                 <tr>
                     <td class="col-data">{{ afirmacao.data|date:"d/m/Y" }}</td>
-                    <td class="col-nome">{{ afirmacao.nomeafirmacao|default:"[Sem Título]" }}</td>
                     <td class="col-descricao">{{ afirmacao.descricaoafirmacao|default:"[Sem descrição]" }}</td>
                 </tr>
                 {% endfor %}

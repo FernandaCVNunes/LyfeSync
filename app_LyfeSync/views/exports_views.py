@@ -9,7 +9,7 @@ from django.template.loader import render_to_string
 
 # Importando os Models reais necessários para as views de exportação
 from ..models import Gratidao, Afirmacao, Humor, HumorTipo
-from ..forms import AfirmacaoForm, HumorForm, DicasForm
+from ..forms import  HumorForm, DicasForm
 
 # Importando a lógica auxiliar e os Mocks necessários
 from ._aux_logic import (
@@ -209,7 +209,6 @@ def exportar_afirmacao_csv(request):
         writer.writerow([
             a.idafirmacao,
             a.data.strftime('%d/%m/%Y'),
-            a.nomeafirmacao or '', # Garante string vazia se for None
             a.descricaoafirmacao or '',
             timezone.localtime(a.data_registro).strftime('%d/%m/%Y %H:%M:%S')
         ])

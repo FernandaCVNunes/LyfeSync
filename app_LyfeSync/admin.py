@@ -61,7 +61,7 @@ class GratidaoAdmin(admin.ModelAdmin):
 @admin.register(Afirmacao)
 class AfirmacaoAdmin(admin.ModelAdmin):
     # CORREÇÃO DEFINITIVA: Usando 'descricaoafirmacao' e 'data' (não existe data_registro)
-    list_display = ('idafirmacao', 'usuario', 'data', 'nomeafirmacao', 'descricaoafirmacao')
+    list_display = ('idafirmacao', 'usuario', 'data', 'descricaoafirmacao')
     list_filter = ('data',)
     # Usando 'descricaoafirmacao' na busca.
     search_fields = ('descricaoafirmacao', 'usuario__username')

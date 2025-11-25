@@ -1,5 +1,4 @@
 from django import forms
-from .models import Habito, Gratidao, Afirmacao, Humor, Dicas, PerfilUsuario, HumorTipo
 from django.utils import timezone
 from django.forms import TextInput, DateInput, NumberInput, Select, Textarea, RadioSelect, HiddenInput, modelformset_factory
 from django.contrib.auth import get_user_model
@@ -8,7 +7,9 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from allauth.account.forms import SignupForm
 from django.db import transaction
-import re # Necessário para processar e limpar a descrição
+from datetime import date
+from .models import Habito, Gratidao, Afirmacao, Humor, Dicas, PerfilUsuario, HumorTipo
+import re
 
 User = get_user_model()
 
@@ -185,39 +186,82 @@ class GratidaoUpdateForm(forms.ModelForm):
 # FORMULÁRIO DE AFIRMAÇÃO
 # -------------------------------------------------------------------
 
-class AfirmacaoForm(forms.ModelForm):
+class AfirmacaoBaseForm(forms.Form):
     """
-    Formulário para a criação de registros de Afirmação.
+    Formulário base para inclusão/alteração de Afirmações.
+    Define os campos de data e as 3 descrições.
     """
+    # Campo de Data (permite datas anteriores)
+    data = forms.DateField(
+        label='Data da Afirmação',
+        widget=forms.DateInput(attrs={
+            'type': 'date',
+            'class': 'form-control',
+            # Valor padrão de hoje para o campo de data
+            'value': date.today().strftime('%Y-%m-%d')
+        }),
+        required=True
+    )
     
+    # Campo 1: Obrigatório
+    descricao_1 = forms.CharField(
+        label='Afirmação Positiva 1 (Obrigatório)',
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        required=True,
+    )
+    
+    # Campo 2: Opcional
+    descricao_2 = forms.CharField(
+        label='Afirmação Positiva 2 (Opcional)',
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        required=False,
+    )
+    
+    # Campo 3: Opcional
+    descricao_3 = forms.CharField(
+        label='Afirmação Positiva 3 (Opcional)',
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        required=False,
+    )
+
+    def clean(self):
+        """
+        Validação para garantir que pelo menos uma afirmação foi preenchida.
+        (Já é garantido pelo required=True do campo 1, mas serve como double check).
+        """
+        cleaned_data = super().clean()
+        desc_1 = cleaned_data.get("descricao_1")
+        # Se desc_1 for None (não deve acontecer com required=True) ou vazio após limpeza, gera erro
+        if not desc_1:
+            raise forms.ValidationError("Pelo menos a primeira afirmação é obrigatória.")
+        return cleaned_data
+
+class AfirmacaoRegistroForm(AfirmacaoBaseForm):
+    """Formulário para o registro de novas afirmações."""
+    pass
+
+class AfirmacaoAlteracaoForm(forms.Form):
+    """
+    Formulário específico para alteração. 
+    Lida com apenas uma descrição por vez, pois a alteração é feita em itens individuais do histórico.
+    """
+    descricaoafirmacao = forms.CharField(
+        label='Afirmação',
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        required=True
+    )
+    
+    # O campo de data será apenas para visualização no modal de alteração, mas pode ser 
+    # necessário para lógica de view, então o mantemos aqui (embora não seja editável).
+    data = forms.DateField(
+        label='Data da Afirmação',
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control', 'readonly': 'readonly'}),
+        required=True
+    )
+
     class Meta:
         model = Afirmacao
-        fields = ['descricaoafirmacao'] # Mantemos apenas o campo principal para o Formset
-        widgets = {
-             # Removido o TextInput para o nome (título), focando no conteúdo
-            'descricaoafirmacao': Textarea(attrs={
-                'placeholder': 'Sua afirmação deve caber neste espaço...',
-                'rows': 8,
-                'class': 'form-control afirmacao-textarea bg-transparent border-0 text-dark p-4',
-                'required': 'true'
-            }),
-             # 'data' e 'nomeafirmacao' serão definidos por fora ou no Formset para simplificar a UX
-        }
-        labels = {
-            'descricaoafirmacao': 'Afirmação',
-        }
-
-# FORMSET DE AFIRMAÇÕES
-# -------------------------------------------------------------------
-
-AfirmacaoFormSet = modelformset_factory(
-    Afirmacao,
-    form=AfirmacaoForm,
-    fields=('descricaoafirmacao',), # Apenas o campo de conteúdo para o registro
-    extra=3, # Define que o formulário terá 3 instâncias
-    max_num=3,
-    can_delete=False # Desabilitamos a exclusão aqui, pois é para registro
-)
+        fields = ['data', 'descricaoafirmacao']
 
 # -------------------------------------------------------------------
 # FORMULÁRIO DE HUMOR
