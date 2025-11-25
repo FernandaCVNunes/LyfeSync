@@ -10,7 +10,7 @@
 
 {% block extra_css %}
   <!-- O relatorio.css contém os estilos de cores e células para todos os relatórios -->
-  <link rel="stylesheet" href="{% static 'app_LyfeSync/css/relatorio.css' %}">
+  <link rel="stylesheet" href="{% static 'css/relatorio.css' %}">
 {% endblock %}
 
 {% block content_logado %}
@@ -61,7 +61,7 @@
                 <table class="table table-bordered table-striped table-relatorio table-habitos align-middle shadow-sm">
                 <thead>
                     <tr class="text-uppercase">
-                    <th scope="col" class="text-start" style="min-width: 180px;">Hábito</th>
+                    <th scope="col" class="text-start text-success" style="min-width: 180px;">Hábito</th>
                     <!-- Cabeçalho dos dias (1 a 31) -->
                     {% for dia in dias_do_mes %}
                         <th scope="col" style="min-width: 30px;">{{ dia }}</th>
@@ -78,63 +78,21 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Linhas do Relatório por Hábito -->
                     {% for dado in dados_relatorio %}
-                    <tr>
-                    <!-- Coluna Hábito -->
-                    <th scope="row" class="text-start p-2 habito-nome">
-                        {{ dado.nome }}
-                    </th>
-                    
-                    <!-- Colunas dos Dias (1 a N) -->
-                    {% for dia in dias_do_mes %}
-                        <td class="celula-habito">
-                        {% if dia in dado.dias_concluidos %}
-                            <!-- Marcação de conclusão do hábito -->
-                            <div class="habito-celula-marcada"></div>
-                        {% endif %}
-                        </td>
-                    {% endfor %}
-                    
-                    <!-- Células vazias para preencher até o dia 31 (meses com menos de 31 dias) -->
-                    {% with max_dias=31 %}
-                        {% for i in max_dias|make_range %}
-                        {% if i > ultimo_dia %}
-                            <td class="bg-light"></td>
-                        {% endif %}
-                        {% endfor %}
-                    {% endwith %}
-
-                    <!-- Coluna Resultado (Total de dias concluídos) -->
-                    <td class="resultado-celula-habito text-primary">
-                        {{ dado.total_concluido }}
-                    </td>
-                    </tr>
-                    {% endfor %}
-                    
-                    <!-- Linhas Vazias de Preenchimento (Opcional, mas mantém a estética da imagem) -->
-                    {% with num_habitos_exibidos=dados_relatorio|length %}
-                    {% for i in 5|make_range %}
-                        {% if i >= num_habitos_exibidos %}
-                        <tr class="vazio">
-                            <td class="text-start text-muted">--</td>
-                            {% for dia in dias_do_mes %}
-                                <td class="bg-light"></td>
-                            {% endfor %}
-                            <!-- Células vazias para preencher até o dia 31 -->
-                            {% with max_dias=31 %}
-                                {% for j in max_dias|make_range %}
-                                {% if j > ultimo_dia %}
-                                    <td class="bg-light"></td>
+                        <tr>
+                            <td class="habito-nome text-primary">{{ dado.nome }}</td>
+                            
+                            {% for dia in dias_do_mes %} 
+                                {% if dia in dado.dias_concluidos %}
+                                    <td class="concluido text-success"><i class="fas fa-check"></i></td>
+                                {% else %}
+                                    <td class="vazio"></td>
                                 {% endif %}
-                                {% endfor %}
-                            {% endwith %}
-                            <td class="text-muted">0</td>
+                            {% endfor %} 
+                                                        
+                            <td class="resultado-celula-habito">{{ dado.total_concluido }}</td> 
                         </tr>
-                        {% endif %}
                     {% endfor %}
-                    {% endwith %}
-                    
                 </tbody>
                 </table>
             </div>

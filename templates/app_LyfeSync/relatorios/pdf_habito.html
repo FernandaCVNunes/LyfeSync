@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Relatório de Hábitos - {{ periodo_str }}</title>
-    <!-- Estilos otimizados para PDF/Impressão -->
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -18,33 +17,14 @@
             margin-bottom: 20px;
             padding: 10px;
             background-color: #f0f0f5;
-            border-bottom: 2px solid #28a745; /* Verde para Hábitos */
+            border-bottom: 2px solid #28a745;
         }
-        .header h1 {
-            color: #28a745;
-            margin: 5px 0;
-            font-size: 16pt;
-        }
-        .header p {
-            font-size: 11pt;
-            color: #555;
-            margin: 0;
-        }
-        .summary {
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #dee2e6;
-            background-color: #e9ecef;
-            text-align: center;
-            font-size: 11pt;
-        }
-        h2 {
-            font-size: 14pt;
-            color: #495057;
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 5px;
-            margin-top: 25px;
-        }
+        /* ... (restante do CSS do cabeçalho, summary e h2) ... */
+        .header h1 { color: #28a745; margin: 5px 0; font-size: 16pt; }
+        .header p { font-size: 11pt; color: #555; margin: 0; }
+        .summary { margin-bottom: 20px; padding: 10px; border: 1px solid #dee2e6; background-color: #e9ecef; text-align: center; font-size: 11pt; }
+        h2 { font-size: 14pt; color: #495057; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 25px; }
+        
         /* Estilos da Tabela */
         table {
             width: 100%;
@@ -58,19 +38,25 @@
             font-size: 9pt;
         }
         th {
-            background-color: #28a745; /* Verde */
+            background-color: #28a745;
             color: white;
             text-transform: uppercase;
         }
+        /* OTIMIZAÇÃO: Repetir cabeçalho e evitar quebra de linha em registro */
+        thead { display: table-header-group; } 
+        tr { page-break-inside: avoid; } 
+        
         td.habito-nome {
             text-align: left;
             font-weight: bold;
-            width: 30%; /* Ajuste a largura do nome do hábito */
+            width: 30%;
         }
-        .concluido { background-color: #d4edda; color: #155724; } /* Verde claro */
-        .nao-concluido { background-color: #f8d7da; color: #721c24; } /* Vermelho claro */
-        .vazio { background-color: #f8f9fa; } /* Cinza claro */
+        .concluido { background-color: #d4edda; color: #155724; }
+        .nao-concluido { background-color: #f8d7da; color: #721c24; }
+        .vazio { background-color: #f8f9fa; }
         .footer {
+            /* Mantido, mas use position: running(footer) se estiver usando uma biblioteca como WeasyPrint. 
+               Para Pisa, fixed é o método comum, mesmo com ressalvas. */
             position: fixed;
             bottom: 0;
             left: 0;
@@ -95,24 +81,12 @@
 
     <h2>Acompanhamento Diário</h2>
 
-    {% if habitos_com_acompanhamento %}
-        <!--
-            O contexto esperado é uma estrutura como:
-            {
-                'dias_periodo': [data1, data2, ...],
-                'habitos': [
-                    {'nome': 'Hábito A', 'acompanhamento': {data1: True, data2: False, ...}},
-                    {'nome': 'Hábito B', 'acompanhamento': {data1: True, data2: True, ...}},
-                    ...
-                ]
-            }
-        -->
+    {% if habitos %} 
         <table>
             <thead>
                 <tr>
                     <th class="habito-nome">Hábito</th>
                     {% for dia in dias_periodo %}
-                        <!-- Mostra apenas o dia (ex: 15) -->
                         <th>{{ dia|date:"d" }}</th>
                     {% endfor %}
                 </tr>
@@ -137,7 +111,6 @@
             </tbody>
         </table>
 
-        <!-- Legenda para o PDF -->
         <div style="margin-top: 20px; font-size: 10pt;">
             <strong>Legenda:</strong>
             <span class="concluido" style="padding: 2px 5px; border-radius: 3px; border: 1px solid #c3e6cb;">✔ = Concluído</span>
@@ -150,7 +123,7 @@
     {% endif %}
 
     <div class="footer">
-        Gerado por LyfeSync em {{ now|date:"d/m/Y H:i" }}
+        Gerado por LyfeSync em {{ data_geracao }}
     </div>
 
 </body>

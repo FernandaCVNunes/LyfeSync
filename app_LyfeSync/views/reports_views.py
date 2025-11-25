@@ -9,6 +9,7 @@ from django.db import transaction, IntegrityError
 from django.utils import timezone
 from django.template.loader import render_to_string 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db import models
 from django.forms.models import modelformset_factory
 from datetime import timedelta, date, datetime
 from io import BytesIO
@@ -19,7 +20,7 @@ import locale
 import re
 # Importando os Models reais necessários para as views de relatório
 from ..models import Gratidao, Afirmacao, Habito, StatusDiario, Humor, HumorTipo 
-from ..forms import HumorForm, DicasForm, RelatorioHumorForm# Importando a lógica auxiliar
+from ..forms import HumorForm, DicasForm, RelatorioHumorForm, RelatorioHabitoForm
 from ._aux_logic import _get_report_date_range, get_humor_map, _get_humor_cor_classe, get_humor_icone, get_habitos_e_acompanhamento
 
 
@@ -94,16 +95,17 @@ def relatorio_habito(request):
     """
     # 1. Define o mês e ano de referência
     hoje = timezone.localdate()
-    
-    try:
-        mes_param = int(request.GET.get('mes', hoje.month))
-        ano_param = int(request.GET.get('ano', hoje.year))
-        data_referencia = hoje.replace(day=1, month=mes_param, year=ano_param)
-        
-    except (ValueError, TypeError):
-        mes_param = hoje.month
-        ano_param = hoje.year
-        data_referencia = hoje.replace(day=1, month=mes_param, year=ano_param)
+
+    form = RelatorioHabitoForm(request.GET)
+
+    mes_param = hoje.month
+    ano_param = hoje.year
+
+    if form.is_valid():
+        mes_param = int(form.cleaned_data['mes'])
+        ano_param = int(form.cleaned_data['ano'])
+
+    data_referencia = hoje.replace(day=1, month=mes_param, year=ano_param)
 
     # 2. Determina o último dia do mês e a lista de dias (1 a N)
     ultimo_dia = calendar.monthrange(ano_param, mes_param)[1]
@@ -130,7 +132,7 @@ def relatorio_habito(request):
         habito_id__in=habitos_ids,
         data__year=ano_param,
         data__month=mes_param,
-        concluido=True # <--- CORREÇÃO AQUI: Mudado de 'status=True' para 'concluido=True'
+        concluido=True 
     ).values('habito_id', 'data__day')
 
     # Mapeia as datas de conclusão: {habito_id: [dia1, dia2, ...]}
@@ -164,6 +166,7 @@ def relatorio_habito(request):
         'mes_selecionado': mes_param,
         'dias_do_mes': dias_do_mes, 
         'dados_relatorio': dados_relatorio, 
+        'form': form,
         'ultimo_dia': ultimo_dia,
         'meses': [(i, calendar.month_name[i].capitalize()) for i in range(1, 13)]
     }
@@ -201,8 +204,8 @@ def exportar_habito_csv(request):
     writer = csv.writer(response, delimiter=';')
 
     # 3. Escreve o cabeçalho: 'Hábito' + todas as datas formatadas
-    #header_dates = [d.strftime('%d/%m/%Y') for d in dias_periodo]
-    writer.writerow(['ID', 'Data', 'Descrição'])
+    header_dates = [d.strftime('%d/%m') for d in dias_periodo] # Mês/Dia para ser mais conciso
+    writer.writerow(['ID', 'Hábito'] + header_dates)
 
     # 4. Escreve os dados
     for habito in habitos_processados:
@@ -283,10 +286,7 @@ def exportar_habito_pdf(request):
     # Retorna o HTML com o Content-Type como PDF
     filename = f"relatorio_habitos_{data_inicio.strftime('%Y%m%d')}_{data_fim.strftime('%Y%m%d')}.pdf"
 
-    response = HttpResponse(html_content, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="{filename}"'
-
-    return response
+    return convert_html_to_pdf(html_content, filename, request)
 
 # -------------------------------------------------------------------
 # RELATÓRIO DE GRATIDÃO - PDF/CSV

@@ -191,6 +191,22 @@
     background-color: #fafafa;
 }
 
+.table-relatorio td.concluido {
+    background-color: #d4edda;
+    /* Fundo verde clarinho */
+    color: #155724;
+    /* Cor do visto (Verde escuro) */
+    font-weight: bold;
+    /* Deixa o visto mais destacado */
+}
+
+.table-relatorio td.vazio {
+    background-color: #ffffff;
+    /* Fundo branco ou neutro */
+    color: #555555;
+    /* Cor do traço, se houvesse, mas é bom definir. */
+    /* Garante que o conteúdo seja realmente vazio após a mudança no HTML */
+}
 
 /* --------------------------------------
    Estilos da Tabela de HUMOR

@@ -10,6 +10,7 @@ from django.db import transaction
 from datetime import date
 from .models import Habito, Gratidao, Afirmacao, Humor, Dicas, PerfilUsuario, HumorTipo
 import re
+import calendar
 
 User = get_user_model()
 
@@ -51,7 +52,47 @@ class HabitoForm(forms.ModelForm):
           'alvo': 'Alvo/Objetivo',
           'descricao': 'Descrição',
       }
-      
+
+# -------------------------------------------------------------------
+# RELATÓRIO DE HUMOR
+# -------------------------------------------------------------------    
+class RelatorioHabitoForm(forms.Form):
+    """Formulário simples para selecionar Mês e Ano do relatório de Hábitos."""
+    
+    MESES = [(i, calendar.month_name[i].capitalize()) for i in range(1, 13)]
+    
+    hoje = timezone.localdate()
+    
+    mes = forms.ChoiceField(
+        choices=MESES,
+        initial=hoje.month,
+        label="Selecionar Mês",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    
+    ano = forms.IntegerField(
+        initial=hoje.year,
+        label="Selecionar Ano",
+        min_value=2000, 
+        max_value=9999,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'min': 2000, 'max': 9999})
+    )
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        mes = cleaned_data.get("mes")
+        ano = cleaned_data.get("ano")
+        
+        if mes and ano:
+            try:
+                # Apenas para validar se a data é construível, embora não seja estritamente necessário
+                # já que o mês e o ano são validados individualmente.
+                date(int(ano), int(mes), 1)
+            except ValueError:
+                raise forms.ValidationError("Data inválida para o mês/ano selecionado.")
+        
+        return cleaned_data
+
 # -------------------------------------------------------------------
 #     Formulário GRATIDÃO (Criação de Múltiplos Registros)
 # -------------------------------------------------------------------
