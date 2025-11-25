@@ -398,25 +398,24 @@ def exportar_gratidao_pdf(request):
     else:
         periodo_str = "Período Inválido"
 
+    rodape_str = timezone.localtime(timezone.now()).strftime('Gerado por LyfeSync em %d/%m/%Y')
+
     context = {
         'gratidoes': gratidoes,
         'periodo_str': periodo_str,
-        'data_geracao': timezone.localtime(timezone.now()).strftime('%d/%m/%Y %H:%M'),
+        'rodape_content': rodape_str, 
         'total_gratidoes': gratidoes.count(),
         'usuario': request.user.username,
         'data_inicio': data_inicio.strftime('%d/%m/%Y'),
         'data_fim': data_fim.strftime('%d/%m/%Y'),
     }
-
     # Renderiza o template HTML (otimizado para PDF/impressão)
     html_content = render_to_string('app_LyfeSync/relatorios/pdf_gratidao.html', context)
 
     # Retorna o HTML com o Content-Type como PDF
     filename = f"relatorio_gratidao_{data_inicio.strftime('%Y%m%d')}_{data_fim.strftime('%Y%m%d')}.pdf"
-    response = HttpResponse(html_content, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
-    return response
+    return convert_html_to_pdf(html_content, filename, request)
 
 # -------------------------------------------------------------------
 # RELATÓRIO DE AFIRMAÇÃO - PDF/CSV

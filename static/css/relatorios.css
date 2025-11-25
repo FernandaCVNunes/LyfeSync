@@ -51,36 +51,6 @@
     color: #4a4a4a;
 }
 
-/* Cores customizadas de Botões/Texto no HTML (para usar com cores de Afirmação) */
-.btn-purple {
-    background-color: #9c27b0;
-    /* Roxo */
-    border-color: #9c27b0;
-}
-
-.btn-purple:hover {
-    background-color: #7b1fa2;
-    /* Roxo mais escuro */
-    border-color: #7b1fa2;
-}
-
-.text-purple {
-    color: #7b1fa2 !important;
-    /* Roxo escuro para o período */
-}
-
-.btn-blue {
-    background-color: #C0CFF7;
-}
-
-.btn-pink {
-    background-color: #F7C0C0;
-}
-
-.btn-green-light {
-    background-color: #C0F7C9;
-}
-
 /* --------------------------------------
    Estilos da Tabela Geral (Compartilhados)
    -------------------------------------- */
