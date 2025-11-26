@@ -7,9 +7,6 @@ from django.utils import timezone
 # Obtém o modelo de usuário ativo (geralmente User)
 User = get_user_model()
 
-# ===================================================================
-# 1. HÁBITOS
-# ===================================================================
 class Habito(models.Model):
     """Modelo para registro dos hábitos que o usuário deseja acompanhar."""
     # 1. Definição das constantes
@@ -90,7 +87,6 @@ class StatusDiario(models.Model):
         unique_together = (('habito', 'data'),)
         verbose_name = "Status Diário"
         verbose_name_plural = "Status Diários"
-
 
 # ===================================================================
 # 3. AFIRMAÇÕES

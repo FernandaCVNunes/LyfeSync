@@ -5,7 +5,7 @@
 {% endblock %}
 
 
-<div class="modal fade" id="registrarHabitoModal" tabindex="-1" aria-labelledby="registrarHabitoLabel" aria-hidden="true">
+<div class="modal fade " id="registrarHabitoModal" tabindex="-1" aria-labelledby="registrarHabitoLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rs-modal-content shadow-lg rounded-3">
             
@@ -14,7 +14,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
 
-            <div class="modal-body pt-3 px-4 pb-5">
+            <div class="modal-body pt-3 px-4 pb-5 bg-info">
                 <form method="POST" action="{% url 'registrar_habito' %}">
                     {% csrf_token %}
 

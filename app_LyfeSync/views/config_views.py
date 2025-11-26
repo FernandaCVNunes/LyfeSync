@@ -66,7 +66,7 @@ def registrar_dica(request):
         'dicas_list': dicas_list,
         'humores_disponiveis': humores_disponiveis, 
     }
-    return render(request, 'app_LyfeSync/dicas/dicas.html', context)
+    return render(request, 'app_LyfeSync/autocuidado/dicas.html', context)
 
 @login_required(login_url='login')
 @user_passes_test(is_staff_user, login_url='/') 

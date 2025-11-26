@@ -22,6 +22,7 @@ class HabitoForm(forms.ModelForm):
 
     class Meta:
       model = Habito
+
       fields = ['nome', 'data_inicio', 'data_fim', 'quantidade', 'frequencia', 'alvo', 'descricao']
       
       widgets = {
@@ -35,6 +36,7 @@ class HabitoForm(forms.ModelForm):
               format='%Y-%m-%d'
           ),
           'quantidade': NumberInput(attrs={'placeholder': 'Ex: 8 copos, 10 minutos', 'min': 1, 'class': 'form-control'}),
+
           'frequencia': Select(
               choices=Habito.FREQUENCIA_CHOICES,
               attrs={'class': 'form-select'}
@@ -54,7 +56,7 @@ class HabitoForm(forms.ModelForm):
       }
 
 # -------------------------------------------------------------------
-# RELATÓRIO DE HUMOR
+# RELATÓRIO DE HABITO
 # -------------------------------------------------------------------    
 class RelatorioHabitoForm(forms.Form):
     """Formulário simples para selecionar Mês e Ano do relatório de Hábitos."""
