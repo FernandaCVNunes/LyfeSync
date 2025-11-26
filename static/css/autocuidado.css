@@ -20,31 +20,27 @@
     background-color: var(--lyfesync-light-green) !important;
 }
 
-/* Estilo de Card com Shadow e Hover Customizados (Antigo .section-card) */
-/* Substitui shadow-xl e adiciona o efeito de hover que o BS não tem por padrão */
-.custom-shadow-hover {
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-    /* Equivalente a shadow-lg */
+/* Efeito de Shadow/Lift no Hover (Customizado) */
+.ls-hover-lift {
     transition: all 0.3s ease;
 }
 
-.custom-shadow-hover:hover {
+.ls-hover-lift:hover {
     transform: translateY(-2px);
     box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.2) !important;
     /* Sombra mais forte no hover */
 }
 
+/* Fundo/Borda do Destaque (highlight-card) - Estilo customizado */
+.highlight-card {
+    /* bg-emerald-50 e border-emerald-500 */
+    background-color: #f0fdf4 !important;
+    border-left: 5px solid #10b981 !important;
+}
+
 /* Ajuste para ícones Lucide no BS */
 i[data-lucide] {
     vertical-align: middle;
-}
-
-/* Destaque de Mensagem (Antigo .highlight-card) - Fundo esverdeado claro e borda */
-.highlight-card {
-    background-color: #f0fdf4 !important;
-    /* emerald-50 */
-    border-left: 5px solid #10b981 !important;
-    /* emerald-500 */
 }
 
 /* ========================================================= */
@@ -60,34 +56,13 @@ i[data-lucide] {
     border-color: var(--gratidao-blue) !important;
 }
 
-/* Cabeçalho de Tabela Customizado */
-.table-gratidao-header th {
-    background-color: var(--gratidao-blue) !important;
-    color: white !important;
-    font-size: 1rem;
-    font-weight: 700;
-    vertical-align: middle;
-}
-
-/* Linha da Tabela (Fundo claro para hover) */
-.gratidao-list-item-hover:hover {
+/* Linha da Tabela (Fundo claro para hover) - Customizado */
+.ls-gratidao-hover:hover {
     background-color: var(--gratidao-light-blue) !important;
     border-color: var(--gratidao-blue) !important;
     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     transition: all 0.3s ease-in-out;
     cursor: pointer;
-}
-
-/* Estilo para inputs de data no modal - Adaptação para .form-control */
-.gratidao-date-input.form-control {
-    font-size: 1.25rem;
-    padding: 0.75rem 1rem;
-}
-
-.gratidao-item-history {
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
 }
 
 .gratidao-date {
@@ -100,7 +75,7 @@ i[data-lucide] {
 /* --- ESTILOS PÁGINA REGISTRAR AFIRMAÇÃO (Customizados) --- */
 /* ========================================================= */
 
-/* Definição do formato circular */
+/* Definição do formato circular - Customizado */
 .affirmation-circle {
     width: 250px;
     height: 250px;
@@ -116,7 +91,7 @@ i[data-lucide] {
     transform: translateY(-5px);
 }
 
-/* Cores específicas para os círculos */
+/* Cores específicas para os círculos - Customizado */
 .circle-blue {
     background-color: #C0CFF7;
 }
@@ -129,18 +104,24 @@ i[data-lucide] {
     background-color: #C0F7C9;
 }
 
-/* Estilo para garantir que o textarea dentro do círculo se ajuste */
+/* Estilo para garantir que o textarea dentro do círculo se ajuste - Customizado */
+/* Ajuste de background/border para combinar com o círculo */
 .afirmacao-textarea {
     background: transparent;
+    /* Alterado de white para transparent */
     border: none;
+    /* Alterado de white para none */
     padding: 1rem;
     resize: none;
     width: 100%;
     height: 100%;
     font-size: 1.25rem;
+    /* Adicionado para consistência */
     font-style: italic;
+    /* Adicionado para consistência */
     color: #333;
     box-shadow: none !important;
     text-align: center;
+    /* Adicionado para consistência */
     transition: all 0.3s ease;
 }
