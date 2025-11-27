@@ -1,163 +1,49 @@
-{# relatorioHumor.html #}
-{% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
-{% load static %}
-{% load custom_filters %}
-{% load app_LyfeSync_extras %}
+   <tbody>
+    
+       {% for habit in habitos %}
+       <tr class="habit-row" data-habit-id="{{ habit.id }}">
+          
+          {# COLUNA HÁBITO - Adicionar classe de padding reduzido (ex: p-2) #}
+          <td class="align-middle fw-bold small p-2">
+             {{ habit.nome }}
+          </td>
 
-{% block title %}
-  Relatório de Humor
-{% endblock %}
+          
+          {# COLUNA DESCRIÇÃO - Adicionar classe de padding reduzido #}
+          <td class="align-middle small text-muted p-2">
+             {{ habit.descricao|default:"Sem descrição." }}
+          </td>
+          
+          {# COLUNA FREQUÊNCIA - Adicionar classe de padding reduzido #}
+          <td class="align-middle text-center p-2">
+             <span class="badge bg-info text-dark">{{ habit.frequencia }}</span>
+          </td>
 
-{% block extra_css %}
-  <link rel="stylesheet" href="{% static 'app_LyfeSync/css/relatorio.css' %}">
-{% endblock %}
-
-{% block content_logado %}
-
-  <div class="container my-5">
-
-    <div class="row mb-4 report-header">
-      <div class="col-12 col-md-8">
-        <h1 class="report-title">Relatório de Humor</h1>
-        <p class="lead text-muted">Acompanhamento Mensal do seu estado emocional.</p>
-      </div>
-      <div class="col-12 col-md-4 text-md-end d-flex align-items-center justify-content-md-end">
-        <h3 class="mb-0 text-success">{{ mes_extenso }} / {{ ano_selecionado }}</h3>
-      </div>
-    </div>
-
-    <div class="card shadow-sm mb-5 month-selector-card">
-      <div class="card-body p-3">
-        <form method="get" class="row g-3 align-items-end">
-          <div class="col-12 col-sm-6 col-md-4">
-            <label for="id_mes" class="form-label">Selecionar Mês:</label>
-            <select name="mes" id="id_mes" class="form-select">
-              {% for num, nome in meses %}
-                <option value="{{ num }}" {% if num == mes_selecionado %}selected{% endif %}>
-                  {{ nome }}
-                </option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="col-12 col-sm-6 col-md-4">
-            <label for="id_ano" class="form-label">Selecionar Ano:</label>
-            <input type="number" name="ano" id="id_ano" class="form-control" value="{{ ano_selecionado }}" min="2020" max="{{ hoje.year }}">
-          </div>
-          <div class="col-12 col-md-4">
-            <button type="submit" class="btn btn-success w-100">Gerar Relatório</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    {% if total_dias_marcados == 0 %}
-      <div class="alert alert-info text-center" role="alert">
-        Nenhum registro de humor encontrado para {{ mes_extenso }} / {{ ano_selecionado }}.
-        <p class="mt-2 mb-0"><a href="{% url 'registrar_humor' %}" class="alert-link">Clique aqui para registrar seu humor hoje!</a></p>
-      </div>
-    {% else %}
-
-      <div class="table-responsive mb-4">
-        <table class="table table-bordered table-striped table-relatorio align-middle shadow-sm">
-          <thead>
-            <tr class="text-uppercase">
-              <th scope="col" class="text-start" style="min-width: 150px;">Humor</th>
-              {% for dia in dias_do_mes %}
-                <th scope="col">{{ dia }}</th>
-              {% endfor %}
-
-              {% with max_dias=31 %}
-                {% for i in max_dias|make_range %}
-                  {% if i > ultimo_dia %}
-                    <th scope="col" class="bg-light text-muted" style="min-width: 30px;"></th>
-                  {% endif %}
-                {% endfor %}
-              {% endwith %}
-              <th scope="col" class="resultado-celula" style="min-width: 80px;">Resultado</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for dado in dados_relatorio %}
-            <tr>
-              <th scope="row" class="text-start d-flex align-items-center p-2">
-                <img src="{% static dado.tipo.icone %}" alt="{{ dado.tipo.estado }}" class="humor-icon me-2">
-                <span>{{ dado.tipo.estado }}</span>
-              </th>
-              
-              {% for dia in dias_do_mes %}
-                <td class="celula-humor">
-                  {% if dia in dado.dias_marcados %}
-                    <div class="humor-celula-marcada {{ dado.cor_classe }}"></div>
-                  {% endif %}
-                </td>
-              {% endfor %}
-              
-              {% with max_dias=31 %}
-                {% for i in max_dias|make_range %}
-                  {% if i > ultimo_dia %}
-                    <td class="bg-light"></td>
-                  {% endif %}
-                {% endfor %}
-              {% endwith %}
-
-              <td class="resultado-celula fw-bold">
-                {{ dado.porcentagem }}%
-              </td>
-            </tr>
-            {% endfor %}
-            
-            {% with num_humores_exibidos=dados_relatorio|length %}
-              {% for i in 5|make_range %}
-                {% if i > num_humores_exibidos %}
-                  <tr>
-                      <td class="text-start text-muted">-- Vazio --</td>
-                      {% for dia in dias_do_mes %}
-                          <td class="bg-light"></td>
-                      {% endfor %}
-                      {% with max_dias=31 %}
-                        {% for j in max_dias|make_range %}
-                          {% if j > ultimo_dia %}
-                            <td class="bg-light"></td>
-                          {% endif %}
-                        {% endfor %}
-                      {% endwith %}
-                      <td class="text-muted">0.0%</td>
-                  </tr>
-                {% endif %}
-              {% endfor %}
-            {% endwith %}
-            
-          </tbody>
-        </table>
-      </div>
-
-      <div class="d-flex justify-content-end mb-5">
-        <div class="btn-group shadow-sm" role="group" aria-label="Exportar Relatórios">
-          <a href="{% url 'exportar_humor_pdf' %}?mes={{ mes_selecionado }}&ano={{ ano_selecionado }}" 
-             class="btn btn-danger" 
-             title="Exportar Relatório Mensal (Tabela) em PDF">
-            <i class="bi bi-file-pdf me-2"></i> Exportar PDF
-          </a>
-          <a href="{% url 'exportar_humor_csv' %}?mes={{ mes_selecionado }}&ano={{ ano_selecionado }}" 
-             class="btn btn-primary" 
-             title="Exportar Registros Detalhados em CSV">
-            <i class="bi bi-file-earmark-spreadsheet me-2"></i> Exportar CSV
-          </a>
-        </div>
-      </div>
-      
-    {% endif %}
-
-    <div class="d-flex justify-content-between mt-5 pt-3 border-top">
-      <button onclick="window.history.back()" class="btn btn-outline-secondary btn-lg shadow-sm">
-        <i class="bi bi-arrow-left me-2"></i> Voltar à Página Anterior
-      </button>
-
-      <a href="{% url 'humor' %}" class="btn btn-info text-white btn-lg shadow-sm">
-        <i class="bi bi-pencil-square me-2"></i> Ver Registros
-      </a>
-    </div>
-
-  </div>
-
-{% endblock %}
+          {# Células de Status Diário - Adicionar classe de padding reduzido #}
+          {% for day_info in last_7_days_list %}
+          <td class="align-middle text-center small p-2" 
+             data-date="{{ day_info.date_iso }}" 
+             onclick="toggleHabitDay({{ habit.id }}, '{{ day_info.date_iso }}', event)"> 
+             {% with status_key=day_info.date_iso %}
+               <input type="checkbox" class="form-check-circle" {% if habit.completion_status|get_item:status_key %}checked{% endif %}>
+             {% endwith %}
+          </td>
+          {% endfor %}
+          
+          {# COLUNA AÇÕES - Adicionar classe de padding reduzido #}
+          <td class="align-middle text-center p-2">
+             <div class="d-flex justify-content-center">
+              <button type="button" class="btn btn-sm btn-warning text-white me-2 btnAlterar" 
+                  onclick="abrirModalAlterar({{ habit.id }}, event)" 
+                  data-bs-toggle="modal" data-bs-target="#alterarHabitoModal">
+                <i class="bi bi-pencil-square"></i>
+              </button>
+              <button type="button" class="btn btn-sm btn-danger text-white btnExcluir" 
+                  onclick="abrirModalExcluir({{ habit.id }}, event)" 
+                  data-bs-toggle="modal" data-bs-target="#confirmacaoExclusaoModal">
+                <i class="bi bi-trash-fill"></i>
+              </button>
+             </div>
+          </td>
+       </tr>
+       {% empty %}

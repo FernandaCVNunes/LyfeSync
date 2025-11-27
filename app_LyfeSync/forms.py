@@ -354,7 +354,6 @@ class HumorForm(forms.ModelForm):
 # -------------------------------------------------------------------
 # RELATÓRIO DE HUMOR
 # -------------------------------------------------------------------
-
 class RelatorioHumorForm(forms.Form):
     """
     Formulário para selecionar o mês e ano do relatório de humor.

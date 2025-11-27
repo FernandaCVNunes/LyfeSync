@@ -9,12 +9,12 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rs-modal-content shadow-lg rounded-3">
             
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold fs-4" id="registrarHabitoLabel">Novo Hábito</h5>
+            <div class="modal-header border-0 pb-0 bg-success">
+                <h5 class="modal-title fw-bold fs-4 text-white" id="registrarHabitoLabel">Novo Hábito</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
 
-            <div class="modal-body pt-3 px-4 pb-5 bg-info">
+            <div class="modal-body pt-3 px-4 pb-5">
                 <form method="POST" action="{% url 'registrar_habito' %}">
                     {% csrf_token %}
 
@@ -76,7 +76,8 @@
 
                     <div class="row">
                         <div class="col-12 text-center">
-                            <button type="submit" class="btn rs-btn-adicionar">Adicionar Hábito</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-sm rs-btn-adicionar">Adicionar Hábito</button>
                         </div>
                     </div>
                 </form>

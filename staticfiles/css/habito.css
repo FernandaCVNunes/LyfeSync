@@ -1,124 +1,96 @@
-/* habito.css */
-
-/* Estilo para a linha selecionada */
-.habit-row {
-    cursor: pointer;
-    transition: background-color 0.2s;
+/* Estilo para reduzir o espaçamento vertical nas linhas da tabela */
+.table tbody tr td {
+    /* Define um padding menor nas laterais e muito pequeno no topo/fundo */
+    padding-top: 0.35rem !important;
+    /* Menor que o padrão (ex: 0.5rem) */
+    padding-bottom: 0.35rem !important;
+    /* Menor que o padrão */
 }
 
-.habit-row:hover {
-    background-color: #f8f9fa;
-    cursor: pointer;
+/* Opcional: Garante que a descrição não force muita altura se for muito longa */
+.table tbody tr td.text-muted {
+    white-space: normal;
+    /* Permite quebras de linha */
+    max-width: 150px;
+    /* Limita a largura para melhor visualização */
 }
 
-.habit-row.selected {
-    background-color: #e6f7ff !important;
-    /* Azul claro para seleção */
-    box-shadow: 0 1px 6px rgba(0, 123, 255, 0.1);
-    transition: background-color 0.2s ease;
+#toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
 }
 
-/* Ajuste para o header elevado, usando classes Bootstrap */
-.card-header-elevated {
-    padding: 0 !important;
-    position: relative;
-    margin-top: -1.5rem !important;
-    margin-left: 1rem !important;
-    margin-right: 1rem !important;
-    z-index: 2;
-}
-
-/* Cor de fundo para o cabeçalho elevado (Azul da imagem) */
-.bg-primary-custom {
-    background-color: #1a73e8 !important;
-    /* Exemplo de azul forte */
-}
-
-/* Pequeno ajuste para texto na tabela */
-.table-header-sm {
-    font-size: 0.65rem;
-}
-
-/* Estilo para as caixas de seleção da coluna de status */
-.table .form-check-input {
-    /* Retângulo da imagem principal (semelhante a um checkbox quadrado customizado) */
-    width: 1rem;
-    height: 1rem;
-    border-radius: 0;
-    /* Torna quadrado */
-    border: 1px solid #ccc;
-    background-color: #fff;
-    vertical-align: middle;
-}
-
-.table .form-check-input:checked {
-    /* Fundo verde e borda verde, como o primeiro check da imagem */
-    background-color: #38a852;
-    border-color: #38a852;
-    /* Oculta o 'check' interno do Bootstrap para ficar um quadrado verde sólido */
-    background-image: none;
-}
-
-/* Estilo da célula do primeiro hábito (Beber Água) com o fundo verde */
-.habit-row:first-child .form-check-input:checked:first-of-type {
-    /* Cor de destaque para o primeiro item concluído, como na imagem */
-    background-color: #5cb85c;
-    /* Verde mais claro */
-    border-color: #5cb85c;
-}
-
-/* BADGE de Frequência (FUNDO CLARO) */
-.badge.bg-info-custom {
-    background-color: #92e0ff !important;
-    /* Azul claro (como 'SEMANAL' na imagem) */
-    color: #000 !important;
-    font-weight: bold;
-    font-size: 0.65em;
-    padding: 0.3em 0.6em;
-}
-
-/* --- Estilos do Modal de Alteração (Baseado na imagem Alterar Habito - Laranja/Vermelho) --- */
-
-/* Cor de fundo para o modal de alteração (Laranja escuro/Vermelho) */
-.rs-modal-content {
-    background-color: #f1795c !important;
-    /* Laranja/Vermelho da imagem */
-    color: white;
-}
-
-.rs-modal-content .modal-title {
-    color: white !important;
-}
-
-/* Estilo para os campos de formulário dentro do modal (Branco com borda sutil) */
-.rs-form-control {
-    background-color: white !important;
-    color: #333 !important;
-    border: 1px solid #f9f9f9 !important;
-    border-radius: 0.25rem;
-    padding: 0.75rem 0.5rem;
-    /* Aumenta a altura */
-    font-weight: 500;
-}
-
-/* Cor de fundo para o campo de texto desabilitado/apenas leitura, se necessário */
-.rs-form-control:disabled,
-.rs-form-control[readonly] {
-    background-color: #f8f9fa !important;
-}
-
-/* Botão do modal de alteração (AZUL CLARO/CIANO) */
-.rs-btn-adicionar {
-    background-color: #4ac1e7 !important;
-    /* Azul/Ciano da imagem */
-    color: white !important;
-    font-weight: bold;
-    padding: 0.75rem 2.5rem;
+/* Estilo do Toast Individual */
+.toast {
+    padding: 1rem 1.5rem;
+    margin-bottom: 0.5rem;
     border-radius: 0.5rem;
-    border: none;
-    transition: background-color 0.2s;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    color: white;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateX(100%);
 }
 
-.rs-btn-adicionar:hover {
-    background-color: #3aaac9 !important;
+.toast.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.toast.success {
+    background-color: #10b981;
+    /* green-500 */
+}
+
+.toast.error {
+    background-color: #ef4444;
+    /* red-500 */
+}
+
+.toast.info {
+    background-color: #3b82f6;
+    /* blue-500 */
+}
+
+/* Estilos existentes para o círculo (mantidos) */
+.form-check-circle {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 1.2rem;
+    height: 1.2rem;
+    border-radius: 50%;
+    border: 2px solid #ced4da;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Estilo quando 'checked' */
+.form-check-circle:checked {
+    border-color: #28a745;
+    /* Cor da borda mais forte (verde 'success') */
+    background-color: #28a745;
+    /* Fundo verde */
+}
+
+/* Estilo do 'tick' dentro do círculo (opcional, aqui mudo para o branco) */
+.form-check-circle:checked::after {
+    content: '\2713';
+    /* Símbolo de check */
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.7rem;
+    color: white;
+    /* Cor do check (branco) */
+}
+
+/* Ajuste para o texto HOJE ficar branco no cabeçalho */
+thead .table-header-sm .text-muted {
+    color: white !important;
 }

@@ -3,8 +3,6 @@ import re
 import calendar
 from datetime import timedelta, date
 from decimal import Decimal
-
-# Imports Django
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
@@ -12,6 +10,7 @@ from django.contrib import messages
 from django.forms.models import modelformset_factory
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.utils import timezone 
+from ..models import StatusDiario
 
 # ===================================================================
 # MOCKS DE CLASSES E FUNÇÕES (Necessário para Views de Exportação)
@@ -169,6 +168,39 @@ def _get_humor_cor_classe(estado):
     # Retorna o código Hexadecimal da cor, ou uma cor padrão para 'bg-light'
     return mapping.get(estado, 'bg-light')
 
+# Mocks para Humor
+class HumorMock:
+    """Modelo Mockup de Humor"""
+    def __init__(self, id, data, nota, descricao, fatores, data_registro):
+        self.idhumor = id
+        self.data = data
+        self.notahumor = nota
+        self.descricaohumor = descricao
+        self.fatores = fatores
+        self.data_registro = data_registro
+
+class HumorManager:
+    """Gerenciador Mockup para simular consultas ao ORM de Humor."""
+    def filter(self, usuario, data__gte, data__lte):
+        """Simula a busca de registros de humor dentro do intervalo."""
+        # Gera dados mockados (usando o modelo mock)
+        hoje = timezone.localdate()
+        yesterday = hoje - timedelta(days=1)
+        
+        registros_mock = [
+            HumorMock(101, hoje, Decimal('4.5'), "Dia muito produtivo e feliz", "Trabalho Concluído, Exercício Físico", timezone.now() - timedelta(hours=2)),
+            HumorMock(102, yesterday, Decimal('2.0'), "Manhã estressante com trânsito", "Trânsito, Pouco Sono", timezone.now() - timedelta(days=1, hours=8)),
+            HumorMock(103, hoje - timedelta(days=5), Decimal('3.8'), "Neutro, mas com boa refeição.", "Boa Alimentação", timezone.now() - timedelta(days=5, hours=10)),
+        ]
+        
+        # Filtra os mocks para simular o comportamento do ORM
+        return [
+            r for r in registros_mock if data__gte <= r.data <= data__lte
+        ]
+
+# Instância do gerenciador mock de Humor
+Humor_mock = HumorManager()
+
 
 # -------------------------------------------------------------------
 # LÓGICA AUXILIAR PARA HÁBITOS (Mantida do original)
@@ -176,17 +208,50 @@ def _get_humor_cor_classe(estado):
 
 def _get_checked_days_for_last_7_days(habito_obj):
     """
-    Gera um mapa de conclusão (True/False) para os últimos 7 dias.
-    A chave é a data no formato 'YYYY-MM-DD'.
-    (Em um projeto real, esta função usaria o modelo StatusDiario.)
+    Gera um mapa de status de conclusão (True/False) para os últimos 7 dias.
+
+    Busca todos os registros de StatusDiario (ativos/existentes) no período
+    e retorna o valor do campo 'concluido' (True ou False) para aquele dia.
+    Se não houver registro para um dia, assume-se False.
+    
+    A janela de verificação é de 7 dias móveis, terminando em 'hoje'.
+    Dessa forma, os dias de conclusão "somem" automaticamente quando caem fora
+    desta janela, seguindo exatamente o comportamento solicitado.
     """
     
+    # Define o período de 7 dias (Ex: Se Hoje é Quarta, o período vai de Quinta passada até Quarta)
     today = timezone.localdate()
     seven_days_ago = today - timedelta(days=6)
     
-    # MOCK: Simula a busca de conclusões
-    completions = []
-    # Simulando 3 dias de conclusão para um hábito com ID 1
+    # 1. Busca todos os StatusDiario (ativos) para o hábito e o período de 7 dias
+    # (Seleciona 'data' e 'concluido' - sem filtrar por concluido=True)
+    statuses = StatusDiario.objects.filter(
+        habito=habito_obj,
+        data__gte=seven_days_ago,
+        data__lte=today,
+    ).values('data', 'concluido')
+    
+    # Converte os resultados da busca para um mapa de fácil acesso
+    status_map = {}
+    for entry in statuses:
+        # Pega a data e formata para string ISO
+        date_str = entry['data'].strftime('%Y-%m-%d')
+        # Armazena o status real de 'concluido' do banco de dados
+        status_map[date_str] = entry['concluido']
+    
+    # 2. Cria o mapa de resultados final para os 7 dias
+    result_map = {}
+    for i in range(7):
+        # Calcula a data atual na iteração (do mais antigo para o mais recente)
+        current_date = today - timedelta(days=6 - i)
+        date_iso = current_date.strftime('%Y-%m-%d')
+        
+        # O status final é:
+        # - O valor de 'concluido' encontrado no status_map
+        # - OU False (valor padrão) se não houver registro para aquele dia (não concluído/não registrado)
+        result_map[date_iso] = status_map.get(date_iso, False)
+            
+    return result_map
     class HabitoMockID:
          id = 1
     if habito_obj.id == 1: 
@@ -262,36 +327,3 @@ def get_habitos_e_acompanhamento(user, data_inicio, data_fim):
         })
         
     return habitos_processados
-
-# Mocks para Humor
-class HumorMock:
-    """Modelo Mockup de Humor"""
-    def __init__(self, id, data, nota, descricao, fatores, data_registro):
-        self.idhumor = id
-        self.data = data
-        self.notahumor = nota
-        self.descricaohumor = descricao
-        self.fatores = fatores
-        self.data_registro = data_registro
-
-class HumorManager:
-    """Gerenciador Mockup para simular consultas ao ORM de Humor."""
-    def filter(self, usuario, data__gte, data__lte):
-        """Simula a busca de registros de humor dentro do intervalo."""
-        # Gera dados mockados (usando o modelo mock)
-        hoje = timezone.localdate()
-        yesterday = hoje - timedelta(days=1)
-        
-        registros_mock = [
-            HumorMock(101, hoje, Decimal('4.5'), "Dia muito produtivo e feliz", "Trabalho Concluído, Exercício Físico", timezone.now() - timedelta(hours=2)),
-            HumorMock(102, yesterday, Decimal('2.0'), "Manhã estressante com trânsito", "Trânsito, Pouco Sono", timezone.now() - timedelta(days=1, hours=8)),
-            HumorMock(103, hoje - timedelta(days=5), Decimal('3.8'), "Neutro, mas com boa refeição.", "Boa Alimentação", timezone.now() - timedelta(days=5, hours=10)),
-        ]
-        
-        # Filtra os mocks para simular o comportamento do ORM
-        return [
-            r for r in registros_mock if data__gte <= r.data <= data__lte
-        ]
-
-# Instância do gerenciador mock de Humor
-Humor_mock = HumorManager()
