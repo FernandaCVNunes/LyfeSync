@@ -15,15 +15,18 @@
 
 <div class="container py-5 bg-lyfesync-light">
     <div class="row">
-                <div class="col-12 d-flex justify-content-between align-items-center mb-4">
+        <!-- Título e Botão de Inclusão -->
+        <div class="col-12 d-flex justify-content-between align-items-center mb-4">
             <h1 class="mb-4 text-lyfesync-green">Afirmações Positivas</h1>
             
-                        <button class="btn-add btn btn-success" data-bs-toggle="modal" data-bs-target="#modalRegistroAfirmacao">
+            <!-- Botão que abre o Modal de Inclusão -->
+            <button class="btn-add btn btn-success" data-bs-toggle="modal" data-bs-target="#modalRegistroAfirmacao">
                 <i class="bi bi-plus-circle-fill me-2"></i>Incluir Afirmação
             </button>
         </div>
 
-                <div class="col-12">
+        <!-- Mensagens do Django (Success/Error) -->
+        <div class="col-12">
             {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
                     {{ message }}
@@ -32,27 +35,26 @@
             {% endfor %}
         </div>
 
-                <div class="col-12">
-            <h2 class="subtitle h4 mb-3">Histórico ({{ page_obj.paginator.count }} Registros)</h2>
+        <!-- Histórico de Afirmações -->
+        <div class="col-12">
+            <h2 class="subtitle h4 mb-3">Listagem de Afirmações</h2>
             
             {% if page_obj %}
                 <div class="history-list list-group">
                     {% for afirmacao in page_obj %}
-                                                <div class="history-item list-group-item d-flex justify-content-between align-items-center mb-2 shadow-sm rounded-3 **ls-hover-lift**">
-                                                        <div class="flex-grow-1 me-3">
-                                <small class="item-date text-muted d-block mb-1">
-                                    <i class="bi bi-calendar me-1"></i>
-                                    {{ afirmacao.data|date:"d/m/Y" }}
-                                </small>
-                                <p class="item-content mb-0">
+                        <div class="history-item list-group-item d-flex justify-content-between align-items-center mb-2 shadow-sm rounded-3">
+                            <!-- Data e Conteúdo -->
+                            <div class="flex-grow-1 me-3 rounded-pill ">
+                                <p class="item-content mb-0 text-break">
                                     {{ afirmacao.descricaoafirmacao }}
                                 </p>
                             </div>
 
-                                                        <div class="d-flex flex-shrink-0">
-                                                                <button 
-                                    class="btn-edit btn btn-sm me-2" 
-                                    style="background-color: #d76249; color: white;" 
+                            <!-- Botões de Ação -->
+                            <div class="d-flex flex-shrink-0">
+                                <!-- Botão Alterar-->
+                                <button 
+                                    class="btn-edit btn btn-sm me-2 btn-warning" 
                                     data-bs-toggle="modal" 
                                     data-bs-target="#modalAlteracaoAfirmacao"
                                     data-afirmacao-id="{{ afirmacao.idafirmacao }}"
@@ -62,7 +64,8 @@
                                     <i class="bi bi-pencil-square"></i> Alterar
                                 </button>
                                 
-                                                                <button 
+                                <!-- Botão Excluir (Vermelho) -->
+                                <button 
                                     class="btn-delete btn btn-danger btn-sm" 
                                     data-bs-toggle="modal" 
                                     data-bs-target="#modalExclusaoAfirmacao"
@@ -75,7 +78,8 @@
                     {% endfor %}
                 </div>
 
-                                {% if page_obj.paginator.num_pages > 1 %}
+                <!-- Paginação -->
+                {% if page_obj.paginator.num_pages > 1 %}
                     <nav aria-label="Paginação de Afirmações" class="mt-4">
                         <ul class="pagination justify-content-center">
                             {% if page_obj.has_previous %}
@@ -111,6 +115,9 @@
     </div>
 </div>
 
+<!-- ================================================================= -->
+<!-- MODAL DE INCLUSÃO (REGISTRO) -->
+<!-- ================================================================= -->
 <div class="modal fade" id="modalRegistroAfirmacao" tabindex="-1" aria-labelledby="modalRegistroAfirmacaoLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -129,30 +136,42 @@
                         </div>
                         <div class="col-4 text-end">
                             <label for="{{ registro_form.data.id_for_label }}" class="form-label mb-0 text-dark">Data:</label>
-                                                        {{ registro_form.data|attr:"class:form-control fs-5 p-3" }}
-                                                    </div>
+                            <!-- Campo de Data -->
+                            {{ registro_form.data }}
+                            <!-- Lembrete: A validação de data deve ser feita na View se houver regra de "não futuro" -->
+                        </div>
                     </div>
 
-                                        <div class="row justify-content-center text-center">
+                    <!-- Campos de Afirmação em Layout de Círculos (Estilização no autocuidado.css) -->
+                    <div class="row justify-content-center text-center">
                         
-                                                <div class="col-lg-4 col-md-6 mb-4">
-                                                        <div class="affirmation-circle circle-blue p-4 mx-auto">
+                        <!-- Afirmação 1 (Obrigatório) -->
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <!-- Usando as classes customizadas .affirmation-circle e .circle-blue -->
+                            <div class="affirmation-circle circle-blue p-4 mx-auto">
                                 <label for="{{ registro_form.descricao_1.id_for_label }}" class="form-label text-white fw-bold d-block">{{ registro_form.descricao_1.label }}</label>
-                                                                {{ registro_form.descricao_1|attr:"class:form-control afirmacao-textarea text-center fs-5 fst-italic" }}
+                                <!-- Aplicando as classes Bootstrap e customizada .afirmacao-textarea -->
+                                {{ registro_form.descricao_1|attr:"class:form-control afirmacao-textarea" }}
                             </div>
                         </div>
 
-                                                <div class="col-lg-4 col-md-6 mb-4">
-                                                        <div class="affirmation-circle circle-pink p-4 mx-auto">
+                        <!-- Afirmação 2 (Opcional) -->
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <!-- Usando as classes customizadas .affirmation-circle e .circle-pink -->
+                            <div class="affirmation-circle circle-pink p-4 mx-auto">
                                 <label for="{{ registro_form.descricao_2.id_for_label }}" class="form-label text-white fw-bold d-block">{{ registro_form.descricao_2.label }}</label>
-                                                                {{ registro_form.descricao_2|attr:"class:form-control afirmacao-textarea text-center fs-5 fst-italic" }}
+                                <!-- Aplicando as classes Bootstrap e customizada .afirmacao-textarea -->
+                                {{ registro_form.descricao_2|attr:"class:form-control afirmacao-textarea" }}
                             </div>
                         </div>
 
-                                                <div class="col-lg-4 col-md-6 mb-4">
-                                                        <div class="affirmation-circle circle-green p-4 mx-auto">
+                        <!-- Afirmação 3 (Opcional) -->
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <!-- Usando as classes customizadas .affirmation-circle e .circle-green -->
+                            <div class="affirmation-circle circle-green p-4 mx-auto">
                                 <label for="{{ registro_form.descricao_3.id_for_label }}" class="form-label text-white fw-bold d-block">{{ registro_form.descricao_3.label }}</label>
-                                                                {{ registro_form.descricao_3|attr:"class:form-control afirmacao-textarea text-center fs-5 fst-italic" }}
+                                <!-- Aplicando as classes Bootstrap e customizada .afirmacao-textarea -->
+                                {{ registro_form.descricao_3|attr:"class:form-control afirmacao-textarea" }}
                             </div>
                         </div>
                     </div>
@@ -160,13 +179,133 @@
                 </div>
                 
                 <div class="modal-footer justify-content-center border-0">
-                                        <button type="submit" class="btn-save btn btn-lg" style="background-color: #e55c3c; color: white;">
+                    <!-- Botão Salvar (Laranja escuro) -->
+                    <button type="submit" class="btn-save btn btn-lg" style="background-color: #e55c3c; color: white;">
                         <i class="bi bi-floppy-fill me-2"></i>SALVAR
                     </button>
-                                        <button type="button" class="btn btn-secondary btn-lg" data-bs-dismiss="modal">CANCELAR</button>
+                    <!-- Botão Cancelar -->
+                    <button type="button" class="btn btn-secondary btn-lg" data-bs-dismiss="modal">CANCELAR</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-{% endblock content_logado %}
+
+<!-- ================================================================= -->
+<!-- MODAL DE ALTERAÇÃO -->
+<!-- Ativado pelo botão 'Alterar' no histórico -->
+<!-- ================================================================= -->
+<div class="modal fade" id="modalAlteracaoAfirmacao" tabindex="-1" aria-labelledby="modalAlteracaoAfirmacaoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- O action do formulário será preenchido via JavaScript -->
+            <form id="formAlteracaoAfirmacao" method="POST" action="">
+                {% csrf_token %}
+                
+                <div class="modal-header">
+                    <h5 class="modal-title modal-title" id="modalAlteracaoAfirmacaoLabel">Alterar Afirmação</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                
+                <div class="modal-body">
+                    <!-- Campo de Data (apenas leitura) -->
+                    <div class="mb-3">
+                        {{ alteracao_form.data.label_tag }}
+                        <input type="date" id="id_alteracao_data" name="data" class="form-control" readonly required>
+                    </div>
+                    
+                    <!-- Campo de Descrição (Editável) -->
+                    <div class="mb-3">
+                        {{ alteracao_form.descricaoafirmacao.label_tag }}
+                        <textarea id="id_alteracao_descricaoafirmacao" name="descricaoafirmacao" class="form-control" rows="4" required></textarea>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn-save-edit btn btn-primary" style="background-color: #d76249; border-color: #d76249;">
+                        <i class="bi bi-save me-1"></i>Salvar Alteração
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+    </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- MODAL DE EXCLUSÃO -->
+<!-- Ativado pelo botão 'Excluir' no histórico -->
+<!-- ================================================================= -->
+<div class="modal fade" id="modalExclusaoAfirmacao" tabindex="-1" aria-labelledby="modalExclusaoAfirmacaoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- O action do formulário será preenchido via JavaScript -->
+            <form id="formExclusaoAfirmacao" method="POST" action="">
+                {% csrf_token %}
+                
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title modal-title" id="modalExclusaoAfirmacaoLabel">Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                
+                <div class="modal-body">
+                    <p>Tem certeza de que deseja **excluir** esta afirmação?</p>
+                    <p class="fw-bold text-danger">Esta ação é irreversível.</p>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn-confirm-delete btn btn-danger">
+                        <i class="bi bi-trash-fill me-1"></i>Confirmar Exclusão
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modalAlteracao = document.getElementById('modalAlteracaoAfirmacao');
+        const modalExclusao = document.getElementById('modalExclusaoAfirmacao');
+        
+        // Listener para o Modal de ALTERAÇÃO
+        modalAlteracao.addEventListener('show.bs.modal', function (event) {
+            // Botão que disparou o modal
+            const button = event.relatedTarget; 
+            
+            // Extrai as informações dos atributos data-*
+            const afirmacaoId = button.getAttribute('data-afirmacao-id');
+            const afirmacaoData = button.getAttribute('data-afirmacao-data');
+            const afirmacaoDesc = button.getAttribute('data-afirmacao-desc');
+
+            // Define a URL de Ação do formulário de alteração
+            const form = document.getElementById('formAlteracaoAfirmacao');
+            // Assume que a URL 'alterar_afirmacao' existe e precisa do ID
+            form.action = `/afirmacao/alterar/${afirmacaoId}/`; 
+
+            // Preenche os campos do formulário
+            const inputData = document.getElementById('id_alteracao_data');
+            const textareaDesc = document.getElementById('id_alteracao_descricaoafirmacao');
+            
+            inputData.value = afirmacaoData;
+            textareaDesc.value = afirmacaoDesc;
+        });
+
+        // Listener para o Modal de EXCLUSÃO
+        modalExclusao.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget; 
+            const afirmacaoId = button.getAttribute('data-afirmacao-id');
+
+            // Define a URL de Ação do formulário de exclusão
+            const form = document.getElementById('formExclusaoAfirmacao');
+            // Assume que a URL 'delete_afirmacao' existe e precisa do ID
+            form.action = `/afirmacao/excluir/${afirmacaoId}/`; 
+        });
+    });
+</script>
+{% endblock scripts %}
