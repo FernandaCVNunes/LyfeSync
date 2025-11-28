@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório de Afirmações - {{ periodo_str }}</title>
+    <!-- Inclui estilos otimizados para PDF/Impressão -->
+    <style>
+        @page {
+            /* Mantenha apenas o tamanho e as margens */
+            size: A4 portrait; 
+            margin: 2cm; 
+        }
+
+        /* Estilos globais e de corpo */
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 10pt;
+            margin: 0;
+            padding: 0;
+            color: #585f63;
+        }
+
+        /* Cabeçalho do Documento */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f7f0df; /* Cor de fundo suave */
+            border-bottom: 2px solid #ced4daff;
+        }
+        .header h1 {
+            color: #ef4421; 
+            margin: 5px 0;
+            font-size: 16pt;
+        }
+        .header p {
+            font-size: 11pt;
+            color: #555;
+            margin: 0;
+        }
+
+        /* Resumo/Total */
+        .summary {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            background-color: #e9ecef;
+            text-align: center;
+            font-size: 11pt;
+        }
+
+        /* Estilos da Tabela */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            table-layout: fixed; /* Ajuda no controle de largura */
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            word-wrap: break-word; /* Garante que textos longos quebrem a linha */
+        }
+        th {
+            background-color: #ffb853; /* Cor Roxo Escuro */
+            color: white;
+            font-size: 10pt;
+            text-transform: uppercase;
+        }
+        tr:nth-child(even) {
+            background-color: #f7f0df;
+        }
+
+        /* Definição de Largura das Colunas */
+        .col-data { width: 20%; }
+        .col-descricao { width: 80%; }
+
+        /* Rodapé */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 8pt;
+            color: #888;
+            padding: 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Relatório Detalhado de Afirmações</h1>
+        <p>Período: <strong>{{ periodo_str }}</strong></p>
+    </div>
+
+    <div class="summary">
+        Total de Afirmações Registradas: <strong>{{ total_afirmacoes }}</strong>
+    </div>
+
+    {% if afirmacoes %}
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-data">Data</th>
+                    <th class="col-descricao">Descrição da Afirmação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for afirmacao in afirmacoes %}
+                <tr>
+                    <td class="col-data">{{ afirmacao.data|date:"d/m/Y" }}</td>
+                    <td class="col-descricao">{{ afirmacao.descricaoafirmacao|default:"[Sem descrição]" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p style="text-align: center; margin-top: 50px; color: #777;">Nenhum registro de afirmação encontrado para o período.</p>
+    {% endif %}
+
+    <div class="footer">
+        {{ rodape_content }}
+    </div>
+
+</body>
+</html>

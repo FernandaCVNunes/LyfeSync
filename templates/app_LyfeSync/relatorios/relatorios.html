@@ -1,22 +1,65 @@
+{# relatorios.html #}
 {% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
 {% load static %}
 
 {% block title %}Relatórios e Estatísticas{% endblock %}
 
 {% block content_logado %}
-    <div class="container-fluid">
-        <h1 class="mb-4">Relatórios Gerais</h1>
-        <p class="lead">Selecione abaixo o tipo de relatório que você deseja visualizar:</p>
-        
-        <ul class="list-group">
-            <li class="list-group-item"><a href="{% url 'relatorio_habito' %}">Relatório de Hábitos</a></li>
-            <li class="list-group-item"><a href="{% url 'relatorio_humor' %}">Relatório de Humor</a></li>
-            <li class="list-group-item"><a href="{% url 'relatorio_gratidao' %}">Relatório de Gratidão</a></li>
-            <li class="list-group-item"><a href="{% url 'relatorio_afirmacao' %}">Relatório de Afirmações</a></li>
-        </ul>
-        
-        <div class="alert alert-info mt-5" role="alert">
-            Conteúdo da página de Relatórios em desenvolvimento.
+    <div class="container mt-4">
+        <h1 class="mb-4 text-center">📊 Relatórios de Autocuidado</h1>
+        <p class="lead text-center mb-5">Visualize suas estatísticas e progresso nas áreas de foco.</p>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+
+                <a href="{% url 'relatorio_habito' %}" class="text-decoration-none">
+                    <div class="d-flex align-items-center p-3 mb-3 border rounded shadow-sm link-item bg-light">
+                        <img src="{% static 'img/icon/metas.png' %}" alt="Ícone Hábitos" width="40" height="40" class="me-3">
+                        <span class="fs-5 fw-bold text-success">Hábitos</span>
+                    </div>
+                </a>
+
+                <a href="{% url 'relatorio_humor' %}" class="text-decoration-none">
+                    <div class="d-flex align-items-center p-3 mb-3 border rounded shadow-sm link-item bg-light">
+                        <img src="{% static 'img/icon/humor.png' %}" alt="Ícone Humor" width="40" height="40" class="me-3">
+                        <span class="fs-5 fw-bold text-danger">Humor</span>
+                    </div>
+                </a>
+
+                <a href="{% url 'relatorio_gratidao' %}" class="text-decoration-none">
+                    <div class="d-flex align-items-center p-3 mb-3 border rounded shadow-sm link-item bg-light">
+                        <img src="{% static 'img/icon/gratidao.png' %}" alt="Ícone Gratidão" width="40" height="40" class="me-3">
+                        <span class="fs-5 fw-bold text-info">Gratidão</span>
+                    </div>
+                </a>
+
+                <a href="{% url 'relatorio_afirmacao' %}" class="text-decoration-none">
+                    <div class="d-flex align-items-center p-3 mb-3 border rounded shadow-sm link-item bg-light">
+                        <img src="{% static 'img/icon/afirmacoes.png' %}" alt="Ícone Afirmações" width="40" height="40" class="me-3">
+                        <span class="fs-5 fw-bold text-primary">Afirmações</span>
+                    </div>
+                </a>
+            </div>
         </div>
+        
     </div>
+
+    <div class="d-flex justify-content-between mt-5">
+        <button onclick="window.history.back()" class="btn btn-outline-secondary btn-lg shadow-sm">
+            <i class="bi bi-arrow-left me-2"></i> Voltar à Página Anterior
+        </button>
+    </div>
+
+    <style>
+        /* Exemplo de CSS para adicionar ao seu arquivo separado, se desejar */
+        .link-item {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+        }
+
+        .link-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
+    </style>
 {% endblock %}

@@ -1,0 +1,130 @@
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório de Hábitos - {{ periodo_str }}</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 10pt;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f0f0f5;
+            border-bottom: 2px solid #28a745;
+        }
+        /* ... (restante do CSS do cabeçalho, summary e h2) ... */
+        .header h1 { color: #28a745; margin: 5px 0; font-size: 16pt; }
+        .header p { font-size: 11pt; color: #555; margin: 0; }
+        .summary { margin-bottom: 20px; padding: 10px; border: 1px solid #dee2e6; background-color: #e9ecef; text-align: center; font-size: 11pt; }
+        h2 { font-size: 14pt; color: #495057; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 25px; }
+        
+        /* Estilos da Tabela */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 6px;
+            text-align: center;
+            font-size: 9pt;
+        }
+        th {
+            background-color: #28a745;
+            color: white;
+            text-transform: uppercase;
+        }
+        /* OTIMIZAÇÃO: Repetir cabeçalho e evitar quebra de linha em registro */
+        thead { display: table-header-group; } 
+        tr { page-break-inside: avoid; } 
+        
+        td.habito-nome {
+            text-align: left;
+            font-weight: bold;
+            width: 30%;
+        }
+        .concluido { background-color: #d4edda; color: #155724; }
+        .nao-concluido { background-color: #f8d7da; color: #721c24; }
+        .vazio { background-color: #f8f9fa; }
+        .footer {
+            /* Mantido, mas use position: running(footer) se estiver usando uma biblioteca como WeasyPrint. 
+               Para Pisa, fixed é o método comum, mesmo com ressalvas. */
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 8pt;
+            color: #888;
+            padding: 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Relatório Detalhado de Acompanhamento de Hábitos</h1>
+        <p>Período: <strong>{{ periodo_str }}</strong></p>
+    </div>
+
+    <div class="summary">
+        Total de Hábitos Monitorados: <strong>{{ total_habitos }}</strong>
+    </div>
+
+    <h2>Acompanhamento Diário</h2>
+
+    {% if habitos %} 
+        <table>
+            <thead>
+                <tr>
+                    <th class="habito-nome">Hábito</th>
+                    {% for dia in dias_periodo %}
+                        <th>{{ dia|date:"d" }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            
+            <tbody>
+                {% for habito in habitos %}
+                    <tr>
+                        <td class="habito-nome">{{ habito.nome }}</td>
+                        
+                        {% for status in habito.status_diario %} 
+                            {% if status == True %}
+                                <td class="concluido">✔</td>
+                            {% elif status == False %}
+                                <td class="nao-concluido">✘</td>
+                            {% else %}
+                                <td class="vazio">-</td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div style="margin-top: 20px; font-size: 10pt;">
+            <strong>Legenda:</strong>
+            <span class="concluido" style="padding: 2px 5px; border-radius: 3px; border: 1px solid #c3e6cb;">✔ = Concluído</span>
+            <span class="nao-concluido" style="padding: 2px 5px; border-radius: 3px; border: 1px solid #f5c6cb;">✘ = Não Concluído</span>
+            <span class="vazio" style="padding: 2px 5px; border-radius: 3px; border: 1px solid #ccc;">- = Sem Registro</span>
+        </div>
+
+    {% else %}
+        <p style="text-align: center; margin-top: 50px; color: #777;">Nenhum hábito ou acompanhamento encontrado para o período.</p>
+    {% endif %}
+
+    <div class="footer">
+        Gerado por LyfeSync em {{ data_geracao }}
+    </div>
+
+</body>
+</html>

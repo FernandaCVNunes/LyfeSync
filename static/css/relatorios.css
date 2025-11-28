@@ -1,0 +1,277 @@
+/* --------------------------------------
+   Estilos Gerais para Páginas de Relatório
+   (relatorioHumor, relatorioHabito, relatorioAfirmacao, relatorioGratidao)
+   -------------------------------------- */
+
+/* Estilo do cabeçalho do relatório */
+.report-header {
+    /* Cores leves e amigáveis */
+    background-color: #e8f5e9;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Cor de destaque para o cabeçalho de Hábitos */
+.habitos-header {
+    background-color: #e3f2fd;
+    /* Azul bem claro */
+}
+
+/* Cor de destaque para o cabeçalho de Gratidão */
+.gratidao-header {
+    background-color: #fff3e0;
+    /* Laranja pêssego bem suave */
+}
+
+/* Cor de destaque para o cabeçalho de Afirmações */
+.afirmacao-header {
+    background-color: #f3e5f5;
+    /* Lilás muito claro */
+}
+
+.report-title {
+    color: #2E7D32;
+    /* Verde escuro (default) */
+    font-weight: 700;
+}
+
+/* Estilo do seletor de mês/ano */
+.month-selector-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.month-selector-card label {
+    font-weight: 600;
+    color: #4a4a4a;
+}
+
+/* --------------------------------------
+   Estilos da Tabela Geral (Compartilhados)
+   -------------------------------------- */
+.table-relatorio {
+    min-width: 1000px;
+    /* Garante que a tabela seja wide */
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    /* Para garantir o border-radius no contêiner */
+}
+
+.table-relatorio th,
+.table-relatorio td {
+    vertical-align: middle;
+    text-align: center;
+    border: 1px solid #f0f0f0 !important;
+    /* Borda mais suave */
+    padding: 0.5rem;
+}
+
+.table-relatorio thead th {
+    background-color: #dcedc8;
+    /* Verde claro (padrão) */
+    font-weight: 600;
+    color: #333;
+    padding: 0.75rem 0.5rem;
+}
+
+/* Estilo específico para o cabeçalho da tabela de Hábitos */
+.table-habitos thead th {
+    background-color: #bbdefb;
+    /* Azul claro para Hábitos */
+}
+
+/* Estilo específico para o cabeçalho da tabela de Gratidão */
+.table-gratidao thead th {
+    background-color: #ffe0b2;
+    /* Laranja suave para Gratidão */
+    color: #333;
+}
+
+/* Estilo específico para o cabeçalho da tabela de Afirmações */
+.table-afirmacao thead th {
+    background-color: #e1bee7;
+    /* Lilás claro para Afirmações */
+    color: #4a148c;
+    /* Ajustado para melhor contraste */
+}
+
+
+/* Células de Dia */
+.celula-humor,
+.celula-habito {
+    height: 40px;
+    /* Altura padrão para células de dia */
+    min-width: 35px;
+    padding: 3px !important;
+    /* Espaçamento interno reduzido para a marcação de cor */
+}
+
+/* Estilos Específicos do Relatório de Gratidão (Tabela de Lista) */
+.table-gratidao .text-wrap-content {
+    white-space: normal;
+    /* Permite que o texto quebre linha */
+    text-align: left;
+}
+
+.table-gratidao tbody tr:hover {
+    background-color: #fff8e1;
+    /* Efeito hover suave */
+}
+
+.table-gratidao .gratidao-col-data {
+    font-weight: 600;
+    color: #ff9800;
+    /* Cor de destaque Laranja */
+    min-width: 120px;
+}
+
+.gratidao-col-nome {
+    text-align: left;
+    font-weight: 500;
+}
+
+
+/* --------------------------------------
+   Estilos Específicos do Relatório de AFIRMAÇÕES (Tabela de Lista)
+   -------------------------------------- */
+.table-afirmacao tbody tr:hover {
+    background-color: #fbf7fc;
+    /* Efeito hover suave lilás */
+}
+
+.table-afirmacao .afirmacao-col-data {
+    font-weight: 600;
+    color: #9c27b0;
+    /* Cor de destaque Roxo */
+    min-width: 120px;
+}
+
+.afirmacao-col-nome {
+    text-align: left;
+    font-weight: 500;
+    color: #4a148c;
+    /* Roxo escuro para o nome */
+}
+
+
+/* --------------------------------------
+   Estilos da Marcação de HÁBITOS
+   -------------------------------------- */
+
+.habito-celula-marcada {
+    border-radius: 4px;
+    /* Cor de marcação que imita a imagem de referência (Verde/Ciano) */
+    background-color: #2ecc71 !important;
+
+    height: 34px;
+    width: 34px;
+
+    margin: auto;
+    display: block;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Coluna Resultado para Hábitos (Contagem de dias) */
+.resultado-celula-habito {
+    font-weight: bold;
+    color: #1a73e8 !important;
+    /* Azul para destaque do resultado de dias */
+    background-color: #f5f8ff;
+}
+
+.habito-nome {
+    /* Fundo suave para a coluna do nome do hábito */
+    background-color: #fafafa;
+}
+
+.table-relatorio td.concluido {
+    background-color: #d4edda;
+    /* Fundo verde clarinho */
+    color: #155724;
+    /* Cor do visto (Verde escuro) */
+    font-weight: bold;
+    /* Deixa o visto mais destacado */
+}
+
+.table-relatorio td.vazio {
+    background-color: #ffffff;
+    /* Fundo branco ou neutro */
+    color: #555555;
+    /* Cor do traço, se houvesse, mas é bom definir. */
+    /* Garante que o conteúdo seja realmente vazio após a mudança no HTML */
+}
+
+/* --------------------------------------
+   Estilos da Tabela de HUMOR
+   -------------------------------------- */
+
+/* Coluna Humor (Texto e Ícone) */
+.humor-icon {
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.humor-celula-marcada {
+    border-radius: 4px;
+    height: 34px;
+    width: 34px;
+    margin: auto;
+    display: block;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Coluna Resultado para Humor (Porcentagem) */
+.resultado-celula {
+    font-weight: bold;
+    color: #1b5e20 !important;
+    /* Verde escuro para destaque */
+    background-color: #f7fcf9;
+}
+
+
+/* --------------------------------------
+   Classes de Cores para Humores 
+   -------------------------------------- */
+
+/* A cor do 'background-color' é para a célula marcada.
+   A cor do 'color' é para o texto do estado de humor na primeira coluna. */
+
+/* Humor Muito Feliz/Felizão (Ex: :D) - Verde Escuro */
+.humor-muito-feliz {
+    background-color: #27ae60 !important;
+    color: #27ae60;
+}
+
+/* Humor Feliz/Contente (Ex: :) ) - Ciano/Verde Água */
+.humor-feliz {
+    background-color: #1abc9c !important;
+    color: #1abc9c;
+}
+
+/* Humor Neutro/Indiferente (Ex: :|) - Amarelo */
+.humor-neutro {
+    background-color: #f1c40f !important;
+    color: #f1c40f;
+}
+
+/* Humor Triste/Chateado (Ex: :( ) - Azul */
+.humor-triste {
+    background-color: #3498db !important;
+    color: #3498db;
+}
+
+/* Humor Raiva/Irritado (Ex: >:( ) - Vermelho/Laranja */
+.humor-raiva {
+    background-color: #e74c3c !important;
+    color: #e74c3c;
+}

@@ -1,0 +1,94 @@
+<!-- account_signup.html -->
+{% extends "app_LyfeSync/layouts/masterpage.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Validação de Cadastro" %}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="custom-modal-content rounded-5 border-0 shadow-lg p-5 bg-white">
+                
+                <!-- 
+                    NOTA: Este template só é exibido se houver ERROS de validação no formulário de cadastro 
+                    enviado a partir da página de login. Se o cadastro for bem-sucedido, o allauth 
+                    redireciona o usuário para a página de login automaticamente (ou para o URL definido).
+                -->
+
+                <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center text-red">
+                    {% trans "Houve um Erro de Validação" %}
+                </h1>
+                
+                <p class="text-center mb-6 text-gray-600">
+                    Ocorreu um problema com os dados que você enviou. Por favor, corrija os campos
+                    indicados abaixo e clique em "Tentar Novamente".
+                </p>
+
+                <!-- Formulário de Cadastro re-renderizado com erros -->
+                <form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
+                    {% csrf_token %}
+                    
+                    <!-- Exibe erros globais do formulário (Ex: senhas não conferem) -->
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label text-muted">{{ field.label }}</label>
+                            
+                            <!-- 
+                                Renderiza o campo, garantindo que o valor anterior seja mantido 
+                                e as classes Bootstrap sejam aplicadas.
+                            -->
+                            <div class="input-group custom-input-group rounded-pill overflow-hidden shadow-sm">
+                                <span class="input-group-text border-0 bg-white">
+                                    <i class="fas {% if field.name == 'email' %}fa-envelope{% elif 'password' in field.name %}fa-lock{% elif 'name' in field.name %}fa-id-badge{% else %}fa-user{% endif %} input-icon text-muted"></i>
+                                </span>
+                                <!-- Renderiza o campo com valor pré-preenchido e classe 'form-control' -->
+                                <input type="{{ field.field.widget.input_type }}" 
+                                       class="form-control border-0 {% if field.errors %}is-invalid{% endif %}" 
+                                       name="{{ field.name }}" 
+                                       id="{{ field.id_for_label }}" 
+                                       placeholder="{{ field.label }}" 
+                                       value="{{ field.value|default_if_none:'' }}" 
+                                       {% if field.field.required %}required{% endif %}
+                                       aria-label="{{ field.label }}">
+                            </div>
+
+                            {% if field.errors %}
+                                <div class="text-danger small mt-1 ps-3">
+                                    {% for error in field.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    
+                    
+                    {% if redirect_field_value %}
+                    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                    {% endif %}
+                    
+                    <div class="mt-4">
+                        <button class="btn btn-register w-100 rounded-pill fw-bold shadow-sm" type="submit">
+                            {% trans "Tentar Novamente" %}
+                        </button>
+                    </div>
+
+                    <p class="text-center mt-4">
+                        Já tem uma conta? <a href="{% url 'account_login' %}" class="text-decoration-none text-red-dark">Acesse aqui</a>.
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

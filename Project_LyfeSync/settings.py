@@ -27,8 +27,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
-    'app_LyfeSync.apps.ApplyfesyncConfig',
+    'django_filters',
+
+    'django.contrib.humanize',
+    'widget_tweaks',
 
     'django.contrib.sites',
     'allauth',
@@ -36,7 +38,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     #'allauth.socialaccount.providers.facebook', não utilizarei por enquanto
-    'django_filters',
+    
+    'app_LyfeSync.apps.ApplyfesyncConfig',
 ]
 
 SITE_ID = 1
@@ -85,6 +88,12 @@ DATABASES = {
         'PASSWORD': 'root0208', 
         'HOST': '127.0.0.1',         
         'PORT': '3306',
+
+        # --- NOVO TRECHO ADICIONADO ---
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES', default_storage_engine=INNODB, character_set_connection=utf8mb4, collation_connection=utf8mb4_unicode_ci",
+            'charset': 'utf8mb4',
+        }
     }
 }
 
@@ -140,8 +149,19 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/' 
 
 # URL para onde o usuário é redirecionado após o login (Allauth)
+LOGIN_URL = 'account_login'
 LOGIN_REDIRECT_URL = '/home-lyfesync/'
 
 ACCOUNT_FORMS = {
     'signup': 'app_LyfeSync.forms.CustomSignupForm',
 }
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+ACCOUNT_EMAIL_VERIFICATION = 'none' 
+
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = True
+
+ACCOUNT_PREVENT_AUTOMATIC_MESSAGES = True

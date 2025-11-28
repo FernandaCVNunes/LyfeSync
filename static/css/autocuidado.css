@@ -1,0 +1,127 @@
+/* autocuidado.css (Gratidão e Afirmação) - Adaptado para Bootstrap 5 */
+
+/* VARIÁVEIS DE COR CUSTOMIZADAS */
+:root {
+    --gratidao-blue: #0A9BB8;
+    --gratidao-light-blue: #E6F3F5;
+}
+
+/* ========================================================= */
+/* --- ESTILOS DE AUTOCUIDADO GERAL (Utilidades) --- */
+/* ========================================================= */
+
+/* Cor principal LyfeSync Green (#48BB78) para títulos e links */
+.text-lyfesync-green {
+    color: var(--lyfesync-green) !important;
+}
+
+/* Cor de fundo LyfeSync Light Green (#ECFDF5) */
+.bg-lyfesync-light {
+    background-color: var(--lyfesync-light-green) !important;
+}
+
+/* Efeito de Shadow/Lift no Hover (Customizado) */
+.ls-hover-lift {
+    transition: all 0.3s ease;
+}
+
+.ls-hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.2) !important;
+    /* Sombra mais forte no hover */
+}
+
+/* Fundo/Borda do Destaque (highlight-card) - Estilo customizado */
+.highlight-card {
+    /* bg-emerald-50 e border-emerald-500 */
+    background-color: #f0fdf4 !important;
+    border-left: 5px solid #10b981 !important;
+}
+
+/* Ajuste para ícones Lucide no BS */
+i[data-lucide] {
+    vertical-align: middle;
+}
+
+/* ========================================================= */
+/* --- ESTILOS DE TABELA DE GRATIDÃO (Cor Customizada) --- */
+/* ========================================================= */
+
+/* Título e elementos na cor Gratidão Blue (#0A9BB8) */
+.text-gratidao-blue {
+    color: var(--gratidao-blue) !important;
+}
+
+.border-gratidao-blue {
+    border-color: var(--gratidao-blue) !important;
+}
+
+/* Linha da Tabela (Fundo claro para hover) - Customizado */
+.ls-gratidao-hover:hover {
+    background-color: var(--gratidao-light-blue) !important;
+    border-color: var(--gratidao-blue) !important;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+}
+
+.gratidao-date {
+    flex-shrink: 0;
+    font-weight: 600;
+    color: var(--bs-primary);
+}
+
+/* ========================================================= */
+/* --- ESTILOS PÁGINA REGISTRAR AFIRMAÇÃO (Customizados) --- */
+/* ========================================================= */
+
+/* Definição do formato circular - Customizado */
+.affirmation-circle {
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+}
+
+.affirmation-circle:hover {
+    transform: translateY(-5px);
+}
+
+/* Cores específicas para os círculos - Customizado */
+.circle-blue {
+    background-color: #C0CFF7;
+}
+
+.circle-pink {
+    background-color: #F7C0C0;
+}
+
+.circle-green {
+    background-color: #C0F7C9;
+}
+
+/* Estilo para garantir que o textarea dentro do círculo se ajuste - Customizado */
+/* Ajuste de background/border para combinar com o círculo */
+.afirmacao-textarea {
+    background: transparent;
+    /* Alterado de white para transparent */
+    border: none;
+    /* Alterado de white para none */
+    padding: 1rem;
+    resize: none;
+    width: 100%;
+    height: 100%;
+    font-size: 1.25rem;
+    /* Adicionado para consistência */
+    font-style: italic;
+    /* Adicionado para consistência */
+    color: #333;
+    box-shadow: none !important;
+    text-align: center;
+    /* Adicionado para consistência */
+    transition: all 0.3s ease;
+}

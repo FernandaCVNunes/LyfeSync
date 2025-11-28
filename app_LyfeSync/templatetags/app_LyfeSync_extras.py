@@ -9,8 +9,20 @@ register = template.Library()
 
 @register.filter
 def get_item(dictionary, key):
-    """Permite acessar um item de um dicionário por uma chave dinâmica no template."""
-    return dictionary.get(key)
+    """
+    Permite acessar um item de um dicionário por uma chave dinâmica no template.
+    
+    Adicionado tratamento para evitar 'AttributeError: 'str' object has no attribute 'get''
+    caso 'dictionary' seja uma string ou outro tipo não-dicionário.
+    """
+    # Verifica se o objeto 'dictionary' possui o método 'get'.
+    # Isso cobre dicionários, QueryDicts (como request.POST/GET) e outros objetos
+    # semelhantes a dicionários, evitando a falha se for uma string (str).
+    if hasattr(dictionary, 'get'):
+        return dictionary.get(key)
+    # Se o objeto não suportar .get() (ex: é uma string, None, etc.),
+    # retorna None de forma segura.
+    return None
 
 @register.filter
 def jsonify(data):
@@ -19,9 +31,21 @@ def jsonify(data):
     if isinstance(data, (dict, list)):
         return mark_safe(json.dumps(data))
     
-    # Tenta serializar o objeto (útil para QuerySets, mas não necessário aqui)
+    # Tenta serializar o objeto (útil para QuerySets)
     try:
         return mark_safe(serialize('json', data))
     except Exception:
-        # Último recurso para strings simples ou outros tipos
+        # Último recurso para strings simples ou outros tipos, garantindo
+        # que o retorno sempre seja uma string JSON válida.
         return mark_safe(json.dumps(str(data)))
+    
+@register.filter
+def make_range(value):
+    """
+    Cria um range de 1 até o valor (inclusivo).
+    Ex: 5 | make_range -> [1, 2, 3, 4, 5]
+    """
+    try:
+        return range(1, int(value) + 1)
+    except (ValueError, TypeError):
+        return []

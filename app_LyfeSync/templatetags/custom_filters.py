@@ -31,3 +31,35 @@ def first_word(value):
     if not isinstance(value, str):
         return value
     return value.split(' ')[0]
+
+@register.filter(name='get_item') 
+def get_item(dictionary, key):
+    """Permite acessar o valor de um dicionário usando uma variável como chave."""
+    return dictionary.get(key)
+
+@register.filter(name='add_class')
+def add_class(field, css):
+    # Lógica para adicionar a classe
+    return field.as_widget(attrs={"class": css})
+
+@register.filter
+def get_field_by_name(form, field_name):
+    """
+    Permite acessar um campo de formulário usando seu nome dinamicamente.
+    Uso: {{ form|get_field_by_name:"nomebase_"|add:"1" }}
+    """
+    try:
+        return form[field_name]
+    except KeyError:
+        return None
+
+@register.filter(name='to_int')
+def to_int(value):
+    """
+    Converte o valor para inteiro. Útil para comparações no template.
+    """
+    try:
+        # Tenta converter para inteiro. Se for None ou falhar, retorna o valor original.
+        return int(value)
+    except (ValueError, TypeError):
+        return value

@@ -1,0 +1,67 @@
+/* theme.css (Variáveis Globais) */
+
+/* VARIÁVEIS DE TEMA GERAL */
+:root {
+    /* Cores que podem ser usadas em toda a aplicação */
+    --lyfesync-red-salvar: #E5534B;
+    --lyfesync-red: #dc3545;
+    --lyfesync-green: #4CAF50;
+    --lyfesync-text-emerald: #10B981;
+    --lyfesync-gray-input: #E9ECEF;
+    --lyfesync-text-gray: #4A5568;
+    --lyfesync-light-green: #ECFDF5;
+
+    /* VARIÁVEIS PARA O RELATÓRIO DE HUMOR */
+    --mood-great: var(--lyfesync-green);
+    --mood-good: var(--lyfesync-text-emerald);
+    --mood-ok: #F6E05E;
+    --mood-sad: #4299E1;
+    --mood-angry: var(--lyfesync-red-salvar);
+
+    /* Estilização para as mensagens (Django Messages) - Pop bonito */
+    .message-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        max-width: 300px;
+    }
+
+    .message {
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        color: white;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    }
+
+    .message.show {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .message.success {
+        background-color: #10B981;
+    }
+
+    .message.error {
+        background-color: #EF4444;
+    }
+
+    /* Tailwind Red-500 */
+    .message.info {
+        background-color: #3B82F6;
+    }
+
+    .message button {
+        margin-left: 0.5rem;
+        font-weight: bold;
+    }
+
+    .whitespace-pre-line {
+        white-space: pre-line;
+    }
+}

@@ -1,66 +1,154 @@
-{# relatórioHumor.html #}
-{% extends 'app_LyfeSync/base.html' %}
+{# relatorioHumor.html - Visualização Web do Relatório de Humor (Bootstrap 5) #}
+{% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
 {% load static %}
 {% load custom_filters %}
 {% load app_LyfeSync_extras %}
 
-{% block title %}
-  Relatório de Humor
-{% endblock %}
+{% block title %}Relatório de Humor{% endblock %}
 
-{% block content %}
-  <div class="container mx-auto p-4 md:p-8">
-    <div class="flex items-center justify-between mb-8 border-b-2 border-indigo-500 pb-2">
-      <h1 class="text-3xl font-extrabold text-gray-800">Seu Histórico de Humor</h1>
-      <a href="{% url 'relatorios' %}" class="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition duration-150 ease-in-out">&larr; Voltar para Relatórios</a>
+{% block content_logado %}
+
+<div class="container-fluid p-4">
+    
+    <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between mb-4 border-bottom pb-3">
+        <h1 class="fs-3 fw-bold text-success text-uppercase d-flex align-items-center mb-3 mb-sm-0">
+            <i class="bi bi-graph-up-arrow me-2 text-success"></i>
+            Relatório de Humor Mensal
+        </h1>
+    </div>
+    
+   <div class="d-flex align-items-center gap-5">
+        <form method="post" class="d-flex align-items-center gap-2 p-3 w-50">
+            {% csrf_token %}
+            <div class="flex-grow-1">{{ form.mes }}</div>
+            <div class="flex-grow-1">{{ form.ano }}</div>
+            <button type="submit" class="btn btn-primary text-white">
+                Ver Relatório
+            </button>
+        </form>
     </div>
 
-    <p class="text-lg mb-6 text-gray-600">Esta tabela exibe todos os seus registros de humor, ordenados do mais recente para o mais antigo, com o nome do estado emocional e sua descrição.</p>
-
-    <!-- Estrutura da Tabela (Responsiva) -->
-    <div class="bg-white shadow-xl rounded-xl overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-indigo-50">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-bold text-indigo-600 uppercase tracking-wider">Data</th>
-              <th class="px-6 py-3 text-left text-xs font-bold text-indigo-600 uppercase tracking-wider">Estado de Humor</th>
-              <th class="px-6 py-3 text-left text-xs font-bold text-indigo-600 uppercase tracking-wider">Descrição/Nota</th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            {% if humores_registrados %}
-              {% for humor in humores_registrados %}
-                <tr class="hover:bg-gray-50 transition duration-100 ease-in-out">
-                  <!-- Coluna Data -->
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ humor.data }}</td>
-
-                  <!-- Coluna Estado de Humor (Com Icon/Nome) -->
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                    <div class="flex items-center space-x-3">
-                      <!-- Ícone do Humor (imagem estática) -->
-                      <img src="{% static humor.image_path %}" alt="{{ humor.estado }}" class="w-8 h-8 rounded-full border-2 border-gray-100 object-cover" onerror="this.onerror=null;this.src='{% static 'img/icon/default.png' %}'" />
-                      <!-- O NOME do Humor -->
-                      <span class="font-semibold text-base text-gray-800">{{ humor.estado }}</span>
-                    </div>
-                  </td>
-
-                  <!-- Coluna Descrição -->
-                  <td class="px-6 py-4 text-sm text-gray-600 max-w-xs xl:max-w-md">{{ humor.descricaohumor|default:'Nenhuma nota adicionada.' }}</td>
-                </tr>
-              {% endfor %}
-            {% else %}
-              <tr>
-                <td colspan="3" class="px-6 py-10 text-center text-gray-500 italic bg-gray-50">
-                  Você ainda não registrou nenhum humor. Comece a registrar para ver seu histórico aqui!<div class="mt-4">
-                    <a href="{% url 'registrar_humor' %}" class="text-indigo-600 font-medium hover:underline">Registrar Meu Humor Agora</a>
-                  </div>
-                </td>
-              </tr>
+    <!-- Título do Mês -->
+    <div>
+        <h2 class="fs-5 fw-semibold text-secondary mb-1 mt-2 bg-white p-3 rounded shadow-sm border text-center">
+            Mês de {{ mes_extenso }} 
+            {% if total_dias_registrados == 0 %}
+                <span class="fs-6 text-danger ms-2">(Nenhum registro encontrado)</span>
             {% endif %}
-          </tbody>
-        </table>
-      </div>
+        </h2>
     </div>
-  </div>
+
+    <div class="table-responsive shadow-lg rounded-3 bg-white mb-5 border border-light">
+        <table class="table table-striped table-hover table-bordered align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th class="p-3 fs-6 fw-bold text-dark text-uppercase text-start border-end" style="max-width: 130px;">
+                        Humor
+                    </th>
+                    {# Cabeçalho dos Dias #}
+                    {% for dia in dias_do_mes %}
+                        <th class="p-2 fs-7 fw-bold text-uppercase text-center 
+                            {% if dia == data_hoje|date:'d'|to_int and mes == data_hoje|date:'m'|to_int and ano == data_hoje|date:'Y'|to_int %}
+                                bg-info-subtle text-info border border-3 border-info rounded-1
+                            {% else %}
+                                text-secondary
+                            {% endif %}" 
+                            style="min-width: 35px; max-width: 35px;">
+                            {{ dia }}
+                        </th>
+                    {% endfor %}
+                    <th class="p-3 fs-6 fw-bold text-dark text-uppercase text-center border-start w-auto">
+                        Total
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in report_data %}
+                <tr>
+                    <td class="p-2 text-sm fw-semibold border-end" style="color: {{ data.cor_fundo }};">
+                        <div class="text-start d-flex align-items-center p-2">
+                            <img src="{% static data.icone_path %}" alt="{{ data.tipo.estado }}" width="40" height="40" class="img-fluid"/>
+                            <span style="color: {{ data.cor_texto }};">{{ data.tipo.estado }}</span>
+                        </div>
+                    </td>
+                    
+                    {# Células dos Dias #}
+                    {% for dia, registrado in data.dias.items %}
+                        <td class="p-1 text-center" style="min-width: 35px; max-width: 35px; height: 35px;">
+                            {% if registrado %}
+                                <div class="w-100 h-100 mx-auto rounded-1" 
+                                     style="background-color: {{ data.cor_fundo }}; border: 1px solid rgba(0,0,0,0.1);">
+                                </div>
+                            {% else %}
+                                <!-- Célula vazia -->
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+                    
+                    {# Total #}
+                    <td class="p-2 text-sm fw-bold text-dark border-start">
+                        {{ data.total }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot class="table-group-divider">
+                <tr class="table-light fw-bold border-top border-4 border-secondary">
+                    <td colspan="{{ ultimo_dia_do_mes|add:1 }}" class="p-3 text-end text-sm text-dark">
+                        Total de dias com registro:
+                    </td>
+                    <td class="p-3 text-sm text-center text-primary">
+                        {{ total_dias_registrados }}
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    
+    {% if total_dias_registrados == 0 %}
+        <div class="alert alert-warning border-start border-4 border-warning rounded-3 mt-4" role="alert">
+            <p class="fw-bold">Atenção:</p>
+            <p class="mb-0">Não há registros de humor para o mês de {{ mes_extenso }}. Por favor, selecione outro mês ou comece a registrar seu humor.</p>
+        </div>
+    {% endif %}
+
+    <div class="text-sm text-secondary text-end mt-4">
+        Relatório gerado em {{ data_hoje|date:"d/m/Y H:i" }}
+    </div>
+
+    <!-- Seção de Ações (já estava em Bootstrap, apenas aprimorada) -->
+    <div class="d-flex justify-content-between mt-5">
+        <!-- Botão Voltar -->
+        <button onclick="window.history.back()" class="btn btn-outline-secondary btn-lg shadow-sm">
+            <i class="bi bi-arrow-left me-2"></i> Voltar
+        </button>
+
+        <!-- Botões de Exportação -->
+        {% if total_dias_registrados > 0 %}
+            <div class="btn-group shadow-sm" role="group">
+                <button id="btnGroupDrop1" type="button" class="btn btn-success dropdown-toggle text-white btn-lg" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-download me-2"></i> Exportar
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="btnGroupDrop1">
+                <li>
+                    <a class="dropdown-item" href="{% url 'exportar_humor_csv' mes=mes ano=ano %}" id="export-csv-gratidao">
+                        <i class="bi bi-file-earmark-spreadsheet me-2 text-success"></i> CSV (Planilha)
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% url 'exportar_humor_pdf' mes=mes ano=ano %}" id="export-pdf-gratidao">
+                        <i class="bi bi-file-pdf me-2 text-danger"></i> PDF (Documento)
+                    </a>
+                </li>
+                </ul>
+            </div>    
+        {% endif %}
+
+        <!-- Botão Alterar Registros em Humor -->
+        <a href="{% url 'humor' %}" class="btn btn-warning text-white btn-lg shadow-sm">
+            <i class="bi bi-pencil me-2"></i> Alterar Registros
+        </a>
+    </div>
+
+</div>
 {% endblock %}

@@ -1,0 +1,96 @@
+/* Estilo para reduzir o espaçamento vertical nas linhas da tabela */
+.table tbody tr td {
+    /* Define um padding menor nas laterais e muito pequeno no topo/fundo */
+    padding-top: 0.35rem !important;
+    /* Menor que o padrão (ex: 0.5rem) */
+    padding-bottom: 0.35rem !important;
+    /* Menor que o padrão */
+}
+
+/* Opcional: Garante que a descrição não force muita altura se for muito longa */
+.table tbody tr td.text-muted {
+    white-space: normal;
+    /* Permite quebras de linha */
+    max-width: 150px;
+    /* Limita a largura para melhor visualização */
+}
+
+#toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+}
+
+/* Estilo do Toast Individual */
+.toast {
+    padding: 1rem 1.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    color: white;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateX(100%);
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.toast.success {
+    background-color: #10b981;
+    /* green-500 */
+}
+
+.toast.error {
+    background-color: #ef4444;
+    /* red-500 */
+}
+
+.toast.info {
+    background-color: #3b82f6;
+    /* blue-500 */
+}
+
+/* Estilos existentes para o círculo (mantidos) */
+.form-check-circle {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 1.2rem;
+    height: 1.2rem;
+    border-radius: 50%;
+    border: 2px solid #ced4da;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Estilo quando 'checked' */
+.form-check-circle:checked {
+    border-color: #28a745;
+    /* Cor da borda mais forte (verde 'success') */
+    background-color: #28a745;
+    /* Fundo verde */
+}
+
+/* Estilo do 'tick' dentro do círculo (opcional, aqui mudo para o branco) */
+.form-check-circle:checked::after {
+    content: '\2713';
+    /* Símbolo de check */
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.7rem;
+    color: white;
+    /* Cor do check (branco) */
+}
+
+/* Ajuste para o texto HOJE ficar branco no cabeçalho */
+thead .table-header-sm .text-muted {
+    color: white !important;
+}

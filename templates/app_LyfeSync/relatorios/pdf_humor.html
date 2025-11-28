@@ -1,0 +1,182 @@
+{# pdf_Humor.html - Template específico para a geração do relatório em PDF #}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório de Humor - {{ mes_extenso }}</title>
+    <style>
+        /* Estilos CSS para otimizar a impressão/PDF */
+        /* CORREÇÃO: Usando a sintaxe 'A4 landscape' que geralmente é mais confiável no xhtml2pdf/ReportLab. */
+        @page { size: A4 landscape; margin: 1.5cm; } 
+        
+        body {
+            /* Adicionado um tamanho explícito que deve ser a largura da página paisagem menos as margens (29.7cm - 3cm) */
+            width: 26.7cm; 
+            font-family: 'Arial', sans-serif;
+            font-size: 10pt;
+            color: #333;
+            line-height: 1.2;
+        }
+
+        /* Cabeçalho */
+        .header {
+            /* display: flex removido para maior compatibilidade com PDF */
+            margin-bottom: 20px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #000;
+        }
+        .header h1 {
+            color: #10b981; /* Cor verde para o título */
+            font-size: 18pt;
+            font-weight: bold;
+            margin: 0;
+            display: inline-block; 
+            float: left;
+        }
+        .header h2 {
+            font-size: 12pt;
+            font-weight: normal;
+            margin-left: 20px;
+            color: #ef4444; /* Cor vermelha para o mês */
+            display: inline-block;
+            float: right; /* Posiciona o mês/ano à direita */
+        }
+        
+        /* Tabela de Relatório */
+        .report-table {
+            width: 100%; /* Isso fará com que a tabela use toda a largura de 26.7cm */
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 9pt;
+        }
+        
+        .report-table th, .report-table td {
+            border: 1px solid #ccc;
+            /* REMOVIDO: min-height (pode causar problemas). Usaremos padding para altura. */
+            padding: 5px 2px; /* Aumentado o padding vertical para 5px */
+            text-align: center;
+            vertical-align: middle;
+        }
+        
+        /* Cabeçalhos da tabela */
+        .report-table thead th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+            color: #444;
+        }
+
+        /* Largura ajustada para CM */
+        .report-table th.header-day {
+            width: 0.55cm; 
+        }
+
+        /* Coluna do Humor (primeira coluna) */
+        .mood-column {
+            text-align: left;
+            font-weight: bold;
+            width: 4cm; 
+            padding-left: 8px !important;
+            background-color: #fafafa;
+        }
+
+        /* Célula de Cor (o quadrado) */
+        .color-cell {
+            /* Estilo simplificado para garantir compatibilidade */
+            height: 0.5cm; /* Altura do quadrado */
+            width: 90%; 
+            margin: auto;
+            /* display: block removido; ReportLab prefere que seja inline/inline-block */
+        }
+
+        /* Coluna Total */
+        .total-cell {
+            font-weight: bold;
+            width: 1.5cm; 
+            background-color: #f0f0f0;
+        }
+
+        /* Rodapé */
+        .footer {
+            margin-top: 20px;
+            font-size: 8pt;
+            text-align: right;
+            padding-top: 10px;
+            border-top: 1px dashed #ccc;
+        }
+        
+        /* Linha de Totais no Rodapé da Tabela */
+        .report-table tfoot td {
+            background-color: #e0e0e0;
+            font-weight: bold;
+            text-align: right;
+            border: 1px solid #ccc;
+            padding: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>HUMOR MENSAL</h1>
+        <h2>MÊS: {{ mes_extenso|upper }}</h2>
+    </div>
+    
+    {% if total_dias_registrados > 0 %}
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th class="mood-column" style="text-align: center;">Humor</th>
+                    {# Cabeçalho dos Dias #}
+                    {% for dia in dias_do_mes %}
+                        <th class="header-day">{{ dia }}</th>
+                    {% endfor %}
+                    <th class="total-cell">Result</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in report_data %}
+                <tr>
+                    {# Nome do Humor #}
+                    <td class="mood-column" style="color: {{ data.cor_fundo }};">
+                        {{ data.tipo.estado }}
+                    </td>
+                    
+                    {# Células dos Dias #}
+                    {% for dia, registrado in data.dias.items %}
+                        <td class="day-cell">
+                            {% if registrado %}
+                                <div class="color-cell" style="background-color: {{ data.cor_fundo }};">
+                                    &nbsp; <!-- Conteúdo para forçar o bloco a renderizar -->
+                                </div>
+                            {% else %}
+                                &nbsp; <!-- GARANTIDO: Espaço não-quebrável para que o ReportLab calcule a dimensão mínima -->
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+                    
+                    {# Total #}
+                    <td class="total-cell">
+                        {{ data.total }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    {# Colspan corrigido para cobrir a largura total (Humor + Dias + Result) #}
+                    <td colspan="{{ ultimo_dia_do_mes|add:2 }}" style="text-align: right;">
+                        Total de dias registrados: <span style="color: #2563eb; margin-left: 10px;">{{ total_dias_registrados }}</span>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    {% else %}
+        <p style="text-align: center; color: #cc0000; padding: 20px; border: 1px solid #ffcccc; background-color: #ffeeee;">
+            Nenhum registro de humor encontrado para o mês de {{ mes_extenso }}.
+        </p>
+    {% endif %}
+
+    <div class="footer">
+        Relatório gerado em {{ data_hoje|date:"d/m/Y H:i" }} pelo sistema LyfeSync.
+    </div>
+</body>
+</html>

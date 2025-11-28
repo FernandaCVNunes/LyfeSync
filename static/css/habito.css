@@ -1,0 +1,57 @@
+/* Estilo para reduzir o espaçamento vertical nas linhas da tabela */
+.table tbody tr td {
+    /* Define um padding menor nas laterais e muito pequeno no topo/fundo */
+    padding-top: 0.35rem !important;
+    /* Menor que o padrão (ex: 0.5rem) */
+    padding-bottom: 0.35rem !important;
+    /* Menor que o padrão */
+}
+
+/* Opcional: Garante que a descrição não force muita altura se for muito longa */
+.table tbody tr td.text-muted {
+    white-space: normal;
+    /* Permite quebras de linha */
+    max-width: 150px;
+    /* Limita a largura para melhor visualização */
+}
+
+/* Estilos existentes para o círculo (mantidos) */
+.form-check-circle {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 1.2rem;
+    height: 1.2rem;
+    border-radius: 50%;
+    border: 2px solid #ced4da;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Estilo quando 'checked' */
+.form-check-circle:checked {
+    border-color: #28a745;
+    /* Cor da borda mais forte (verde 'success') */
+    background-color: #28a745;
+    /* Fundo verde */
+}
+
+/* Estilo do 'tick' dentro do círculo (opcional, aqui mudo para o branco) */
+.form-check-circle:checked::after {
+    content: '\2713';
+    /* Símbolo de check */
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.7rem;
+    color: white;
+    /* Cor do check (branco) */
+}
+
+/* Ajuste para o texto HOJE ficar branco no cabeçalho */
+thead .table-header-sm .text-muted {
+    color: white !important;
+}

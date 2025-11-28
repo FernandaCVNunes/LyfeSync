@@ -1,0 +1,145 @@
+<!-- account_login.html -->
+{% extends "app_LyfeSync/layouts/masterpage.html" %}
+{% load static %}
+{% load socialaccount %}
+{% load i18n %}
+
+{% block title %}{% trans "Entrar ou Cadastrar" %}{% endblock %}
+
+{% block content %}
+<div class="login-container container-fluid d-flex justify-content-center align-items-center py-5">
+    
+    <div class="custom-modal-content rounded-5 border-0 shadow-lg" style="max-width: 900px; width: 95%;">
+        <div class="p-0">
+            <div class="d-flex flex-column flex-md-row">
+                
+                <div class="col-md-6 d-flex flex-column align-items-center justify-content-center p-5 text-center">
+                    <h2 class="mb-4 fw-bold text-red">Bem-vindo de Volta!</h2>
+                    
+                    <div class="w-100">
+                        <a href="{% provider_login_url 'google' %}" class="btn btn-social btn-google w-100 mb-3 d-flex align-items-center justify-content-center rounded-pill shadow-sm">
+                            <i class="fab fa-google me-2"></i> 
+                            <span>Fazer login com o Google</span> 
+                        </a>
+                    </div>
+                    <div class="divider d-flex align-items-center w-100 mb-4">
+                        <hr class="flex-grow-1 border-gray" />
+                        <span class="px-3 text-secondary">ou</span>
+                        <hr class="flex-grow-1 border-gray" />
+                    </div>
+                    
+                    <form method="post" action="{% url 'account_login' %}" class="w-100">
+                        {% csrf_token %}
+                        
+                        {% if form.errors and form.data.login %}
+                            <div class="alert alert-danger" role="alert">
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="input-group mb-3 custom-input-group rounded-pill overflow-hidden shadow-sm">
+                            <span class="input-group-text border-0 bg-white">
+                                <i class="fas fa-envelope input-icon text-muted"></i>
+                            </span>
+                            <input type="text" class="form-control border-0" name="login" placeholder="Email ou Nome de Usuário" aria-label="Email" required value="{{ form.login.value|default_if_none:'' }}">
+                        </div>
+                        
+                        <div class="input-group mb-4 custom-input-group rounded-pill overflow-hidden shadow-sm">
+                            <span class="input-group-text border-0 bg-white">
+                                <i class="fas fa-lock input-icon text-muted"></i>
+                            </span>
+                            <input type="password" class="form-control border-0" name="password" placeholder="Senha" aria-label="Senha" required>
+                        </div>
+                        
+                        <div class="form-check d-flex justify-content-start w-100 mb-4 ps-4">
+                            <input class="form-check-input me-2" type="checkbox" name="remember" id="id_remember"> 
+                            <label class="form-check-label text-muted" for="id_remember">Relembre-me</label>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-login w-100 rounded-pill fw-bold shadow-sm">Entrar</button>
+                    </form>
+                    
+                    <a href="{% url 'account_reset_password' %}" class="mt-4 text-decoration-none text-red-dark">Esqueceu a senha? Clique aqui.</a>
+                    <div class="d-flex justify-content-between mt-5">
+                        <button onclick="window.history.back()" class="btn btn-outline-secondary btn-lg shadow-sm">
+                            <i class="bi bi-arrow-left me-2"></i> Voltar à Página Anterior
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 d-flex flex-column align-items-center justify-content-center p-5 text-white register-section rounded-end-5">
+                    <h2 class="mb-4 fw-bold">Cadastre-se aqui!</h2>
+                    
+                    <p class="mb-4 text-center">Crie sua conta e comece a viver a sua melhor versão!</p>
+
+                    <form method="post" action="{% url 'account_signup' %}" class="w-100">
+                        {% csrf_token %}
+                        
+                        <div class="input-group mb-3 custom-input-group-white rounded-pill overflow-hidden shadow-sm">
+                            <span class="input-group-text border-0 bg-white">
+                                <i class="fas fa-id-badge input-icon-white text-muted"></i>
+                            </span>
+                            <input type="text" class="form-control border-0" name="first_name" placeholder="Seu Nome" aria-label="Nome" required>
+                        </div>
+
+                        <div class="input-group mb-3 custom-input-group-white rounded-pill overflow-hidden shadow-sm">
+                            <span class="input-group-text border-0 bg-white">
+                                <i class="fas fa-id-badge input-icon-white text-muted"></i>
+                            </span>
+                            <input type="text" class="form-control border-0" name="last_name" placeholder="Seu Sobrenome" aria-label="Sobrenome" required>
+                        </div>
+                        
+                        <div class="input-group mb-3 custom-input-group-white rounded-pill overflow-hidden shadow-sm">
+                            <span class="input-group-text border-0 bg-white">
+                                <i class="fas fa-user input-icon-white text-muted"></i>
+                            </span>
+                            <input type="text" class="form-control border-0" name="username" placeholder="Nome de Usuário" aria-label="Nome de Usuário" required>
+                        </div>
+
+                        <div class="input-group mb-3 custom-input-group-white rounded-pill overflow-hidden shadow-sm">
+                            <span class="input-group-text border-0 bg-white">
+                                <i class="fas fa-envelope input-icon-white text-muted"></i>
+                            </span>
+                            <input type="email" class="form-control border-0" name="email" placeholder="Email" aria-label="Email" required>
+                        </div>
+                        
+                        <div class="input-group mb-3 custom-input-group-white rounded-pill overflow-hidden shadow-sm">
+                            <span class="input-group-text border-0 bg-white">
+                                <i class="fas fa-lock input-icon-white text-muted"></i>
+                            </span>
+                            <input type="password" class="form-control border-0" name="password" placeholder="Senha" aria-label="Senha" required>
+                        </div>
+
+                        <div class="input-group mb-4 custom-input-group-white rounded-pill overflow-hidden shadow-sm">
+                            <span class="input-group-text border-0 bg-white">
+                                <i class="fas fa-lock input-icon-white text-muted"></i>
+                            </span>
+                            <input type="password" class="form-control border-0" name="password2" placeholder="Confirme a Senha" aria-label="Confirme a Senha" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-register w-100 rounded-pill fw-bold shadow-sm">Cadastre-se</button>
+                    </form>
+                    
+                    <div class="divider d-flex align-items-center w-100 my-4">
+                        <hr class="flex-grow-1 border-white opacity-50" />
+                        <span class="px-3 text-white">ou</span>
+                        <hr class="flex-grow-1 border-white opacity-50" />
+                    </div>
+
+                    <p class="mb-3 text-white">Cadastre-se com:</p>
+                    <div class="w-100 text-center">
+                        <a href="{% provider_login_url 'google' %}" class="btn btn-social-white-circle rounded-circle shadow-sm">
+                            <i class="fab fa-google social-icon-white"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</div>
+{% endblock %}

@@ -1,0 +1,369 @@
+{# autocuidado/gratidao.html #}
+{% extends 'app_LyfeSync/layouts/masterpage_logado.html' %}
+{% load static %}
+{% load custom_filters %} 
+{% load widget_tweaks %}
+
+{% block title %}Diário de Gratidão{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/autocuidado.css' %}">
+{% endblock extra_css %}
+
+{% block content_logado %}
+<div class="container py-4 py-md-5">
+    <h1 class="h1 fw-bold text-primary pb-2 mb-3">Diário de Gratidão</h1>
+
+    <div class="message-container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert" data-timeout="8000">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <div class="card shadow-lg border-3 border-primary rounded-3 mb-4 w-100">
+        <div class="d-flex align-items-center justify-content-between p-3">
+            <h2 class="h5 fw-semibold text-dark mb-1">
+                Gratidões de Hoje: {{ hoje|date:"d/m/Y" }}
+            </h2>
+        </div>
+
+        {% if gratidoes_hoje %}
+            <div class="space-y-2 p-3 pt-1"> {% for gratidao in gratidoes_hoje %}
+                    <div class="p-1 border-start border-1 border-warning rounded-end bg-light d-flex justify-content-between align-items-start">
+                        <p class="h6 fst-italic text-success">
+                            <i class="bi bi-star-fill text-warning me-1"></i>
+                            {{ gratidao.descricaogratidao }}
+                        </p>
+                        <div class="btn-group btn-group-sm ms-auto flex-shrink-1 d-flex align-items-center gap-1">
+                            <button 
+                                class="btn btn-outline-primary btn-sm text-primary p-1"
+                                onclick="openUpdateModal('{{ gratidao.idgratidao }}', '{{ gratidao.nomegratidao|escapejs }}', '{{ gratidao.descricaogratidao|escapejs }}', '{{ gratidao.data|date:"Y-m-d" }}')"
+                            >
+                                Alterar
+                            </button>
+                            <button 
+                                class="btn btn-outline-danger btn-sm text-danger p-1 mt-1"
+                                onclick="openDeleteModal('{{ gratidao.idgratidao }}', '{{ gratidao.descricaogratidao|truncatechars:20|escapejs }}')"
+                            >
+                                Excluir
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <button 
+                class="btn btn-secondary btn-sm fw-bold shadow-sm m-3 mt-1"
+                onclick="openCreateModal(false)"
+            >
+                ➕ Inclusão(Para datas passadas)
+            </button>
+        {% else %}
+            <p class="text-muted p-3 pt-0">Você ainda não registrou suas gratidões de hoje.</p>
+            <button 
+                class="btn btn-primary btn-sm fw-bold shadow-sm m-3 mt-1"
+                onclick="openCreateModal(true)"
+            >
+                ✨ Registrar Gratidões de Hoje
+            </button>
+        {% endif %}
+    </div>
+
+    <h2 class="h5 fw-bold text-dark mt-4">Histórico de Gratidões</h2>
+    
+    {% if page_obj %}
+        <div class="row g-0"> {% for gratidao in page_obj %}
+                <div class="col-12 mb-1"> <div class="card p-2 border-start border-1 border-secondary shadow-lg rounded-3 ls-hover-lift rounded-1">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="gratidao-item-history w-100 me-2">
+                                <span class="gratidao-date small text-muted me-2">{{ gratidao.data|date:"d/m/Y" }}:</span>
+                                <p class="text-dark fw-normal mb-0 small" style="white-space: pre-line;"><i class="bi bi-heart-fill text-danger me-1"></i>{{ gratidao.descricaogratidao }}</p>
+                            </div>
+                            
+                            <div class="btn-group btn-group-sm ms-auto flex-shrink-0 d-flex align-items-center gap-1">
+                                <button 
+                                    class="btn btn-outline-primary text-primary p-0 small"
+                                    onclick="openUpdateModal('{{ gratidao.idgratidao }}', '{{ gratidao.nomegratidao|escapejs }}', '{{ gratidao.descricaogratidao|escapejs }}', '{{ gratidao.data|date:"Y-m-d" }}')"
+                                >
+                                    Alterar
+                                </button>
+                                <button 
+                                    class="btn btn-outline-danger text-danger p-0 small"
+                                    onclick="openDeleteModal('{{ gratidao.idgratidao }}', '{{ gratidao.descricaogratidao|truncatechars:20|escapejs }}')"
+                                >
+                                    Excluir
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        {% if page_obj.paginator.num_pages > 1 %}
+            <div class="d-flex justify-content-center mt-3">
+                <nav aria-label="Paginação de gratidões">
+                    <ul class="pagination pagination-sm shadow-sm">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item"><a class="page-link" href="?page=1">Primeira</a></li>
+                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a></li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">Primeira</span></li>
+                            <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+                        {% endif %}
+                        
+                        <li class="page-item active" aria-current="page">
+                            <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                        </li>
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Próxima</a></li>
+                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Última</a></li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">Próxima</span></li>
+                            <li class="page-item disabled"><span class="page-link">Última</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-warning border-start border-1 border-warning-subtle " role="alert">
+            Ainda não há gratidões antigas registradas.
+        </div>
+    {% endif %}
+
+</div>
+
+<!-- ______________________ MODAIS ______________________ -->
+
+<!-- Modal Base (Estrutura Bootstrap) -->
+<div id="modal-base" class="modal fade" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content shadow-sm border-0 rounded-3" id="modal-content">
+            <!-- O conteúdo será injetado aqui -->
+        </div>
+    </div>
+</div>
+
+<!-- Conteúdo do Modal de Inclusão (Hoje/Tardia) - Será clonado para o modal base -->
+<div id="modal-create-content" class="modal-content-area d-none">
+    <div class="modal-header">
+        <h3 id="create-modal-title" class="modal-title h5"></h3>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <form method="POST" action="{% url 'registrar_gratidao' %}" id="create-form-content">
+        {% csrf_token %}
+        <div class="modal-body p-4">
+            
+            <!-- O campo de data só aparece no modo "Inclusão Tardia" (isToday=false) e é preenchido no JS para o modo "Hoje" -->
+            <div id="data-input-container" class="">
+                <label for="id_data" class="form-label small text-muted">{{ create_form.data.label }}</label>
+                {{ create_form.data|attr:"class:form-control gratidao-date-input" }}
+            </div>
+
+            {% for i in "123" %}
+                <div class=" p-3 border rounded-3 bg-light shadow-sm">
+                    <p class="fw-semibold text-primary mb-2">Gratidão {{ i }}</p>
+                    <div>
+                        <label for="id_descricaogratidao_{{ i }}" class="form-label small text-muted">Descrição</label>
+                        {% with field_name="descricaogratidao_"|add:i %}
+                            {% with form_field=create_form|get_field_by_name:field_name %}
+                                {{ form_field|attr:"class:form-control" }}
+                            {% endwith %}
+                        {% endwith %}
+                    </div>
+                </div>
+            {% endfor %}
+
+        </div>
+        <div class="modal-footer d-flex justify-content-end">
+            <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">Cancelar</button>
+            <button type="submit" class="btn btn-primary fw-bold shadow-sm">Salvar Gratidões</button>
+        </div>
+    </form>
+</div>
+
+<!-- Conteúdo do Modal de Alteração - Será clonado para o modal base -->
+<div id="modal-update-content" class="modal-content-area d-none">
+    <div class="modal-header">
+        <h3 class="modal-title h5">Alterar Gratidão</h3>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <form method="POST" action="" id="update-form-content">
+        {% csrf_token %}
+        <div class="modal-body p-4">
+            
+            <!-- Campo de Data: Deve ser readonly -->
+            <div class="">
+                <label for="id_data_update" class="form-label small text-muted">{{ update_form.data.label }}</label>
+                <!-- Adicionado o atributo readonly e classe bg-light -->
+                {{ update_form.data|attr:"readonly:readonly class:form-control bg-light" }} 
+            </div>
+
+            <div class="">
+                <label for="id_descricaoalterar_gratidao" class="form-label small text-muted">{{ update_form.descricaogratidao.label }}</label>
+                <!-- Adiciona form-control para estilo BS -->
+                {{ update_form.descricaogratidao|attr:"class:form-control" }}
+            </div>
+        </div>
+        <div class="modal-footer d-flex justify-content-end">
+            <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">Cancelar</button>
+            <button type="submit" class="btn btn-primary fw-bold shadow-sm">Salvar Alteração</button>
+        </div>
+    </form>
+</div>
+
+<!-- Conteúdo do Modal de Exclusão - Será clonado para o modal base -->
+<div id="modal-delete-content" class="modal-content-area d-none">
+    <div class="modal-body p-4 text-center">
+        <!-- Ícone de alerta Bootstrap (usando SVG) -->
+        <svg class="mx-auto my-3" xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2 text-danger" viewBox="0 0 16 16" role="img" aria-label="Warning:">
+            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.954 1.054v3.376c0 .592-.42.954-.954.954-.535 0-.954-.462-.954-1.054V6.054c0-.592.42-.954.954-.954zM9 12h.01V12h-.01z"/>
+        </svg>
+        <h3 class="h4 fw-bold text-danger mb-2 ">Confirmar Exclusão</h3>
+        <p class=" text-dark">Tem certeza que deseja excluir a gratidão "<strong id="delete-name"></strong>"?</p>
+        <p class="text-sm text-muted">Esta ação é irreversível.</p>
+        
+        <form method="POST" action="" id="delete-form-content" class="">
+            {% csrf_token %}
+            <div class="d-flex">
+                <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">Cancelar</button>
+                <button type="submit" class="btn btn-danger fw-bold shadow-sm">Excluir</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock content_logado %}
+
+{% block scripts %}
+<script>
+    // Inicializa o objeto Bootstrap Modal fora das funções para uso reutilizável
+    let currentModal = null;
+
+    // --- Nova Função para abrir o modal base usando a API Bootstrap ---
+    function openBootstrapModal(contentId) {
+        const modalBase = document.getElementById('modal-base');
+        const modalContentArea = document.getElementById(contentId);
+        const modalContent = document.getElementById('modal-content');
+        
+        // Limpa o conteúdo anterior e insere o novo (clonando)
+        modalContent.innerHTML = '';
+        const clonedContent = modalContentArea.cloneNode(true);
+        // Remove a classe d-none do conteúdo clonado e adiciona os elementos filhos
+        Array.from(clonedContent.children).forEach(child => modalContent.appendChild(child));
+        
+        // Usa a API nativa do Bootstrap
+        if (currentModal) {
+            currentModal.hide(); // Garante que qualquer modal aberto seja fechado
+        }
+        currentModal = new bootstrap.Modal(modalBase);
+        currentModal.show();
+        
+        return modalContent; // Retorna o conteúdo injetado para manipulação posterior
+    }
+
+    // --- Função para fechar o modal base (Apenas para uso interno, o BS handle dismiss) ---
+    function closeModal() {
+        if (currentModal) {
+            currentModal.hide();
+            currentModal = null;
+        }
+        document.getElementById('modal-content').innerHTML = ''; // Limpa o conteúdo após fechar
+    }
+    
+    // --- 1. Modal de Inclusão (Hoje / Tardia) ---
+    function openCreateModal(isToday) {
+        // Abre o modal e obtém o elemento de conteúdo
+        const modal = openBootstrapModal('modal-create-content');
+        const titleElement = modal.querySelector('#create-modal-title');
+        const dataInputContainer = modal.querySelector('#data-input-container');
+        const dataInput = modal.querySelector('[name="data"]');
+        
+        // Atualiza o título e a data
+        if (isToday) {
+            // INCLUIR HOJE: Data fixa e não visível/editável
+            titleElement.textContent = '✨ Registrar Gratidões de Hoje';
+            dataInputContainer.style.display = 'none'; // Esconde o campo de data
+
+            // O valor do input type="date" deve ser no formato ISO (YYYY-MM-DD)
+            const todayISO = new Date().toISOString().substring(0, 10);
+            dataInput.value = todayISO;
+            dataInput.readOnly = true; 
+            dataInput.required = false; // Não é necessário, pois está escondido
+        } else {
+            // INCLUSÃO TARDIA: Data editável e visível
+            titleElement.textContent = '➕ Inclusão Tardia (Data Anterior)';
+            dataInputContainer.style.display = 'block'; // Mostra o campo de data
+            dataInput.value = ''; // Limpa a data para seleção manual
+            dataInput.readOnly = false;
+            dataInput.required = true;
+            dataInput.classList.remove('bg-light');
+            dataInput.style.cursor = 'auto';
+        }
+
+        // Reseta todos os campos de descrição para garantir que estejam vazios
+        modal.querySelectorAll('[name^="descricaogratidao_"]').forEach(input => {
+            input.value = '';
+        });
+    }
+
+
+    // --- 2. Modal de Alteração ---
+    // OBS: A data deve ser passada em formato ISO (YYYY-MM-DD) para que o input type="date" funcione
+    function openUpdateModal(id, nome, descricao, dataISO) {
+        const modal = openBootstrapModal('modal-update-content');
+        const form = modal.querySelector('form');
+        
+        // Define a URL de ação do formulário
+        form.action = "{% url 'alterar_gratidao' pk=0 %}".replace('/0/', '/' + id + '/');
+
+        // Preenche os campos do formulário no modal
+        // CORREÇÃO DE DATA: O input type="date" precisa de YYYY-MM-DD
+        modal.querySelector('[name="data"]').value = dataISO;
+        // DESCRIÇÃO
+        modal.querySelector('[name="descricaogratidao"]').value = descricao;
+        
+        // O campo nomegratidao foi removido do HTML. 
+        // A variável 'nome' (título antigo) ainda é passada, mas não é mais utilizada no modal.
+    }
+
+
+    // --- 3. Modal de Exclusão ---
+    // Usa a descrição (truncada) para a confirmação de exclusão
+    function openDeleteModal(id, nomeOuDescricaoTruncada) {
+        const modal = openBootstrapModal('modal-delete-content');
+        const form = modal.querySelector('form');
+        
+        // Define a URL de ação do formulário
+        form.action = "{% url 'delete_gratidao' pk=0 %}".replace('/0/', '/' + id + '/');
+        
+        // Exibe o nome/descrição para confirmação
+        modal.querySelector('#delete-name').textContent = nomeOuDescricaoTruncada;
+    }
+
+    // --- Lógica para as Mensagens (Pop Bonito) ---
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializa o ouvinte para fechar alertas após o timeout
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach((alertElement) => {
+            const timeout = parseInt(alertElement.getAttribute('data-timeout') || '5000', 10);
+            setTimeout(() => {
+                // Certifica-se de que a biblioteca Bootstrap está carregada
+                if (typeof bootstrap !== 'undefined' && bootstrap.Alert) {
+                    const bsAlert = new bootstrap.Alert(alertElement);
+                    bsAlert.close();
+                } else {
+                    // Fallback simples se o BS não estiver carregado (menos ideal)
+                    alertElement.style.display = 'none';
+                }
+            }, timeout);
+        });
+    });
+    
+</script>
+{% endblock scripts %}

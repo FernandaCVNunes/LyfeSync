@@ -1,0 +1,160 @@
+/* account.css */
+/* ===================== ESTILOS PARA PÁGINAS DE AUTENTICAÇÃO (Login, Signup, Logout) ===================== */
+
+/* Variáveis de cores específicas (se necessário) */
+:root {
+    --red-color: #e88972;
+    /* Cor principal LyfeSync */
+    --red-dark-color: #c9715a;
+    /* Cor escura do LyfeSync (hover/links) */
+    --bg-register: #f7a26c;
+    /* Cor de fundo para a seção de Cadastro (laranja secundário) */
+    --text-color-muted: #6c757d;
+}
+
+/* -------------------- Cores e utilitários globais -------------------- */
+
+.text-red {
+    color: var(--red-color) !important;
+}
+
+.text-red-dark {
+    color: var(--red-dark-color) !important;
+}
+
+.bg-light-section {
+    background-color: #f8f9fa;
+    /* Cinza bem claro */
+}
+
+/* -------------------- Estrutura do Card de Login/Cadastro -------------------- */
+
+.login-container {
+    background-color: white;
+    min-height: 85vh;
+    /* Estilo movido do HTML */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    /* Sombra mais pronunciada */
+}
+
+/* Contêiner principal do formulário (antigo "custom-modal-content") */
+.custom-modal-content {
+    width: 100%;
+    /* Estilo movido do HTML */
+    max-width: 1000px;
+    /* Estilo movido do HTML */
+}
+
+/* Seção de Cadastro (Fundo com Cor Secundária) */
+.register-section {
+    background-color: var(--bg-register);
+}
+
+/* -------------------- Inputs e Botões -------------------- */
+
+.custom-input-group {
+    border: 1px solid #ced4da;
+    /* Borda suave para inputs */
+    transition: border-color 0.3s;
+}
+
+.custom-input-group:focus-within {
+    border-color: var(--red-color);
+    box-shadow: 0 0 0 0.25rem rgba(232, 137, 114, 0.25);
+    /* Sombra do focus com a cor LyfeSync */
+}
+
+.custom-input-group .form-control {
+    height: 48px;
+    padding-left: 0;
+}
+
+.input-icon {
+    font-size: 1.2rem;
+    padding: 0 10px;
+}
+
+/* Botão de Login (Cor Primária) */
+.btn-login {
+    background-color: var(--red-color);
+    color: white;
+    height: 50px;
+    font-size: 1.1rem;
+    transition: background-color 0.3s;
+}
+
+.btn-login:hover {
+    background-color: var(--red-dark-color);
+    color: white;
+}
+
+/* Botão de Cadastro (Cor Invertida na seção de cadastro) */
+.btn-register {
+    background-color: #102b37;
+    color: white;
+    height: 50px;
+    font-size: 1.1rem;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-register:hover {
+    background-color: #58606b;
+    color: white;
+}
+
+/* Classe de utilidade para limitar a largura de um botão específico, movida do HTML */
+.btn-max-w-250 {
+    max-width: 250px !important;
+}
+
+
+/* -------------------- Login Social (Google) -------------------- */
+
+.btn-social {
+    background-color: white;
+    /* Mantido: A variável --text-color-dark não está definida, mas é melhor preservar a intenção original. */
+    color: var(--text-color-dark);
+    border: 1px solid #e0e0e0;
+    height: 50px;
+    font-weight: 600;
+    transition: background-color 0.3s;
+}
+
+.btn-social:hover {
+    background-color: #f8f8f8;
+    color: var(--text-color-dark);
+}
+
+.social-icon-img {
+    height: 20px;
+}
+
+.btn-social-white-circle {
+    background-color: white;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.social-icon-white {
+    color: var(--red-color);
+    font-size: 1.2rem;
+}
+
+
+/* -------------------- Layout e Responsividade -------------------- */
+
+/* Para telas pequenas, a seção de cadastro fica no topo e não arredondada */
+@media (max-width: 767px) {
+    .register-section {
+        border-radius: 1rem 1rem 0 0 !important;
+        /* Arredonda o topo em mobile */
+    }
+
+    .login-container {
+        max-width: 450px !important;
+        /* Limita a largura em mobile para não ficar muito larga */
+    }
+}

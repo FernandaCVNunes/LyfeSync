@@ -1,248 +1,535 @@
-# Este arquivo contém os Formulários do Django, usados para renderização
-# HTML, validação e personalização da interface de administração.
-
 from django import forms
 from django.utils import timezone
-from django.forms import ModelForm, TextInput, DateInput, NumberInput, Select, Textarea, RadioSelect
-from django.contrib.auth.forms import UserChangeForm
-# ALTERAÇÃO: Usar get_user_model é uma boa prática para garantir compatibilidade
+from django.forms import TextInput, DateInput, NumberInput, Select, Textarea, RadioSelect, HiddenInput, modelformset_factory
 from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import UserChangeForm, PasswordChangeForm
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from allauth.account.forms import SignupForm
 from django.db import transaction
+from datetime import date
+from .models import Habito, Gratidao, Afirmacao, Humor, Dicas, PerfilUsuario, HumorTipo
+import re
+import calendar
 
-# Importação dos modelos, assumindo que eles existem no diretório pai ou estão configurados
-# NOTA: O nome dos modelos aqui é baseado na estrutura do Forms e não nos Models anteriormente vistos.
-from .models import Habito, Gratidao, Afirmacao, Humor, Dicas, PerfilUsuario
-
-# Obtém o modelo de Usuário ativo (padrão ou customizado)
 User = get_user_model()
 
 # -------------------------------------------------------------------
-# 1. FORMULÁRIO DE HÁBITO
+# FORMULÁRIO DE HÁBITO
 # -------------------------------------------------------------------
 
 class HabitoForm(forms.ModelForm):
-    """
-    Formulário para a criação e edição de hábitos.
-    """
+
     class Meta:
-        model = Habito
-        fields = ['nome', 'data_inicio', 'data_fim', 'quantidade', 'frequencia', 'alvo', 'descricao']
-        
-        widgets = {
-            'nome': TextInput(attrs={'placeholder': 'Ex: Beber água, Meditar', 'class': 'form-control'}),
-            'data_inicio': DateInput(
-                attrs={'type': 'date', 'class': 'form-control', 'value': timezone.localdate().strftime('%Y-%m-%d')},
-                format='%Y-%m-%d'
-            ),
-            'data_fim': DateInput(
-                attrs={'type': 'date', 'class': 'form-control'},
-                format='%Y-%m-%d'
-            ),
-            'quantidade': NumberInput(attrs={'placeholder': 'Ex: 8 copos, 10 minutos', 'min': 1, 'class': 'form-control'}),
-            'frequencia': Select(
-                choices=[('Diário', 'Diário'), ('Semanal', 'Semanal'), ('Mensal', 'Mensal')],
-                attrs={'class': 'form-control'}
-            ),
-            'alvo': TextInput(attrs={'placeholder': 'Ex: Chegar a 50kg, 100% de conclusão', 'class': 'form-control'}),
-            'descricao': Textarea(attrs={'placeholder': 'Detalhes sobre como executar o hábito', 'rows': 3, 'class': 'form-control'}),
-        }
-        
-        labels = {
-            'nome': 'Nome do Hábito',
-            'data_inicio': 'Data de Início',
-            'data_fim': 'Data de Fim (Opcional)',
-            'quantidade': 'Quantidade/Meta Diária', 
-            'frequencia': 'Frequência',
-            'alvo': 'Alvo/Objetivo',
-            'descricao': 'Descrição',
-        }
+      model = Habito
+
+      fields = ['nome', 'data_inicio', 'data_fim', 'quantidade', 'frequencia', 'alvo', 'descricao']
+      
+      widgets = {
+          'nome': TextInput(attrs={'placeholder': 'Ex: Beber água, Meditar', 'class': 'form-control'}),
+          'data_inicio': DateInput(
+              attrs={'type': 'date', 'class': 'form-control', 'value': timezone.localdate().strftime('%Y-%m-%d')},
+              format='%Y-%m-%d'
+          ),
+          'data_fim': DateInput(
+              attrs={'type': 'date', 'class': 'form-control'},
+              format='%Y-%m-%d'
+          ),
+          'quantidade': NumberInput(attrs={'placeholder': 'Ex: 8 copos, 10 minutos', 'min': 1, 'class': 'form-control'}),
+
+          'frequencia': Select(
+              choices=Habito.FREQUENCIA_CHOICES,
+              attrs={'class': 'form-select'}
+          ),
+          'alvo': TextInput(attrs={'placeholder': 'Ex: Chegar a 50kg, 100% de conclusão', 'class': 'form-control'}),
+          'descricao': Textarea(attrs={'placeholder': 'Detalhes sobre como executar o hábito', 'rows': 3, 'class': 'form-control'}),
+      }
+      
+      labels = {
+          'nome': 'Nome do Hábito',
+          'data_inicio': 'Data de Início',
+          'data_fim': 'Data de Fim (Opcional)',
+          'quantidade': 'Quantidade/Meta Diária',
+          'frequencia': 'Frequência',
+          'alvo': 'Alvo/Objetivo',
+          'descricao': 'Descrição',
+      }
 
 # -------------------------------------------------------------------
-# 2. FORMULÁRIOS PARA AUTOCUIDADO
-# -------------------------------------------------------------------
+# RELATÓRIO DE HABITO
+# -------------------------------------------------------------------    
+class RelatorioHabitoForm(forms.Form):
+    """Formulário simples para selecionar Mês e Ano do relatório de Hábitos."""
+    
+    MESES = [(i, calendar.month_name[i].capitalize()) for i in range(1, 13)]
+    
+    hoje = timezone.localdate()
+    
+    mes = forms.ChoiceField(
+        choices=MESES,
+        initial=hoje.month,
+        label="Selecionar Mês",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    
+    ano = forms.IntegerField(
+        initial=hoje.year,
+        label="Selecionar Ano",
+        min_value=2000, 
+        max_value=9999,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'min': 2000, 'max': 9999})
+    )
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        mes = cleaned_data.get("mes")
+        ano = cleaned_data.get("ano")
+        
+        if mes and ano:
+            try:
+                # Apenas para validar se a data é construível, embora não seja estritamente necessário
+                # já que o mês e o ano são validados individualmente.
+                date(int(ano), int(mes), 1)
+            except ValueError:
+                raise forms.ValidationError("Data inválida para o mês/ano selecionado.")
+        
+        return cleaned_data
 
-class GratidaoForm(forms.ModelForm):
+# -------------------------------------------------------------------
+#     Formulário GRATIDÃO (Criação de Múltiplos Registros)
+# -------------------------------------------------------------------
+class GratidaoCreateForm(forms.Form):
     """
-    Formulário para a criação de registros de Gratidão.
+    Formulário para registrar 3 gratidões de uma vez.
     """
+    # Campo obrigatório para a data
+    data = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-input w-full md:w-auto', 'required': 'required'}),
+        label="Data da Gratidão"
+    )
+
+    # Campos para a primeira gratidão (apenas descrição)
+    descricaogratidao_1 = forms.CharField(
+        widget=forms.Textarea(attrs={'class': 'form-textarea resize-none', 'rows': 3, 'placeholder': 'Detalhe o motivo de sua gratidão...'}),
+        label="Gratidão 1 (Descrição)",
+        required=False
+    )
+    
+    # Campos para a segunda gratidão (apenas descrição)
+    descricaogratidao_2 = forms.CharField(
+        widget=forms.Textarea(attrs={'class': 'form-textarea resize-none', 'rows': 3, 'placeholder': 'Detalhe o motivo de sua gratidão...'}),
+        label="Gratidão 2 (Descrição)",
+        required=False
+    )
+
+    # Campos para a terceira gratidão (apenas descrição)
+    descricaogratidao_3 = forms.CharField(
+        widget=forms.Textarea(attrs={'class': 'form-textarea resize-none', 'rows': 3, 'placeholder': 'Detalhe o motivo de sua gratidão...'}),
+        label="Gratidão 3 (Descrição)",
+        required=False
+    )
+
+    def generate_gratitude_name(self, description):
+        """Gera o nome (título) da gratidão a partir da descrição, truncando se necessário."""
+        if not description:
+            return "Gratidão do Dia"
+        
+        # Pega a primeira linha da descrição
+        first_line = description.split('\n')[0]
+        name = first_line.strip()
+        
+        # Limpa espaços em excesso para garantir precisão no limite
+        name = re.sub(r'\s+', ' ', name)
+        
+        # Limita a 100 caracteres
+        if len(name) > 100:
+             # Trunca a 97 caracteres e adiciona '...'
+             name = name[:97].strip() + '...'
+             
+        return name if name else "Gratidão do Dia"
+
+
+    def clean(self):
+        """
+        Garanti que pelo menos uma descrição de gratidão foi preenchida.
+        (O problema "não deixa escrever" pode estar na view ou no template,
+        mas o clean() aqui está correto para a regra de negócio.)
+        """
+        cleaned_data = super().clean()
+        
+        descriptions = [
+            cleaned_data.get('descricaogratidao_1'),
+            cleaned_data.get('descricaogratidao_2'),
+            cleaned_data.get('descricaogratidao_3'),
+        ]
+        
+        # Verifica se pelo menos uma descrição foi preenchida e não está vazia (após strip)
+        filled_descriptions = [desc for desc in descriptions if desc and desc.strip()]
+        
+        if not filled_descriptions:
+            raise ValidationError("Você deve preencher pelo menos uma das Descrições para registrar sua gratidão.")
+        
+        return cleaned_data
+
+    def save(self, user):
+        """
+        Cria múltiplos objetos Gratidao em lote, usando bulk_create.
+        """
+        gratitude_objects = []
+        data = self.cleaned_data['data']
+        
+        # O clean() já garantiu que pelo menos uma descrição está preenchida
+        for i in range(1, 4):
+            descricao = self.cleaned_data.get(f'descricaogratidao_{i}')
+            
+            if descricao and descricao.strip():
+                # Gera o nome a partir da descrição
+                nome = self.generate_gratitude_name(descricao)
+                
+                gratitude_objects.append(
+                    Gratidao(
+                        data=data,
+                        descricaogratidao=descricao,
+                        usuario=user
+                    )
+                )
+
+        if not gratitude_objects:
+            return [] # Retorna lista vazia se nada foi criado
+
+        with transaction.atomic():
+            # Cria todos os objetos de uma vez
+            created_gratitudes = Gratidao.objects.bulk_create(gratitude_objects)
+        
+        return created_gratitudes
+
+
+# --- Formulário para Alteração de uma única Gratidão ---
+class GratidaoUpdateForm(forms.ModelForm):
+    """
+    Formulário para alterar uma única gratidão existente.
+    """
+    # Tornar a data read-only
+    data = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-input w-full', 'required': 'required', 'readonly': 'readonly'}),
+        label="Data da Gratidão"
+    )
+    
+
+    descricaogratidao = forms.CharField(
+        widget=forms.Textarea(attrs={'class': 'form-textarea resize-none', 'rows': 5}),
+        label="Descrição Completa"
+    )
+    
     class Meta:
         model = Gratidao
-        fields = ['nomegratidao', 'descricaogratidao', 'data']
-        widgets = {
-            'nomegratidao': TextInput(attrs={'placeholder': 'Ex: Pelo Sol de hoje', 'class': 'form-control'}),
-            'descricaogratidao': Textarea(attrs={'placeholder': 'Escreva sobre o que você é grato.', 'rows': 4, 'class': 'form-control'}),
-            'data': DateInput(
-                attrs={'type': 'date', 'class': 'form-control', 'value': timezone.localdate().strftime('%Y-%m-%d')},
-                format='%Y-%m-%d'
-            ),
-        }
-        labels = {
-            'nomegratidao': 'O que te fez grato?',
-            'descricaogratidao': 'Detalhes',
-            'data': 'Data',
-        }
+        fields = ['data', 'descricaogratidao'] 
+    
+# -------------------------------------------------------------------
+# FORMULÁRIO DE AFIRMAÇÃO
+# -------------------------------------------------------------------
 
-class AfirmacaoForm(forms.ModelForm):
+class AfirmacaoBaseForm(forms.Form):
     """
-    Formulário para a criação de registros de Afirmação.
+    Formulário base para inclusão/alteração de Afirmações.
+    Define os campos de data e as 3 descrições.
     """
+    # Campo de Data (permite datas anteriores)
+    data = forms.DateField(
+        label='Data da Afirmação',
+        widget=forms.DateInput(attrs={
+            'type': 'date',
+            'class': 'form-control',
+            # Valor padrão de hoje para o campo de data
+            'value': date.today().strftime('%Y-%m-%d')
+        }),
+        required=True
+    )
+    
+    # Campo 1: Obrigatório
+    descricao_1 = forms.CharField(
+        label='Afirmação Positiva 1 (Obrigatório)',
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        required=True,
+    )
+    
+    # Campo 2: Opcional
+    descricao_2 = forms.CharField(
+        label='Afirmação Positiva 2 (Opcional)',
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        required=False,
+    )
+    
+    # Campo 3: Opcional
+    descricao_3 = forms.CharField(
+        label='Afirmação Positiva 3 (Opcional)',
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        required=False,
+    )
+
+    def clean(self):
+        """
+        Validação para garantir que pelo menos uma afirmação foi preenchida.
+        (Já é garantido pelo required=True do campo 1, mas serve como double check).
+        """
+        cleaned_data = super().clean()
+        desc_1 = cleaned_data.get("descricao_1")
+        # Se desc_1 for None (não deve acontecer com required=True) ou vazio após limpeza, gera erro
+        if not desc_1:
+            raise forms.ValidationError("Pelo menos a primeira afirmação é obrigatória.")
+        return cleaned_data
+
+class AfirmacaoRegistroForm(AfirmacaoBaseForm):
+    """Formulário para o registro de novas afirmações."""
+    pass
+
+class AfirmacaoAlteracaoForm(forms.Form):
+    """
+    Formulário específico para alteração. 
+    Lida com apenas uma descrição por vez, pois a alteração é feita em itens individuais do histórico.
+    """
+    descricaoafirmacao = forms.CharField(
+        label='Afirmação',
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        required=True
+    )
+    
+    # O campo de data será apenas para visualização no modal de alteração, mas pode ser 
+    # necessário para lógica de view, então o mantemos aqui (embora não seja editável).
+    data = forms.DateField(
+        label='Data da Afirmação',
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control', 'readonly': 'readonly'}),
+        required=True
+    )
+
     class Meta:
         model = Afirmacao
-        fields = ['nomeafirmacao', 'descricaoafirmacao', 'data']
-        widgets = {
-            'nomeafirmacao': TextInput(attrs={'placeholder': 'Ex: Sou capaz de superar desafios', 'class': 'form-control'}),
-            'descricaoafirmacao': Textarea(attrs={'placeholder': 'Detalhe como esta afirmação te impacta.', 'rows': 4, 'class': 'form-control'}),
-            'data': DateInput(
-                attrs={'type': 'date', 'class': 'form-control', 'value': timezone.localdate().strftime('%Y-%m-%d')},
-                format='%Y-%m-%d'
-            ),
-        }
-        labels = {
-            'nomeafirmacao': 'Afirmação Principal',
-            'descricaoafirmacao': 'Detalhes/Intenção',
-            'data': 'Data',
-        }
-        
+        fields = ['data', 'descricaoafirmacao']
+
+# -------------------------------------------------------------------
+# FORMULÁRIO DE HUMOR
+# -------------------------------------------------------------------
+
 class HumorForm(forms.ModelForm):
     """
     Formulário para a criação/edição de registros de Humor.
+    
     """
     class Meta:
-        model = Humor
-        # O campo 'idusuario' será preenchido na view
-        fields = ['estado', 'descricaohumor', 'data'] 
-        
-        widgets = {
-            # O campo 'estado' se beneficia de um RadioSelect com as choices definidas no Model
-            'estado': RadioSelect(attrs={'class': 'form-control'}), 
-            'descricaohumor': Textarea(attrs={'placeholder': 'Opcional: Descreva o que motivou este humor.', 'rows': 4, 'class': 'form-control'}),
-            'data': DateInput(
-                attrs={'type': 'date', 'class': 'form-control', 'value': timezone.localdate().strftime('%Y-%m-%d')},
-                format='%Y-%m-%d'
-            ),
-        }
-        labels = {
-            'estado': 'Qual o seu humor?',
-            'descricaohumor': 'Detalhes/Motivação',
-            'data': 'Data do Registro',
-        }
+      model = Humor
+      
+      fields = ('estado', 'descricaohumor', 'data')
+      
+      widgets = {
+          # O campo 'estado' usa Select por ser FK (embora seja substituído por JS no template)
+          'estado': Select(attrs={
+              'class': 'form-select',
+          }),
+          'descricaohumor': Textarea(attrs={
+              'class': 'form-control',
+              'rows': 3,
+              'placeholder': 'Detalhe o motivo do seu humor...'
+          }),
+          'data': DateInput(attrs={
+              'class': 'form-control',
+              'type': 'date'
+          }),
+      }
+      
+      labels = {
+          'estado': 'Qual o seu humor?',
+          'descricaohumor': 'Detalhes/Motivação',
+          'data': 'Data do Registro',
+      }
 
-        error_messages = {
-            'estado': {
-                'required': 'Por favor, selecione seu humor para prosseguir.',
-            },
-            'data': {
-                 'required': 'A data do registro é obrigatória.',
-            }
-        }
+      error_messages = {
+          'estado': {
+              'required': 'Por favor, selecione seu humor para prosseguir.',
+          },
+          'data': {
+              'required': 'A data do registro é obrigatória.',
+          }
+      }
+
+# -------------------------------------------------------------------
+# RELATÓRIO DE HUMOR
+# -------------------------------------------------------------------
+class RelatorioHumorForm(forms.Form):
+    """
+    Formulário para selecionar o mês e ano do relatório de humor.
+    """
+    
+    # Geramos uma lista de anos para o selectbox, do ano atual até 5 anos no passado.
+    ANO_CHOICES = [(y, y) for y in range(date.today().year, date.today().year - 5, -1)]
+    
+    # Opções de meses (em Português)
+    MES_CHOICES = [
+        (1, 'Janeiro'), (2, 'Fevereiro'), (3, 'Março'), (4, 'Abril'),
+        (5, 'Maio'), (6, 'Junho'), (7, 'Julho'), (8, 'Agosto'),
+        (9, 'Setembro'), (10, 'Outubro'), (11, 'Novembro'), (12, 'Dezembro'),
+    ]
+
+    mes = forms.ChoiceField(
+        choices=MES_CHOICES,
+        label='Mês',
+        initial=date.today().month,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    
+    ano = forms.ChoiceField(
+        choices=ANO_CHOICES,
+        label='Ano',
+        initial=date.today().year,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+# -------------------------------------------------------------------
+# FORMULÁRIO DE DICAS
+# -------------------------------------------------------------------
 
 class DicasForm(forms.ModelForm):
     """
-    Formulário para o administrador cadastrar novas dicas de humor.
+    Formulário para o administrador cadastrar novas dicas.
+    Usa ModelChoiceField com RadioSelect para 'humor_relacionado'.
     """
+
+    humor_relacionado = forms.ModelChoiceField(
+        queryset=HumorTipo.objects.all(),
+        widget=forms.RadioSelect(),
+        required=True,
+        label="Relacionar a qual Humor:",
+        empty_label=None
+    )
+
+    class Meta:
+      model = Dicas
+      fields = ['humor_relacionado', 'nomeDica', 'descricaoDica', 'criado_por']
+      
+      widgets = {
+          'nomeDica': TextInput(attrs={
+              'class': 'form-control',
+              'placeholder': 'Digite um título curto para a dica'
+          }),
+          'descricaoDica': Textarea(attrs={
+              'class': 'form-control',
+              'rows': 5,
+              'placeholder': 'Escreva aqui a descrição detalhada da dica...',
+              'style': 'min-height: 200px;'
+          }),
+          # Adicionado widget para 'criado_por' (assumindo que existe no modelo Dicas)
+          'criado_por': HiddenInput(),
+      }
     
-    class Meta:
-        model = Dicas
-        # ASSUMIDO: Campos para corresponder ao modelo Dicas
-        fields = ['TipoHumor', 'nomeDica', 'descricaoDica']
-        
-        widgets = {
-            'TipoHumor': forms.Select(attrs={
-                'class': 'form-control' 
-            }),
-            'nomeDica': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Digite um título curto para a dica'
-            }),
-            'descricaoDica': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 5, 
-                'placeholder': 'Escreva aqui a descrição detalhada da dica...',
-                'style': 'min-height: 200px;'
-            }),
-        }
-
 # -------------------------------------------------------------------
-# 3. FORMULÁRIOS DE USUÁRIO E PERFIL
+# Formulário de Atualização de Perfil (Nome e Sobrenome)
 # -------------------------------------------------------------------
-
-class UserUpdateForm(UserChangeForm):
+class UserUpdateForm(forms.ModelForm):
     """
-    Formulário para o usuário editar seu nome e sobrenome (AuthUser).
+    Formulário para o usuário editar seu nome e sobrenome.
+    Utiliza ModelForm, que é mais limpo que UserChangeForm para esta finalidade.
     """
     class Meta:
-        # CORREÇÃO: Usando o modelo User obtido via get_user_model()
-        model = User 
-        fields = ('first_name', 'last_name') 
+        model = User
+        fields = ['first_name', 'last_name']
         
-        widgets = {
-            'first_name': TextInput(attrs={'class': 'form-control'}),
-            'last_name': TextInput(attrs={'class': 'form-control'}),
-        }
-
-    # Removemos o campo 'password' para evitar que o cliente altere a senha acidentalmente
     def __init__(self, *args, **kwargs):
-        super(UserUpdateForm, self).__init__(*args, **kwargs)
-        if 'password' in self.fields:
-            del self.fields['password'] 
+        super().__init__(*args, **kwargs)
         
-        # Garante que todos os campos restantes recebam a classe Bootstrap
+        # Aplica a classe 'form-control' do Bootstrap a todos os campos
         for field in self.fields.values():
-            field.widget.attrs.update({'class': 'form-control'})
-            
-# Formulário para o Perfil (Contém tipoUsuario)
+            field.widget.attrs['class'] = 'form-control'
+
+# -------------------------------------------------------------------
+# Formulário de Perfil Estendido (tipoUsuario)
+# -------------------------------------------------------------------
 class PerfilUsuarioForm(forms.ModelForm):
     """
-    Formulário para o usuário alterar o tipo de perfil (Ex: Básico, Premium).
+    Formulário para o usuário alterar o tipo de perfil.
     """
     class Meta:
         model = PerfilUsuario
         fields = ('tipoUsuario',)
         
         widgets = {
-             'tipoUsuario': Select(attrs={'class': 'form-select'}),
+            # Note: Select é o widget base do Django. É melhor importá-lo.
+            'tipoUsuario': Select(attrs={'class': 'form-select'}),
         }
         
+    # O __init__ do PerfilUsuarioForm não precisa de nada extra por padrão
+
+# -------------------------------------------------------------------
+#Formulário de Alteração de Senha (NOVO - Segurança)
+# -------------------------------------------------------------------
+class CustomPasswordChangeForm(PasswordChangeForm):
+    """
+    Personaliza o PasswordChangeForm padrão do Django para aplicar
+    classes Bootstrap 5 e labels em português.
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # O campo 'tipoUsuario' deve ser o único visível/editável se este formulário for usado isoladamente.
+        
+        # Aplica a classe 'form-control' do Bootstrap a todos os campos
+        for field in self.fields.values():
+            field.widget.attrs['class'] = 'form-control'
+            
+        # Altera os labels dos campos para português
+        self.fields['old_password'].label = 'Senha Atual'
+        self.fields['new_password1'].label = 'Nova Senha'
+        self.fields['new_password2'].label = 'Confirme a Nova Senha'
+        
+        # Remove a ajuda padrão do Django para a primeira nova senha, se existir.
+        # Caso queira personalizar a mensagem de erro, use o help_text
+        self.fields['new_password1'].help_text = None
+        self.fields['new_password2'].help_text = None
 
-
+# -------------------------------------------------------------------
+# Formulário de Cadastro Customizado (Allauth)
+# -------------------------------------------------------------------
 class CustomSignupForm(SignupForm):
     """
-    Estende o formulário de cadastro do Django-allauth para incluir
-    os campos first_name e last_name.
+    Formulário de cadastro customizado para incluir nome e sobrenome no User.
+    Integrado com allauth.
     """
+    # Estes campos serão incluídos no formulário de cadastro do allauth
     first_name = forms.CharField(max_length=150, label='Nome', widget=TextInput(attrs={'class': 'form-control'}))
     last_name = forms.CharField(max_length=150, label='Sobrenome', widget=TextInput(attrs={'class': 'form-control'}))
 
     @transaction.atomic
     def save(self, request):
+        
+        # 1. Chama o save original (cria o objeto User, mas sem nome/sobrenome ainda)
         user = super(CustomSignupForm, self).save(request)
         
+        # 2. Atualiza os campos extras
         user.first_name = self.cleaned_data['first_name']
         user.last_name = self.cleaned_data['last_name']
+        
+        # 3. Salva o User
         user.save()
         
-        # NOTA IMPORTANTE:
-        # Esta lógica assume que o related_name de PerfilUsuario para User é 'perfil'.
-        # Se você estiver usando o modelo 'UserProfile' do seu models.py anterior, o nome
-        # de relacionamento padrão é 'userprofile', e você precisaria de 'user.userprofile.save()'.
-        try:
-             if hasattr(user, 'perfilusuario'): # Tentativa com o nome do modelo em minúsculo
-                 perfil = user.perfilusuario
-             elif hasattr(user, 'perfil'): # Tentativa com o related_name 'perfil'
-                 perfil = user.perfil
-             else:
-                 # Se o signal post_save não criou o perfil ou o related_name é diferente
-                 # Você pode precisar de UserProfile.objects.get_or_create(user=user)
-                 perfil = PerfilUsuario.objects.get(user=user)
-
-             perfil.tipoUsuario = 'Cliente'
-             perfil.save()
-        except Exception as e:
-            # Em caso de erro na manipulação do perfil (ex: related_name errado ou perfil não criado)
-            print(f"ATENÇÃO: Não foi possível salvar tipoUsuario no Perfil. Verifique o related_name da FK. Erro: {e}")
+        # 4. Configura o PerfilUsuario (Assumindo que o sinal já o criou)
+        if hasattr(user, 'perfil'):
+            user.perfil.tipoUsuario = 'Cliente'
+            user.perfil.save()
         
         return user
+
+# -------------------------------------------------------------------
+#   Formulário de Consentimento para Dados e Privacidade
+# -------------------------------------------------------------------
+class ConsentimentoForm(forms.Form):
+    """
+    Formulário para o usuário confirmar que leu e concorda com
+    os termos e políticas da plataforma.
+    """
+    # Campo booleano para aceitação. Required=True garante a validação.
+    aceite_termos = forms.BooleanField(
+        required=True,
+        label="Li e concordo com os Termos de Uso e a Política de Privacidade da LyfeSync.",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Remove o label automático para estilizar melhor no HTML, se desejar
+        self.fields['aceite_termos'].label = False
