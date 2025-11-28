@@ -76,18 +76,18 @@ i[data-lucide] {
 
 /* Definição do formato circular - Customizado */
 .affirmation-circle {
+    /* Manter a centralização e tamanho */
     width: 250px;
     height: 250px;
     border-radius: 50%;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    padding: 1rem;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    text-align: center;
     transition: transform 0.3s ease;
-}
-
-.affirmation-circle:hover {
-    transform: translateY(-5px);
 }
 
 /* Cores específicas para os círculos - Customizado */
@@ -103,50 +103,17 @@ i[data-lucide] {
     background-color: #C0F7C9;
 }
 
-/* Estilo para garantir que o textarea dentro do círculo se ajuste - Customizado */
-/* Ajuste de background/border para combinar com o círculo */
 .afirmacao-textarea {
     background: transparent;
-    /* Alterado de white para transparent */
-    border: none;
-    /* Alterado de white para none */
-    padding: 1rem;
+    border: white;
+    padding: 0.25rem;
     resize: none;
-    width: 100%;
-    height: 100%;
-    font-size: 1.25rem;
-    /* Adicionado para consistência */
+    width: 90%;
+    height: 60%;
+    font-size: 1rem;
     font-style: italic;
-    /* Adicionado para consistência */
     color: #333;
     box-shadow: none !important;
     text-align: center;
-    /* Adicionado para consistência */
     transition: all 0.3s ease;
-}
-
-/* Dicas*/
-
-.card-container {
-    /* Reduza o padding de, por exemplo, 40px para 20px */
-    padding: 20px;
-}
-
-.dica-item {
-    /* Ajuste o padding: vertical horizontal */
-    padding: 15px 0;
-    /* Reduzindo o espaçamento vertical */
-
-    /* Ou ajuste as margens se estiverem definidas */
-    margin: 10px 0;
-}
-
-.dica-item h4 {
-    /* Diminua ou remova a margem inferior (espaço entre o título e o Humor:) */
-    margin-bottom: 5px;
-}
-
-.dica-item p {
-    /* Diminua ou remova a margem inferior (espaço entre o texto e o próximo item) */
-    margin-bottom: 10px;
 }

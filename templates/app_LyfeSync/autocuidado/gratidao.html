@@ -75,8 +75,10 @@
     <h2 class="h5 fw-bold text-dark mt-4">Histórico de Gratidões</h2>
     
     {% if page_obj %}
-        <div class="row g-0"> {% for gratidao in page_obj %}
-                <div class="col-12 mb-1"> <div class="card p-2 border-start border-1 border-secondary shadow-lg rounded-3 ls-hover-lift rounded-1">
+        <div class="row g-0"> 
+            {% for gratidao in page_obj %}
+                <div class="col-12 mb-1"> 
+                    <div class="card p-2 border-start border-1 border-secondary shadow-lg rounded-3 ls-hover-lift rounded-1">
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="gratidao-item-history w-100 me-2">
                                 <span class="gratidao-date small text-muted me-2">{{ gratidao.data|date:"d/m/Y" }}:</span>
