@@ -74,22 +74,6 @@ i[data-lucide] {
 /* --- ESTILOS PÁGINA REGISTRAR AFIRMAÇÃO (Customizados) --- */
 /* ========================================================= */
 
-/* Definição do formato circular - Customizado */
-.affirmation-circle {
-    /* Manter a centralização e tamanho */
-    width: 250px;
-    height: 250px;
-    border-radius: 50%;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    transition: transform 0.3s ease;
-}
-
 /* Cores específicas para os círculos - Customizado */
 .circle-blue {
     background-color: #C0CFF7;
@@ -103,17 +87,16 @@ i[data-lucide] {
     background-color: #C0F7C9;
 }
 
-.afirmacao-textarea {
-    background: transparent;
-    border: white;
-    padding: 0.25rem;
-    resize: none;
-    width: 90%;
-    height: 60%;
-    font-size: 1rem;
-    font-style: italic;
-    color: #333;
-    box-shadow: none !important;
+.affirmation-circle {
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    transition: all 0.3s ease;
+    transition: transform 0.3s ease;
 }

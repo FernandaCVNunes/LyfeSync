@@ -1,0 +1,82 @@
+/* ========================================================= */
+/* ESTILOS BASE (APLICADOS EM TODAS AS TELAS - MOBILE FIRST) */
+/* ========================================================= */
+
+/* Garante que o container ocupe toda a largura em telas pequenas */
+.container {
+    padding-left: 15px;
+    padding-right: 15px;
+    width: 100%;
+}
+
+/* Garante que o conteúdo de cards e elementos de lista sejam flexíveis */
+.card,
+.list-group-item {
+    word-wrap: break-word;
+    /* Evita estouro de texto */
+    overflow-wrap: break-word;
+}
+
+/* Torna a fonte um pouco menor em telas muito pequenas, se necessário */
+body {
+    font-size: 0.95rem;
+}
+
+
+/* ========================================================= */
+/* BREAKPOINT: TELAS PEQUENAS (SM) - Acima de 576px */
+/* ========================================================= */
+@media (min-width: 576px) {
+
+    /* Centraliza o container em telas pequenas */
+    .container {
+        max-width: 540px;
+    }
+}
+
+
+/* ========================================================= */
+/* BREAKPOINT: TELAS MÉDIAS (MD) - Acima de 768px (Tablets) */
+/* ========================================================= */
+@media (min-width: 768px) {
+
+    /* Centraliza o container em telas médias */
+    .container {
+        max-width: 720px;
+    }
+
+    /* Restaura o tamanho de fonte padrão ou aumenta levemente */
+    body {
+        font-size: 1rem;
+    }
+}
+
+
+/* ========================================================= */
+/* BREAKPOINT: TELAS GRANDES (LG) - Acima de 992px (Desktops) */
+/* ========================================================= */
+@media (min-width: 992px) {
+
+    /* Centraliza o container em telas grandes */
+    .container {
+        max-width: 960px;
+    }
+
+    /* Regras de Layout: garante que elementos lado a lado (como Navbar) tenham espaço */
+    .navbar .container-fluid {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+}
+
+
+/* ========================================================= */
+/* BREAKPOINT: TELAS EXTRAGRANDES (XL) - Acima de 1200px */
+/* ========================================================= */
+@media (min-width: 1200px) {
+
+    /* Maximização do container em telas muito grandes */
+    .container {
+        max-width: 1140px;
+    }
+}

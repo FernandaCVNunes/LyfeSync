@@ -3,7 +3,7 @@
 <html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>
       LyfeSync -{% block title %}
       {% endblock %}
@@ -16,6 +16,7 @@
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
 
     {# Arquivos de Estilo Personalizados #}
+    <link rel="stylesheet" href="{% static 'css/responsividade.css' %}" />
     {# masterpage.css é carregado primeiro para estilos comuns (navbar/footer) #}
     <link rel="stylesheet" href="{% static 'css/masterpage.css' %}" />
     {# Novo theme.css para variáveis globais de cor #}

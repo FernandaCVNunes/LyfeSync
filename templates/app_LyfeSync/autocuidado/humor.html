@@ -7,7 +7,7 @@
 {% block title %}Meu Humor{% endblock %}
 
 {% block extra_css %}
-    {# Carrega os estilos customizados para a página de humor #}
+    <link rel="stylesheet" href="{% static 'css/responsividade.css' %}">
     <link rel="stylesheet" href="{% static 'css/humor.css' %}">
 {% endblock %}
 
@@ -30,13 +30,13 @@
 
         // 1. Limpa o destaque de todos os cartões
         document.querySelectorAll('#registroOuAlteracaoModal [data-humor-container]').forEach(function (el) {
-            el.classList.remove('active', 'selected', 'border', 'border-4', 'border-primary');
+            el.classList.remove('active', 'selected', 'border', 'border-4');
             el.setAttribute('aria-checked', 'false');
         });
 
         // 2. Adiciona o destaque ao elemento clicado
         if (element) {
-            element.classList.add('active', 'selected', 'border', 'border-4', 'border-primary');
+            element.classList.add('active', 'selected', 'border', 'border-4');
             element.setAttribute('aria-checked', 'true');
             
             // 3. Atualiza o Título APENAS no modo Registro (ID vazio)
@@ -441,7 +441,7 @@
                 // 1. Limpa Destaques e Reseta Form
                 if (humorForm) humorForm.reset();
                 document.querySelectorAll('.humor-option-card').forEach(card => 
-                    card.classList.remove('selected', 'border', 'border-4', 'border-primary', 'active')
+                    card.classList.remove('selected', 'border', 'border-2', 'active')
                 );
                 
                 if (mode === 'alteracao') {
@@ -466,7 +466,7 @@
                     // 4. Destaque o humor selecionado
                     const selectedCard = document.querySelector(`.humor-option-card[data-humor-value="${estadoId}"]`);
                     if (selectedCard) {
-                        selectedCard.classList.add('active', 'selected', 'border', 'border-4', 'border-primary');
+                        selectedCard.classList.add('active', 'selected', 'border', 'border-4');
                         selectedCard.setAttribute('aria-checked', 'true');
                     }
                     

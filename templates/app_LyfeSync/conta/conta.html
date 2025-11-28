@@ -6,6 +6,10 @@
   Configurações da Conta
 {% endblock %}
 
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/responsividade.css' %}">
+{% endblock %}
+
 {% block content_logado %}
   <div class="lyfesync-content-area custom-content-area"> {# Adicionado classe custom-content-area para estilo no CSS #}
     <div class="d-flex w-100 flex-grow-1 p-4">
