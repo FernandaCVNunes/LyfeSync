@@ -27,7 +27,6 @@ from .public_views import (
 #   VIEWS DE CONFIGURAÇÃO
 # -------------------------------------------------------------------
 from .config_views import (
-    registrar_dica as admin_registrar_dica, alterar_dica, excluir_dica,
     conta, 
     configuracoes_conta,
     excluir_conta

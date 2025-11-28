@@ -1,6 +1,5 @@
 /* autocuidado.css (Gratidão e Afirmação) - Adaptado para Bootstrap 5 */
 
-/* VARIÁVEIS DE COR CUSTOMIZADAS */
 :root {
     --gratidao-blue: #0A9BB8;
     --gratidao-light-blue: #E6F3F5;
@@ -124,4 +123,30 @@ i[data-lucide] {
     text-align: center;
     /* Adicionado para consistência */
     transition: all 0.3s ease;
+}
+
+/* Dicas*/
+
+.card-container {
+    /* Reduza o padding de, por exemplo, 40px para 20px */
+    padding: 20px;
+}
+
+.dica-item {
+    /* Ajuste o padding: vertical horizontal */
+    padding: 15px 0;
+    /* Reduzindo o espaçamento vertical */
+
+    /* Ou ajuste as margens se estiverem definidas */
+    margin: 10px 0;
+}
+
+.dica-item h4 {
+    /* Diminua ou remova a margem inferior (espaço entre o título e o Humor:) */
+    margin-bottom: 5px;
+}
+
+.dica-item p {
+    /* Diminua ou remova a margem inferior (espaço entre o texto e o próximo item) */
+    margin-bottom: 10px;
 }

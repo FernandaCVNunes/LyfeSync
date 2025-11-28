@@ -1,49 +1,25 @@
-   <tbody>
-    
-       {% for habit in habitos %}
-       <tr class="habit-row" data-habit-id="{{ habit.id }}">
-          
-          {# COLUNA HÁBITO - Adicionar classe de padding reduzido (ex: p-2) #}
-          <td class="align-middle fw-bold small p-2">
-             {{ habit.nome }}
-          </td>
+/* Dicas*/
 
-          
-          {# COLUNA DESCRIÇÃO - Adicionar classe de padding reduzido #}
-          <td class="align-middle small text-muted p-2">
-             {{ habit.descricao|default:"Sem descrição." }}
-          </td>
-          
-          {# COLUNA FREQUÊNCIA - Adicionar classe de padding reduzido #}
-          <td class="align-middle text-center p-2">
-             <span class="badge bg-info text-dark">{{ habit.frequencia }}</span>
-          </td>
+.card-container {
+    /* Reduza o padding de, por exemplo, 40px para 20px */
+    padding: 20px;
+}
 
-          {# Células de Status Diário - Adicionar classe de padding reduzido #}
-          {% for day_info in last_7_days_list %}
-          <td class="align-middle text-center small p-2" 
-             data-date="{{ day_info.date_iso }}" 
-             onclick="toggleHabitDay({{ habit.id }}, '{{ day_info.date_iso }}', event)"> 
-             {% with status_key=day_info.date_iso %}
-               <input type="checkbox" class="form-check-circle" {% if habit.completion_status|get_item:status_key %}checked{% endif %}>
-             {% endwith %}
-          </td>
-          {% endfor %}
-          
-          {# COLUNA AÇÕES - Adicionar classe de padding reduzido #}
-          <td class="align-middle text-center p-2">
-             <div class="d-flex justify-content-center">
-              <button type="button" class="btn btn-sm btn-warning text-white me-2 btnAlterar" 
-                  onclick="abrirModalAlterar({{ habit.id }}, event)" 
-                  data-bs-toggle="modal" data-bs-target="#alterarHabitoModal">
-                <i class="bi bi-pencil-square"></i>
-              </button>
-              <button type="button" class="btn btn-sm btn-danger text-white btnExcluir" 
-                  onclick="abrirModalExcluir({{ habit.id }}, event)" 
-                  data-bs-toggle="modal" data-bs-target="#confirmacaoExclusaoModal">
-                <i class="bi bi-trash-fill"></i>
-              </button>
-             </div>
-          </td>
-       </tr>
-       {% empty %}
+.dica-item {
+    /* Ajuste o padding: vertical horizontal */
+    padding: 15px 0;
+    /* Reduzindo o espaçamento vertical */
+
+    /* Ou ajuste as margens se estiverem definidas */
+    margin: 10px 0;
+}
+
+.dica-item h4 {
+    /* Diminua ou remova a margem inferior (espaço entre o título e o Humor:) */
+    margin-bottom: 5px;
+}
+
+.dica-item p {
+    /* Diminua ou remova a margem inferior (espaço entre o texto e o próximo item) */
+    margin-bottom: 10px;
+}

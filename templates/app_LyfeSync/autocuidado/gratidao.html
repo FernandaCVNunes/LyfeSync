@@ -14,15 +14,14 @@
 <div class="container py-4 py-md-5">
     <h1 class="h1 fw-bold text-primary pb-2 mb-3">Diário de Gratidão</h1>
 
-    <div class="message-container">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert" data-timeout="8000">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
+    <!-- Mensagens do Django (Success/Error) -->
+    <div class="col-12">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
     </div>
 
     <div class="card shadow-lg border-3 border-primary rounded-3 mb-4 w-100">

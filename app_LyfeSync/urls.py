@@ -30,7 +30,7 @@ from .views import (
     afirmacao, registrar_afirmacao, alterar_afirmacao, delete_afirmacao,
     
     # Views de Dicas (Staff/Admin)
-    registrar_dica, admin_registrar_dica, alterar_dica, excluir_dica,
+    registrar_dica, alterar_dica, excluir_dica,
     
     # Views de Relatório
     relatorios, relatorio, _get_humor_cor_classe,

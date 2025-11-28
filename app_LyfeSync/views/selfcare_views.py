@@ -1,4 +1,4 @@
-# app_LyfeSync/views/crud_views.py
+# app_LyfeSync/views/selfcare_views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
@@ -318,7 +318,6 @@ def delete_humor(request, humor_id):
     # Redireciona sempre para a página principal de humor
     return redirect('humor')
 
-
 @login_required(login_url='login')
 def load_humor_by_date(request):
     """API para buscar dados de humor para uma data específica (via AJAX) e limpando a tag de dica."""
@@ -363,12 +362,14 @@ def load_humor_by_date(request):
 # -------------------------------------------------------------------
 # VIEWS DE DICAS (APENAS REGISTRO - STAFF/ADMIN)
 # -------------------------------------------------------------------
+DICAS_POR_PAGINA = 20
 
 @login_required(login_url='login')
 @user_passes_test(is_staff_user, login_url='/') # Restringe o acesso a usuários Staff/Admin.
 def registrar_dica(request):
     """Permite registrar uma nova dica e lista as existentes (Admin/Staff)."""
     
+    # 1. Lógica de POST
     if request.method == 'POST':
         form = DicasForm(request.POST)
         if form.is_valid():
@@ -376,27 +377,41 @@ def registrar_dica(request):
             dica_obj.criado_por = request.user 
             dica_obj.save()
             messages.success(request, "Dica de autocuidado cadastrada com sucesso!")
+            # Redireciona para evitar reenvio de formulário
             return redirect('registrar_dica')
         else:
             messages.error(request, "Erro ao cadastrar dica. Verifique os campos.")
     else:
         form = DicasForm()
     
+    # 2. Lógica de GET (e Pós-POST)
     try:
-        humores_disponiveis = HumorTipo.objects.all().order_by('pk') 
+        # Busca todas as dicas e ordena (QuerySet não é avaliado até aqui)
         dicas_list = Dicas.objects.all().order_by('-data_criacao')
+        humores_disponiveis = HumorTipo.objects.all().order_by('pk') 
     except NameError:
         # Fallback se os Models não estiverem disponíveis (usando mocks)
         humores_disponiveis = []
         dicas_list = []
 
+    # 3. Aplicar a Paginação
+    paginator = Paginator(dicas_list, DICAS_POR_PAGINA)
+    # Obtém o número da página da URL (padrão para 1 se não especificado)
+    page_number = request.GET.get('page') 
+    # Obtém o objeto da página, tratando números inválidos
+    page_obj = paginator.get_page(page_number)
+    
+    # 4. Preparar o Contexto
     humor_map = get_humor_map() 
     
     context = {
         'form': form,
         'humor_icon_class_map': humor_map, 
-        'dicas_list': dicas_list,
+        # ATENÇÃO: Envie o objeto paginado 'page_obj' em vez de 'dicas_list'
+        'page_obj': page_obj, 
         'humores_disponiveis': humores_disponiveis, 
+        # Mantenha 'dicas_list' para que a contagem do h2 não quebre (mas o template deve usar page_obj.paginator.count)
+        'dicas_list': dicas_list, 
     }
     return render(request, 'app_LyfeSync/autocuidado/dicas.html', context)
 
