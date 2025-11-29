@@ -137,18 +137,18 @@ def alterar_habito(request, habito_id):
         form.save()
         # MENSAGEM DE SUCESSO DE ALTERAÇÃO
         messages.success(request, f"Hábito '{habito_instance.nome}' alterado com sucesso!")
+
+        return JsonResponse({'success': True, 'message': 'Hábito alterado com sucesso!'}, status=200)
     else:
         # Se houver erro, podemos carregar o template com o formulário e os erros
         messages.error(request, "Erro ao alterar o hábito. Verifique os campos.")
         
-    return redirect('habito')
-
+    return JsonResponse({'success': False, 'message': 'Erro de validação.', 'errors': form.errors}, status=400)
 
 @login_required(login_url='login')
 def get_habit_data(request, habit_id):
     """
     Endpoint de API para retornar dados detalhados de um hábito específico.
-    Retorna todos os campos do ModelForm, incluindo 'quantidade' (que era confundido com 'unidade').
     """
     # 2. Funções auxiliares para formatar datas, evitando erro se o campo for nulo
     def format_date_to_iso(date_field):
@@ -180,11 +180,8 @@ def get_habit_data(request, habit_id):
             'frequencia': habito_instance.frequencia, 
             'quantidade': habito_instance.quantidade, 
             'alvo': habito_instance.alvo, 
-            # O campo 'unidade' foi removido conforme sua clarificação (era 'quantidade')
             'data_inicio': format_date_to_iso(habito_instance.data_inicio), 
             'data_fim': format_date_to_iso(habito_instance.data_fim), 
-            # Assumindo que data_criacao existe no model
-            'data_criacao': format_date_to_iso(getattr(habito_instance, 'data_criacao', None)),
             'dias_concluidos': dias_concluidos_str, 
         }
 
