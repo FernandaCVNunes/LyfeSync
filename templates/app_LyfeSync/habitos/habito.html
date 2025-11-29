@@ -2,6 +2,7 @@
 {% load static %}
 {% load custom_filters %}
 {% load app_LyfeSync_extras %}
+{% load widget_tweaks %}
 
 {% block title %}Meus Hábitos{% endblock %}
 
@@ -101,16 +102,16 @@
                              {# COLUNA AÇÕES - Adicionar classe de padding reduzido #}
                              <td class="align-middle text-center small p-2 border-start">
                                     <div class="d-flex justify-content-center mt-2" >
-                                    <button type="button" class="btn btn-sm btn-warning text-white me-2" 
-                                            onclick="abrirModalAlterar({{ habit.id }}, event)" 
-                                            data-bs-toggle="modal" data-bs-target="#alterarHabitoModal">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-danger text-white" 
-                                            onclick="abrirModalExcluir({{ habit.id }}, event)" 
-                                            data-bs-toggle="modal" data-bs-target="#confirmacaoExclusaoModal">
-                                        <i class="bi bi-trash-fill"></i>
-                                    </button>
+                                       <button type="button" class="btn btn-sm btn-warning text-white me-2" 
+                                             onclick="abrirModalAlterar({{ habit.id }}, event)" 
+                                             data-bs-toggle="modal" data-bs-target="#alterarHabitoModal">
+                                          <i class="bi bi-pencil-square"></i>
+                                       </button>
+                                       <button type="button" class="btn btn-sm btn-danger text-white" 
+                                             onclick="abrirModalExcluir({{ habit.id }}, event)" 
+                                             data-bs-toggle="modal" data-bs-target="#confirmacaoExclusaoModal">
+                                          <i class="bi bi-trash-fill"></i>
+                                       </button>
                                     </div>
                              </td>
                         </tr>
@@ -303,112 +304,184 @@
     }
 
     // FUNÇÃO ATUALIZADA: Agora obtém o ID do atributo de dados do modal
-    function excluirHabitoConfirmado(event) {
-         const confirmModalEl = document.getElementById('confirmacaoExclusaoModal');
-         const habitId = confirmModalEl.getAttribute('data-habit-id');
-         
-         if (!habitId) {
-             showToast('ID do hábito para exclusão não encontrado.', 'error');
-             return;
-         }
+   ffunction excluirHabitoConfirmado(event) {
+      const confirmModalEl = document.getElementById('confirmacaoExclusaoModal');
+      const habitId = confirmModalEl.getAttribute('data-habit-id');
+      
+      if (!habitId) {
+         showToast('ID do hábito para exclusão não encontrado.', 'error');
+         return;
+      }
 
-         const confirmarBtn = event.currentTarget;
-         const originalHtml = confirmarBtn.innerHTML;
-         
-         // Feedback de carregamento
-         confirmarBtn.disabled = true;
-         confirmarBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Excluindo...';
-         
-         // Esconde o modal imediatamente
-         const confirmModal = bootstrap.Modal.getInstance(confirmModalEl);
-         if (confirmModal) confirmModal.hide();
+      const confirmarBtn = event.currentTarget;
+      const originalHtml = confirmarBtn.innerHTML;
+      
+      // 1. Feedback de carregamento (antes de fechar o modal)
+      confirmarBtn.disabled = true;
+      confirmarBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Excluindo...';
+      
+      // 2. Esconde o modal IMEDIATAMENTE antes da requisição.
+      const confirmModal = bootstrap.Modal.getInstance(confirmModalEl);
+      if (confirmModal) {
+         confirmModal.hide(); 
+      }
 
-         // Requisição de Exclusão
-         fetch(`/habitos/excluir/${habitId}/`, { 
-             method: 'POST',
-             headers: {
-                  'X-CSRFToken': getCookie('csrftoken')
-             }
-         })
-         .then(response => response.json())
-         .then(data => {
-             // Restaura o botão e o estado
-             confirmarBtn.disabled = false;
-             confirmarBtn.innerHTML = originalHtml;
-             confirmModalEl.removeAttribute('data-habit-id'); // Limpa o ID
+      // Requisição de Exclusão
+      fetch(`/habitos/excluir/${habitId}/`, { 
+         method: 'POST',
+         headers: {
+               'X-CSRFToken': getCookie('csrftoken')
+         }
+      })
+      .then(response => {
+         // Se a requisição HTTP falhar (ex: 404, 500), ela cai no catch
+         if (!response.ok) {
+               throw new Error(`Erro de rede ou servidor. Status: ${response.status}`);
+         }
+         return response.json();
+      })
+      .then(data => {
+         // Restaura o botão e o estado
+         confirmarBtn.disabled = false;
+         confirmarBtn.innerHTML = originalHtml;
+         confirmModalEl.removeAttribute('data-habit-id'); 
 
-             if (data.success) {
-                  showToast(data.message || 'Hábito excluído com sucesso!', 'success');
+         if (data.success) {
+               showToast(data.message || 'Hábito excluído com sucesso!', 'success');
+               // Lógica de remoção da linha (DOM Manipulation)
+               const rowToRemove = document.querySelector(`.habit-row[data-habit-id="${habitId}"]`);
+               if (rowToRemove) {
+                  rowToRemove.remove();
                   
-                  // Lógica de remoção da linha
-                  const rowToRemove = document.querySelector(`.habit-row[data-habit-id="${habitId}"]`);
-                  if (rowToRemove) {
-                      rowToRemove.remove();
-                      
-                      // Verifica se a tabela ficou vazia (BÔNUS)
-                      const tbody = rowToRemove.closest('tbody');
-                      if (tbody && tbody.querySelectorAll('.habit-row').length === 0) { 
-                           const tableHeaderCount = document.querySelectorAll('thead th').length;
-                           const emptyRowHtml = `<tr id="empty-table-row"><td colspan="${tableHeaderCount}" class="text-center text-muted small py-4">Nenhum hábito registrado. Clique em 'Novo Hábito' para começar.</td></tr>`;
-                           tbody.innerHTML = emptyRowHtml;
-                      }
-                  } 
-             } else {
-                  showToast(data.message || 'Falha ao excluir o hábito.', 'error');
-             }
-         })
-         .catch(error => {
-             console.error('Erro na requisição de exclusão:', error);
-             // Restaura o botão e o estado em caso de erro
-             confirmarBtn.disabled = false;
-             confirmarBtn.innerHTML = originalHtml;
-             confirmModalEl.removeAttribute('data-habit-id'); 
-             showToast('Erro ao tentar excluir o hábito.', 'error');
-         });
-    }
+                  // Verifica se a tabela ficou vazia (BÔNUS)
+                  const tbody = rowToRemove.closest('tbody');
+                  if (tbody && tbody.querySelectorAll('.habit-row').length === 0) { 
+                     const tableHeaderCount = document.querySelectorAll('thead th').length;
+                     const emptyRowHtml = `<tr id="empty-table-row"><td colspan="${tableHeaderCount}" class="text-center text-muted small py-4">Nenhum hábito registrado. Clique em 'Novo Hábito' para começar.</td></tr>`;
+                     tbody.innerHTML = emptyRowHtml;
+                  }
+               } 
+         } else {
+               // Falha reportada pelo servidor (success: false)
+               showToast(data.message || 'Falha ao excluir o hábito.', 'error');
+         }
+      })
+      .catch(error => {
+         console.error('Erro na requisição de exclusão:', error);
+         
+         // 3. RESTAURAÇÃO COMPLETA em caso de ERRO DE REDE/SERVIDOR
+         confirmarBtn.disabled = false;
+         confirmarBtn.innerHTML = originalHtml;
+         confirmModalEl.removeAttribute('data-habit-id'); 
+         
+         // Se o modal foi fechado, mas o backdrop ficou, forçamos o dispose
+         if (confirmModal) {
+               ;
+         }
+         
+         showToast('Erro grave ao tentar excluir o hábito. Tente recarregar a página.', 'error');
+      });
+   }
 
-    // NOVO: Função showToast (mantida como estava, muito boa!)
+    // NOVO: Função showToast 
     function showToast(message, type) {
-         const toastPlaceholder = document.getElementById('liveToastPlaceholder');
-         if (!toastPlaceholder) {
-              console.log(`[Toast Fallback]: ${message}`);
-              return; 
-         }
+      const toastPlaceholder = document.getElementById('liveToastPlaceholder');
+      if (!toastPlaceholder) {
+         console.log(`[Toast Fallback]: ${message}`);
+         return;
+      }
 
-         const alertClass = type === 'success' ? 'bg-success' : type === 'warning' ? 'bg-warning' : 'bg-danger';
-         
-         const toastHtml = `
-             <div class="toast align-items-center text-white ${alertClass} border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
-                  <div class="d-flex">
-                      <div class="toast-body fw-bold">
-                           ${message}
-                      </div>
-                      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      const alertClass =
+         type === 'success'
+               ? 'bg-success'
+               : type === 'warning'
+                  ? 'bg-warning'
+                  : 'bg-danger';
+
+      const toastHtml = `
+         <div class="toast align-items-center text-white ${alertClass} border-0"
+               role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+               <div class="d-flex">
+                  <div class="toast-body fw-bold">
+                     ${message}
                   </div>
-             </div>
-         `;
+                  <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                           data-bs-dismiss="toast" aria-label="Close"></button>
+               </div>
+         </div>
+      `;
 
-         const tempDiv = document.createElement('div');
-         tempDiv.innerHTML = toastHtml;
-         const toastElement = tempDiv.firstChild;
-         
-         toastPlaceholder.appendChild(toastElement);
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = toastHtml;
 
-         const bsToast = new bootstrap.Toast(toastElement);
-         bsToast.show();
+      // AQUI ESTÁ A CORREÇÃO
+      const toastElement = tempDiv.firstElementChild;
 
-         toastElement.addEventListener('hidden.bs.toast', () => {
-             toastElement.remove();
-         });
-    }
+      toastPlaceholder.appendChild(toastElement);
 
-    document.addEventListener('DOMContentLoaded', () => {
-         // NOVO: Adiciona o listener para o botão de confirmação de exclusão
-         const confirmarBtn = document.getElementById('confirmarExclusaoBtn');
-         if (confirmarBtn) {
-             confirmarBtn.addEventListener('click', excluirHabitoConfirmado);
-         }
-    });
+      const bsToast = new bootstrap.Toast(toastElement);
+      bsToast.show();
+
+      toastElement.addEventListener('hidden.bs.toast', () => {
+         toastElement.remove();
+      });
+   }
+
+   document.addEventListener('DOMContentLoaded', () => {
+
+      const confirmarBtn = document.getElementById('confirmarExclusaoBtn');
+      if (confirmarBtn) {
+         confirmarBtn.addEventListener('click', excluirHabitoConfirmado);
+      }
+
+      const formAlterar = document.getElementById('formAlterarHabito');
+      if (formAlterar) {
+           formAlterar.addEventListener('submit', function(e) {
+               e.preventDefault();
+               
+               const alterarModalEl = document.getElementById('alterarHabitoModal');
+               const alterarModal = bootstrap.Modal.getInstance(alterarModalEl);
+               
+               // Simplesmente submete via AJAX
+               fetch(this.action, { 
+                   method: 'POST',
+                   body: new FormData(this),
+                   headers: {
+                       'X-CSRFToken': getCookie('csrftoken'),
+                       // Não defina Content-Type, FormData cuida disso.
+                   }
+               })
+               .then(response => {
+                   // Se a view retornar um redirect, isso não funcionará, então a view deve retornar JSON.
+                   if (!response.ok) {
+                       throw new Error(`Erro ao salvar. Status: ${response.status}`);
+                   }
+                   // Assumindo que a view retorna um JSON como {'success': true, 'message': '...'}.
+                   return response.json(); 
+               })
+               .then(data => {
+                   if (alterarModal) {
+                       alterarModal.hide(); // Fecha o modal
+                   }
+                   if (data.success) {
+                       showToast(data.message || 'Hábito alterado com sucesso!', 'success');
+                       // Necessário recarregar a página para ver a mudança na tabela
+                       setTimeout(() => window.location.reload(), 500); 
+                   } else {
+                       showToast(data.message || 'Falha ao alterar o hábito.', 'error');
+                   }
+               })
+               .catch(error => {
+                   console.error('Erro no AJAX (Alterar Submissão):', error);
+                   if (alterarModal) {
+                       alterarModal.hide();
+                   }
+                   showToast('Erro ao submeter a alteração. Tente novamente.', 'error');
+               });
+           });
+        }
+
+   });
 
 </script>
 {% endblock extra_js %}

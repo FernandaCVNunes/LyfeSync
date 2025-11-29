@@ -9,6 +9,7 @@
 <div class="modal fade" id="alterarHabitoModal" tabindex="-1" aria-labelledby="alterarHabitoLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rs-modal-content shadow-lg rounded-3">
+
             <div class="modal-header border-0 pb-0 bg-warning">
                 <h5 class="modal-title fw-bold fs-4 text-white" id="alterarHabitoLabel">Alterar Hábito</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
@@ -18,8 +19,6 @@
                 {# O atributo action será definido dinamicamente pelo JavaScript: form.setAttribute('action', `/habitos/alterar/${data.id}/`); #}
                 <form id="formAlterarHabito" method="POST">
                     {% csrf_token %}
-
-                    {# Removido o campo 'habito_id' pois a view espera o ID na URL, que é setada no atributo 'action' pelo JS. #}
 
                     <div class="row mb-3">
                         <div class="col-12">

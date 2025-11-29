@@ -43,7 +43,7 @@ def habito(request):
     """Lista todos os hábitos do usuário e é a página principal de hábitos."""
     
     # 1. Obter lista de hábitos reais
-    habitos_reais = Habito.objects.filter(usuario=request.user).order_by('-data_inicio')
+    habitos_reais = Habito.objects.filter(usuario=request.user).order_by('nome')
     
     # -------------------------------------------------------------------
     # 2. LÓGICA DE DATAS (O bloco de 7 dias)

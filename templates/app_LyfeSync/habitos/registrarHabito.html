@@ -6,7 +6,7 @@
 {% endblock %}
 
 
-<div class="modal fade " id="registrarHabitoModal" tabindex="-1" aria-labelledby="registrarHabitoLabel" aria-hidden="true">
+<div class="modal fade" id="registrarHabitoModal" tabindex="-1" aria-labelledby="registrarHabitoLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rs-modal-content shadow-lg rounded-3">
             
@@ -16,9 +16,10 @@
             </div>
 
             <div class="modal-body pt-3 px-4 pb-5">
+
                 <form method="POST" action="{% url 'registrar_habito' %}">
                     {% csrf_token %}
-
+                    
                     <div class="row mb-3">
                         <div class="col-12">
                             <label for="id_nome" class="form-label visually-hidden">Nome do Hábito</label>
@@ -77,8 +78,8 @@
 
                     <div class="row">
                         <div class="col-12 text-center">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-sm rs-btn-adicionar">Adicionar Hábito</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Fechar">Cancelar</button>
+                            <button type="submit" class="btn btn-sm rs-btn-adicionar">Adicionar</button>
                         </div>
                     </div>
                 </form>
