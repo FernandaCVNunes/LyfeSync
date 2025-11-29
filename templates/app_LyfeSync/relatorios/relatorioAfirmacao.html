@@ -89,11 +89,11 @@
             {% for afirmacao in afirmacoes %}
             <tr>
               <!-- Coluna Data -->
-              <td class="afirmacao-col-data">
+              <td class="afirmacao-col-data text-muted">
                 {{ afirmacao.data|date:"d/m/Y" }}
               </td>
               <!-- Coluna Descrição da Afirmação -->
-              <td class="text-start text-wrap-content">
+              <td class="text-start text-wrap-content fs-5">
                 {{ afirmacao.descricaoafirmacao|default:"-- Sem descrição --" }}
               </td>
             </tr>

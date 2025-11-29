@@ -87,11 +87,11 @@
             {% for gratidao in gratidoes %}
             <tr>
               <!-- Coluna Data -->
-              <td class="gratidao-col-data">
+              <td class="gratidao-col-data text-muted text-center">
                 {{ gratidao.data|date:"d/m/Y" }}
               </td>
               <!-- Coluna Descrição -->
-              <td class="text-start text-wrap-content">
+              <td class="text-start text-wrap-content fs-6">
                 {{ gratidao.descricaogratidao|default:"-- Sem descrição --" }}
               </td>
             </tr>

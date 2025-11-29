@@ -39,7 +39,7 @@
                         <div class="d-flex justify-content-between align-items-center"> 
                             <div class="gratidao-item-history flex-grow-1 me-2"> 
                                 <p class="card-text fs-5 text-warning fw-bold mb-0 mt-0" style="white-space: pre-line;">
-                                    <i class="bi bi-star-fill text-success me-1"></i>{{ gratidao.descricaogratidao }}
+                                    <i class="bi bi-star-fill text-success ms-1 me-2"></i>{{ gratidao.descricaogratidao }}
                                 </p>
                             </div>
                             
@@ -88,12 +88,12 @@
                     <div class="card ps-2 border-start border-1 border-secondary shadow-lg rounded-3 ls-hover-lift rounded-1">
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="gratidao-item-history flex-grow-1 me-2"> 
-                                <span class="gratidao-date small text-muted">{{ gratidao.data|date:"d/m/Y" }}:</span>
-                                <p class="item-content mb-0 text-break fs-5" style="white-space: pre-line;">
+                                <span class="gratidao-date small text-muted mb-0">{{ gratidao.data|date:"d/m/Y" }}:</span>
+                                <p class="item-content mb-2 text-break text-primary fs-5 align-items-center">
                                 {{ gratidao.descricaogratidao }}</p>
                             </div>
                             
-                            <div class="d-flex gap-1 ms-auto">
+                            <div class="d-flex gap-1 ms-auto me-2">
                                 <button
                                     class="btn btn-outline-primary btn-sm"
                                     onclick="openUpdateModal('{{ gratidao.idgratidao }}', '{{ gratidao.nomegratidao|escapejs }}', '{{ gratidao.descricaogratidao|escapejs }}', '{{ gratidao.data|date:"Y-m-d" }}')"
