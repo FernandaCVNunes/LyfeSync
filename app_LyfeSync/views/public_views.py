@@ -29,7 +29,7 @@ def contatos(request):
         anexo = request.FILES.get('anexo')
         
         # 2. Define o destinatário e o corpo do e-mail
-        destinatario = ['lyfesyncpt@gmail.com']
+        destinatario = ['fedcvn@gmail.com']
         
         corpo_email = f"Mensagem de Contato do Site LyfeSync:\n\n"
         corpo_email += f"E-mail (Identificador): {email_remetente}\n"

@@ -26,42 +26,39 @@
     </div>
 
     <div class="card shadow-lg border-3 border-primary rounded-3 mb-4 w-100">
-        <div class="d-flex align-items-center justify-content-between p-3">
-            <h2 class="h5 fw-semibold text-dark mb-1">
-                Gratidões de Hoje: {{ hoje|date:"d/m/Y" }}
-            </h2>
-        </div>
+    <div class="p-3"> <h2 class="h5 fw-semibold text-dark mb-1">
+            Gratidões de Hoje: {{ hoje|date:"d/m/Y" }}
+        </h2>
+    </div>
 
-        {% if gratidoes_hoje %}
-            <div class="space-y-2 p-3 pt-1"> {% for gratidao in gratidoes_hoje %}
-                    <div class="p-1 border-start border-1 border-warning rounded-end bg-light d-flex justify-content-between align-items-start">
-                        <p class="h6 fst-italic text-success">
-                            <i class="bi bi-star-fill text-warning me-1"></i>
-                            {{ gratidao.descricaogratidao }}
-                        </p>
-                        <div class="btn-group btn-group-sm ms-auto flex-shrink-1 d-flex align-items-center gap-1">
-                            <button 
-                                class="btn btn-outline-primary btn-sm text-primary p-1"
-                                onclick="openUpdateModal('{{ gratidao.idgratidao }}', '{{ gratidao.nomegratidao|escapejs }}', '{{ gratidao.descricaogratidao|escapejs }}', '{{ gratidao.data|date:"Y-m-d" }}')"
+    {% if gratidoes_hoje %}
+        <div class="space-y-2 p-3 pt-1">
+            {% for gratidao in gratidoes_hoje %}
+                <div class="p-1 border-start border-1 border-warning rounded-end bg-light d-flex justify-content-between align-items-start">
+                    <p class="h6 fst-italic text-success me-2"> <i class="bi bi-star-fill text-warning me-1"></i>
+                        {{ gratidao.descricaogratidao }}
+                    </p>
+                    <div class="btn-group btn-group-sm flex-shrink-0 d-flex align-items-center gap-1">
+                        <button 
+                            class="btn btn-outline-primary btn-sm text-primary p-1" 
                             >
-                                Alterar
-                            </button>
-                            <button 
-                                class="btn btn-outline-danger btn-sm text-danger p-1 mt-1"
-                                onclick="openDeleteModal('{{ gratidao.idgratidao }}', '{{ gratidao.descricaogratidao|truncatechars:20|escapejs }}')"
-                            >
-                                Excluir
-                            </button>
-                        </div>
+                            Alterar
+                        </button>
+                        <button 
+                            class="btn btn-outline-danger btn-sm text-danger p-1 mt-1" >
+                            Excluir
+                        </button>
                     </div>
-                {% endfor %}
-            </div>
-            <button 
-                class="btn btn-secondary btn-sm fw-bold shadow-sm m-3 mt-1"
+                </div>
+            {% endfor %}
+        </div>
+        <div class="p-3 pt-1 text-end"> <button 
+                class="btn btn-secondary btn-sm fw-bold shadow-sm"
                 onclick="openCreateModal(false)"
             >
                 ➕ Inclusão(Para datas passadas)
             </button>
+        </div>
         {% else %}
             <p class="text-muted p-3 pt-0">Você ainda não registrou suas gratidões de hoje.</p>
             <button 
@@ -81,13 +78,12 @@
                 <div class="col-12 mb-1"> 
                     <div class="card p-2 border-start border-1 border-secondary shadow-lg rounded-3 ls-hover-lift rounded-1">
                         <div class="d-flex justify-content-between align-items-center">
-                            <div class="gratidao-item-history w-100 me-2">
-                                <span class="gratidao-date small text-muted me-2">{{ gratidao.data|date:"d/m/Y" }}:</span>
+                            <div class="gratidao-item-history **w-100** me-2"> <span class="gratidao-date small text-muted me-2">{{ gratidao.data|date:"d/m/Y" }}:</span>
                                 <p class="text-dark fw-normal mb-0 small" style="white-space: pre-line;"><i class="bi bi-heart-fill text-danger me-1"></i>{{ gratidao.descricaogratidao }}</p>
                             </div>
                             
                             <div class="btn-group btn-group-sm ms-auto flex-shrink-0 d-flex align-items-center gap-1">
-                                <button 
+                                <button
                                     class="btn btn-outline-primary text-primary p-0 small"
                                     onclick="openUpdateModal('{{ gratidao.idgratidao }}', '{{ gratidao.nomegratidao|escapejs }}', '{{ gratidao.descricaogratidao|escapejs }}', '{{ gratidao.data|date:"Y-m-d" }}')"
                                 >
