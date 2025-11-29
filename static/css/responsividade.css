@@ -1,79 +1,25 @@
 /* responsividade.css */
-
-/* ========================================================================= */
-/* --- 1. AJUSTE DO LAYOUT GERAL (Sidebar/Conteúdo) --- */
-/* ========================================================================= */
-
-/* Para telas até 992px (Dispositivos Móveis e Tablets) */
-@media (max-width: 991.98px) {
-
-    /* Esconde o menu lateral por padrão. O botão hamburguer deve controlá-lo. */
-    .menu-lateral,
-    .sidebar {
-        /*
-         * Se o menu lateral tiver 'position: fixed' em desktop:
-         * Ajustar a largura para 100% ou ocultar totalmente.
-         */
-        width: 100% !important;
-        position: fixed;
-        /* Se estiver fixed, manter fixo no topo */
-        top: 0;
-        left: 0;
-        z-index: 1030;
-        /* Acima do conteúdo */
-        /*
-         * Se você usa Bootstrap e ele já está colapsando:
-         * Apenas garanta que o Conteúdo Principal ocupe 100%
-         */
-    }
-
-    /* O Conteúdo Principal deve ocupar 100% da largura */
-    .conteudo-principal,
-    .main-content {
-        /* Remove qualquer margem esquerda que o sidebar fixo impôs em desktop */
-        margin-left: 0 !important;
-        padding-top: 60px;
-        /* Adiciona padding para o menu/header fixo */
-        width: 100%;
-    }
-
-    /* Oculta o Sidebar em telas mobile, a menos que ele seja aberto */
-    .collapse:not(.show) {
-        /* Garante que o menu colapsável não seja visível */
-        display: none;
-    }
-
-    /* Remove o padding excessivo imposto pelo layout de desktop */
-    .navbar {
-        padding: 0.5rem 1rem !important;
-    }
-}
-
-/* ========================================================================= */
-/* --- 1. ESTILOS BASE (MOBILE FIRST) --- */
-/* ========================================================================= */
+/* ======================================================================== */
+/* 1. AJUSTES GERAIS (MOBILE FIRST) */
+/* ======================================================================== */
 
 body {
     font-size: 16px;
     word-wrap: break-word;
     overflow-x: hidden;
-    /* Previne rolagem horizontal causada por transbordamento */
 }
 
-/* Ajuste Global de Container e Padding */
 .container,
 .container-fluid {
     padding-left: 10px !important;
     padding-right: 10px !important;
 }
 
-/* Ajuste de Títulos */
 h1,
 h2,
 h3 {
     word-break: break-word;
     font-size: 1.5rem;
-    /* Títulos menores em mobile */
 }
 
 h1.text-success,
@@ -81,179 +27,130 @@ h1.fw-bold.text-primary {
     font-size: 1.75rem !important;
 }
 
-/* Padronização de Componentes Bootstrap */
-.form-select,
 .form-control,
+.form-select,
 .rs-form-control {
-    border-radius: 0.5rem;
+    border-radius: .5rem;
 }
 
-/* Garante que botões grandes (usados em relatórios) se ajustem */
 .btn-lg {
     font-size: 1rem;
-    padding: 0.5rem 1rem;
+    padding: .5rem 1rem;
 }
 
 
-/* ========================================================================= */
-/* --- 2. LAYOUTS DE CONTEÚDO (Cards/Listas de Gestão: Afirmação, Dicas, etc.) --- */
-/* ========================================================================= */
+/* ======================================================================== */
+/* 2. SIDEBAR / LAYOUT GERAL */
+/* ======================================================================== */
 
-/* Padrão para Itens de Lista/Card com Botões de Ação (e.g., Afirmacao, Dicas) */
-.card,
-.list-group-item {
+@media (max-width: 991.98px) {
+
+    .sidebar,
+    .menu-lateral {
+        width: 100% !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1030;
+    }
+
+    .conteudo-principal,
+    .main-content {
+        margin-left: 0 !important;
+        padding-top: 60px;
+        width: 100%;
+    }
+
+    .collapse:not(.show) {
+        display: none;
+    }
+
+    .navbar {
+        padding: .5rem 1rem !important;
+    }
+}
+
+
+/* ======================================================================== */
+/* 3. ITENS DE GESTÃO (Afirmacao / Dicas / Hábito etc.) */
+/* ======================================================================== */
+/* ⚠ Antes afetava TODOS os cards; agora só afeta cards com a classe .responsivo */
+
+.card.responsivo,
+.list-group-item.responsivo {
     display: flex;
     flex-direction: column;
-    /* Empilhamento em mobile */
-    align-items: flex-start;
-    padding: 10px !important;
     gap: 10px;
-    /* Espaço entre conteúdo e botões */
+    padding: 10px;
 }
 
-.card .btn-group,
-.list-group-item .btn-group {
+.card.responsivo .btn-group,
+.list-group-item.responsivo .btn-group {
     width: 100%;
-    /* Ocupa toda a largura */
     justify-content: space-evenly !important;
-    /* Distribui os botões */
     flex-wrap: wrap;
 }
 
-.card .btn-group .btn,
-.list-group-item .btn-group .btn {
+.card.responsivo .btn-group .btn,
+.list-group-item.responsivo .btn-group .btn {
     flex-grow: 1;
     margin: 5px 2px;
 }
 
-/* Otimização para Dicas/Afirmação em telas muito pequenas (oculta texto do botão) */
+/* Telas pequenas */
 @media (max-width: 575.98px) {
 
-    /* Ajusta a coluna principal em Dicas.html */
-    .container-fluid .row.justify-content-center .col-10 {
-        flex: 0 0 100%;
-        max-width: 100%;
-    }
-
-    /* Faz os botões ficarem maiores e distribuídos uniformemente */
-    .list-group-item .btn-group .btn {
+    .list-group-item.responsivo .btn-group .btn {
         flex: 1;
         padding-left: 0;
         padding-right: 0;
     }
 
-    /* Oculta o texto dos botões de ação na lista para economizar espaço e manter apenas os ícones */
-    .list-group-item .btn-group .btn span {
+    .list-group-item.responsivo .btn-group .btn span {
         display: none;
     }
 
-    /* Garante que os ícones fiquem visíveis no centro dos botões menores */
-    .list-group-item .btn-group .btn i {
+    .list-group-item.responsivo .btn-group .btn i {
         margin: 0 !important;
     }
 }
 
-/* Layout Horizontal para Card/Lista em Tablets/Desktop */
+/* Telas ≥ 768px */
 @media (min-width: 768px) {
 
-    .card,
-    .list-group-item {
+    .card.responsivo,
+    .list-group-item.responsivo {
         flex-direction: row;
-        /* Volta a alinhar o conteúdo na mesma linha */
-        align-items: center;
         gap: 20px;
+        align-items: center;
     }
 
-    .card .btn-group,
-    .list-group-item .btn-group {
-        margin-top: 0;
+    .card.responsivo .btn-group,
+    .list-group-item.responsivo .btn-group {
         width: auto;
-        /* Deixa o grupo de botões ocupar apenas o espaço necessário */
         justify-content: flex-end !important;
         flex-shrink: 0;
-        /* Impede que os botões encolham */
     }
 
-    .card .btn-group .btn,
-    .list-group-item .btn-group .btn {
-        margin: 0 2px;
+    .card.responsivo .btn-group .btn,
+    .list-group-item.responsivo .btn-group .btn {
         flex-grow: 0;
+        margin: 0 2px;
     }
 
-    /* Garante que o texto possa ser truncado corretamente em list-group-item */
-    .list-group-item>div:first-child {
+    .list-group-item.responsivo>div:first-child {
         flex-grow: 1;
         min-width: 0;
-        /* Permite que o texto encolha */
     }
 }
 
 
-/* ========================================================================= */
-/* --- 3. RESPONSIVIDADE DE RELATÓRIOS (Filtros e Botões Inferiores) --- */
-/* ========================================================================= */
+/* ======================================================================== */
+/* 4. RELATÓRIOS – TABELA MATRIZ (HÁBITO) */
+/* ======================================================================== */
 
-/* Ajuste de Título/Período em Header */
-@media (max-width: 576px) {
-
-    .report-header .col-md-8,
-    .report-header .col-md-4 {
-        text-align: center !important;
-    }
-
-    .report-header .report-title {
-        font-size: 1.75rem;
-    }
-
-    .report-header h3 {
-        margin-top: 10px;
-        font-size: 1.25rem;
-        width: 100%;
-        justify-content: center !important;
-    }
-
-    /* Formulário de Filtro (Mês/Ano/Período) */
-    .month-selector-card .row.g-3.align-items-end,
-    #report-filter-form {
-        flex-direction: column !important;
-    }
-
-    .month-selector-card .row.g-3.align-items-end>div,
-    #report-filter-form>div {
-        width: 100% !important;
-        margin-top: 0.5rem;
-    }
-
-    /* Garante que o botão de "Gerar Relatório" ocupe 100% */
-    .month-selector-card button[type="submit"],
-    #report-filter-form button[type="submit"] {
-        width: 100% !important;
-        margin-top: 1rem;
-    }
-}
-
-/* Responsividade dos Botões de Ação Inferiores (Voltar, Exportar, Alterar) */
-@media (max-width: 768px) {
-    .d-flex.justify-content-between.mt-5 {
-        flex-direction: column;
-        gap: 10px;
-        width: 100%;
-    }
-
-    .d-flex.justify-content-between.mt-5 .btn-lg,
-    .d-flex.justify-content-between.mt-5 .btn-group {
-        width: 100%;
-    }
-}
-
-/* ========================================================================= */
-/* --- 4. RELATÓRIOS: TABELA MATRIZ (Hábito, Humor) --- */
-/* ========================================================================= */
-
-/* --- HÁBITO (Gestão - Tabela) --- */
 @media (max-width: 991.98px) {
 
-    /* Estilo de Cartão para cada Hábito */
     .table-habitos-gestao .habit-row {
         display: block;
         border: 1px solid #dee2e6;
@@ -266,7 +163,6 @@ h1.fw-bold.text-primary {
         position: absolute;
         top: -9999px;
         left: -9999px;
-        /* Oculta o cabeçalho da tabela */
     }
 
     .habit-row td {
@@ -277,7 +173,6 @@ h1.fw-bold.text-primary {
         white-space: normal;
     }
 
-    /* Adiciona labels antes do conteúdo */
     .habit-row td:nth-of-type(1):before {
         content: "Hábito: ";
         font-weight: bold;
@@ -296,9 +191,7 @@ h1.fw-bold.text-primary {
         color: #6c757d;
     }
 
-    /* Estilos para os 7 dias da semana (colunas 4 a 10) */
     .habit-row td:nth-of-type(4) {
-        /* O dia da semana 1 fica como um label para o bloco */
         border-top: 1px solid #eee;
         padding-bottom: 0 !important;
     }
@@ -313,25 +206,12 @@ h1.fw-bold.text-primary {
 
     .habit-row td:nth-of-type(n+4):nth-of-type(-n+10) {
         display: inline-block !important;
-        /* Faz as células dos dias ficarem lado a lado */
         width: 14.28%;
         text-align: center !important;
         padding: 5px 2px !important;
         border-right: 1px solid #eee !important;
-        border-bottom: none !important;
     }
 
-    .habit-row td:nth-of-type(10) {
-        border-right: none !important;
-    }
-
-    .habit-row td:nth-of-type(n+5):nth-of-type(-n+10):before {
-        display: none;
-    }
-
-    /* Remove label individual dos dias */
-
-    /* Coluna de Ações (Última coluna) */
     .habit-row td:last-child {
         text-align: center !important;
         padding: 10px 15px !important;
@@ -351,42 +231,40 @@ h1.fw-bold.text-primary {
     }
 }
 
-/* --- RELATÓRIO DE HÁBITO (Visualização - Tabela Matriz com rolagem) --- */
+
+/* ======================================================================== */
+/* 5. RELATÓRIOS – TABELA MATRIZ (HUMOR) */
+/* ======================================================================== */
+
 @media (max-width: 576px) {
 
-    /* Diminui o tamanho das células de dia para maximizar o espaço para a rolagem */
-    .table-habitos thead th:not(:first-child):not(:last-child),
-    .table-habitos tbody td:not(:first-child):not(:last-child) {
-        min-width: 20px !important;
-        max-width: 20px !important;
-        padding: 0.5rem 0.2rem !important;
-        font-size: 0.7rem;
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+        margin-bottom: 1rem;
     }
 
-    /* Ajusta a coluna de nome do hábito */
-    .table-habitos thead th:first-child,
-    .table-habitos tbody td:first-child {
-        min-width: 160px !important;
-        max-width: 160px !important;
-        white-space: normal !important;
+    .table-responsive .table-humor thead th:first-child,
+    .table-responsive .table-humor tbody td:first-child {
+        min-width: 150px !important;
+        max-width: 150px !important;
+        white-space: nowrap;
     }
 
-    /* Ajusta a coluna de resultado */
-    .table-habitos thead th:last-child,
-    .table-habitos tbody td:last-child {
-        min-width: 80px !important;
-        max-width: 80px !important;
+    .table-responsive .table-humor tbody td[style*="min-width: 35px"] {
+        min-width: 25px !important;
+        max-width: 25px !important;
     }
 }
 
 
-/* ========================================================================= */
-/* --- 5. RELATÓRIOS: TABELA LISTA (Afirmação, Gratidão) --- */
-/* ========================================================================= */
+/* ======================================================================== */
+/* 6. RELATÓRIOS – TABELA LISTA (AFIRMAÇÃO / GRATIDÃO) */
+/* ======================================================================== */
 
 @media (max-width: 768px) {
 
-    /* Transforma cada linha em um "cartão" */
     .table-responsive .table-afirmacao tbody tr,
     .table-responsive .table-gratidao tbody tr {
         display: block;
@@ -396,27 +274,22 @@ h1.fw-bold.text-primary {
         box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     }
 
-    /* Oculta o cabeçalho da tabela */
     .table-responsive .table-relatorio thead {
         position: absolute;
         top: -9999px;
-        left: -9999px;
     }
 
-    /* Estiliza as células (td) como blocos de informação */
     .table-responsive .table-relatorio tbody td {
-        border: none;
         display: block;
         padding: 8px 15px;
         text-align: left !important;
+        border: none;
     }
 
-    /* --- Regras Específicas para Relatório de AFIRMAÇÃO --- */
     .table-responsive .table-afirmacao tbody td:nth-of-type(1):before {
         content: "Data: ";
         font-weight: bold;
         color: #8a2be2;
-        /* Cor roxa */
     }
 
     .table-responsive .table-afirmacao tbody td:nth-of-type(2):before {
@@ -425,12 +298,10 @@ h1.fw-bold.text-primary {
         color: #6c757d;
     }
 
-    /* --- Regras Específicas para Relatório de GRATIDÃO --- */
     .table-responsive .table-gratidao tbody td:nth-of-type(1):before {
         content: "Data: ";
         font-weight: bold;
         color: #ffc107;
-        /* Cor amarela/warning */
     }
 
     .table-responsive .table-gratidao tbody td:nth-of-type(2):before {
@@ -438,30 +309,21 @@ h1.fw-bold.text-primary {
         font-weight: bold;
         color: #6c757d;
     }
-
-    /* Separador comum entre as colunas em mobile */
-    .table-responsive .table-afirmacao tbody td:nth-of-type(1),
-    .table-responsive .table-gratidao tbody td:nth-of-type(1) {
-        border-bottom: 1px dashed #e9ecef;
-    }
 }
 
 
-/* ========================================================================= */
-/* --- 6. MODAIS (Humor e Gerais) --- */
-/* ========================================================================= */
+/* ======================================================================== */
+/* 7. MODAIS */
+/* ======================================================================== */
 
 @media (max-width: 575.98px) {
 
-    /* Faz o modal ocupar a maior parte da tela em dispositivos pequenos */
     .modal-dialog {
-        margin: 0.5rem;
+        margin: .5rem;
         width: calc(100% - 1rem);
         max-width: none !important;
-        /* Sobrescreve o max-width do Bootstrap */
     }
 
-    /* --- Modal de Humor --- */
     .modal .humor-option-card {
         width: 70px;
         height: 70px;
@@ -473,88 +335,21 @@ h1.fw-bold.text-primary {
         height: 30px !important;
     }
 
-    .modal .humor-option-card .humor-label {
-        font-size: 0.75rem;
-    }
-
-    /* --- Modal de Gratidão (Criação/Edição) e Exclusão --- */
-
-    /* Footer do Modal de Exclusão (Torna os botões Full Width) */
     #delete-form-content .d-flex {
         flex-direction: column;
         gap: 10px;
         margin-top: 15px;
     }
 
-    #delete-form-content .d-flex button {
-        width: 100%;
-        margin: 0;
-    }
-}
-
-@media (min-width: 576px) {
-
-    /* Garante que modais permaneçam estreitos e centrados em telas maiores, exceto se houver uma classe específica */
-    #modal-base .modal-dialog:not(.modal-lg):not(.modal-xl) {
-        max-width: 500px;
-    }
-}
-
-
-/* ========================================================================= */
-/* --- 7. AJUSTES DE CONTA / SIDEBAR (masterpage_logado.html) --- */
-/* ========================================================================= */
-
-@media (max-width: 767.98px) {
-
-    /* 1. Ajuste do Layout de Duas Colunas para Coluna Única */
-    .row>.col-md-3,
-    .row>.col-md-9 {
-        width: 100% !important;
-        flex: 0 0 100% !important;
-        max-width: 100% !important;
-    }
-
-    /* Espaço abaixo do menu para separá-lo do conteúdo principal */
-    .row>.col-md-3 {
-        margin-bottom: 1.5rem;
-    }
-
-    /* 2. Estilização do Menu Lateral (agora superior/vertical) */
-    .sidebar-menu-conta {
-        flex-direction: column;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    }
-
-    .sidebar-menu-conta .list-group-item {
-        text-align: left;
-        padding: 10px 15px;
-    }
-
-    /* Reduz o padding da área de conteúdo */
-    .lyfesync-content-area.custom-content-area .p-4 {
-        padding: 1rem !important;
-    }
-
-    /* Garante que a tag <strong> com o nome de usuário não transborde */
-    #dados strong.text-primary {
-        word-break: break-all;
-        display: block;
-    }
-
-    /* Ajusta a responsividade da tabela dentro do acordeão */
-    .table-responsive {
-        margin-left: 0;
-        /* Ajustado para não ter margens negativas desnecessárias */
-        margin-right: 0;
+    #delete-form-content button {
         width: 100%;
     }
 }
 
 
-/* ========================================================================= */
-/* --- 8. BREAKPOINTS (Ajustes de Tamanho do Container) --- */
-/* ========================================================================= */
+/* ======================================================================== */
+/* 8. BREAKPOINTS DO CONTAINER */
+/* ======================================================================== */
 
 @media (min-width: 576px) {
     .container {
@@ -572,126 +367,10 @@ h1.fw-bold.text-primary {
     .container {
         max-width: 960px;
     }
-
-    /* Ajustei para 960px, que é o padrão do Bootstrap 5 para LG */
 }
 
 @media (min-width: 1200px) {
     .container {
         max-width: 1140px;
-    }
-}
-
-/* ========================================================================= */
-/* --- 5. RELATÓRIOS: TABELAS MATRIZ (Humor - Continuação) --- */
-/* (Re-inserido para contexto, mas já faz parte da seção 4 ou 5 na consolidação final) */
-/* ========================================================================= */
-
-@media (max-width: 576px) {
-
-    /* --- Tabela de Humor (Obrigatória rolagem horizontal) --- */
-    .table-responsive {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        width: 100%;
-        /* Ocupa 100% do conteúdo principal */
-        margin-bottom: 1rem;
-    }
-
-    /* Melhora a visibilidade da coluna "Humor" */
-    .table-responsive .table-humor thead th:first-child,
-    .table-responsive .table-humor tbody td:first-child,
-    .table-responsive .table-humor tfoot td:first-child {
-        /* Aumenta a largura mínima da coluna para que o ícone e o texto caibam */
-        min-width: 150px !important;
-        max-width: 150px !important;
-        white-space: nowrap;
-        /* Impede a quebra de linha no estado do humor */
-    }
-
-    /* Diminui o padding das células de dia para caber mais na tela */
-    .table-responsive .table-humor thead th {
-        padding: 0.5rem !important;
-        font-size: 0.75rem !important;
-        /* Reduz a fonte dos dias */
-    }
-
-    .table-responsive .table-humor tbody td {
-        padding: 0.5rem !important;
-    }
-
-    /* Garante que a célula do dia tenha um tamanho mínimo */
-    /* A classe 'table-humor' deve ser usada para evitar conflito com 'table-habitos' */
-    .table-responsive .table-humor tbody td[style*="min-width: 35px"] {
-        /* Regra aplicada a células com min-width in-line, mas ajustada para 25px */
-        min-width: 25px !important;
-        max-width: 25px !important;
-    }
-
-    /* Garante que a tabela dentro do container seja larga o suficiente */
-    .table-habitos {
-        /* Define uma largura mínima que será maior que o container em mobile, forçando a rolagem */
-        min-width: 700px;
-        /* Valor arbitrário que força a largura e rolagem */
-    }
-
-    .table-habitos thead th:first-child {
-        /* Fixa o cabeçalho da coluna do Hábito */
-        position: sticky;
-        left: 0;
-        /* Posição para fixar na esquerda */
-        z-index: 2;
-        /* Garante que fique sobre as outras células */
-        background-color: #f8f9fa;
-        /* Cor de fundo para evitar transparência */
-        border-right: 1px solid #dee2e6;
-    }
-
-    /* Regras para as células de dados (Nome do Hábito) */
-    .table-habitos tbody td:first-child {
-        /* Fixa a célula de dados do Hábito em todas as linhas */
-        position: sticky;
-        left: 0;
-        /* Posição para fixar na esquerda */
-        z-index: 1;
-        /* Garante que fique sobre as células de dia */
-        background-color: #ffffff;
-        /* Fundo branco para dados */
-        border-right: 1px solid #dee2e6;
-
-        /* Suas regras de largura já existentes */
-        min-width: 160px !important;
-        max-width: 160px !important;
-        white-space: normal !important;
-        padding-left: 10px !important;
-    }
-
-    /* O restante do seu CSS de Tabela de Hábitos (Diminuição de célula) */
-    .table-habitos thead th:last-child,
-    .table-habitos tbody td:last-child {
-        min-width: 80px !important;
-        max-width: 80px !important;
-    }
-
-    .table-habitos thead th[scope="col"]:not(:first-child):not(:last-child),
-    .table-habitos tbody td:not(:first-child):not(:last-child) {
-        min-width: 20px !important;
-        max-width: 20px !important;
-        padding: 0.5rem 0.2rem !important;
-        font-size: 0.7rem;
-        
-    }
-
-    .table-habitos .concluido i {
-        font-size: 0.8rem;
-    }
-}
-
-@media (max-width: 768px) {
-
-    /* Garante que o separador exista em ambos os relatórios de lista */
-    .table-responsive .table-afirmacao tbody td:nth-of-type(1),
-    .table-responsive .table-gratidao tbody td:nth-of-type(1) {
-        border-bottom: 1px dashed #e9ecef;
     }
 }

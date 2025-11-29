@@ -72,10 +72,7 @@
       <div class="alert alert-info text-center" role="alert">
         Nenhum registro de afirmação encontrado para o período selecionado.
       </div>
-    {% else %}
-      <div class="alert alert-primary mt-4 mb-4" role="alert">
-        Total de Afirmações Registradas: <strong>{{ total_afirmacoes }}</strong>
-      </div>
+    {% else %}     
       
       <!-- Tabela do Relatório (Lista de Afirmações) - Responsiva -->
       <!-- Adiciona a classe 'table-afirmacao' para estilização específica -->
@@ -101,7 +98,6 @@
               </td>
             </tr>
             {% endfor %}
-            
           </tbody>
         </table>
       </div>
