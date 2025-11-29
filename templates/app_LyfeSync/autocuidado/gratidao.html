@@ -85,11 +85,11 @@
         <div class="row g-2"> 
             {% for gratidao in page_obj %}
                 <div class="col-12 mb-1"> 
-                    <div class="card p-2 border-start border-1 border-secondary shadow-lg rounded-3 ls-hover-lift rounded-1">
+                    <div class="card ps-2 border-start border-1 border-secondary shadow-lg rounded-3 ls-hover-lift rounded-1">
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="gratidao-item-history flex-grow-1 me-2"> 
-                                <span class="gratidao-date small text-muted me-2">{{ gratidao.data|date:"d/m/Y" }}:</span>
-                                <p class="text-dark fw-normal mb-0 small" style="white-space: pre-line;">
+                                <span class="gratidao-date small text-muted">{{ gratidao.data|date:"d/m/Y" }}:</span>
+                                <p class="item-content mb-0 text-break fs-5" style="white-space: pre-line;">
                                 {{ gratidao.descricaogratidao }}</p>
                             </div>
                             
@@ -145,7 +145,11 @@
             Ainda não há gratidões antigas registradas.
         </div>
     {% endif %}
-
+    <div class="d-flex justify-content-between mt-5">
+        <button onclick="window.history.back()" class="btn btn-outline-secondary btn-lg shadow-sm">
+            <i class="bi bi-arrow-left me-2"></i> Voltar à Página Anterior
+        </button>
+    </div>
 </div>
 
 <!-- ______________________ MODAIS ______________________ -->

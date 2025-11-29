@@ -73,6 +73,7 @@ i[data-lucide] {
 .gratidao-item-history p {
     display: flex;
     align-items: center;
+    min-height: 60px;
 }
 
 /* ========================================================= */
@@ -109,4 +110,6 @@ i[data-lucide] {
 .afirmacao-item-history p {
     display: flex;
     align-items: center;
+    min-height: 60px;
+    color: #24465C;
 }

@@ -51,38 +51,40 @@
                 {% if page_obj %}
                     <div class="row g-0">
                         {% for afirmacao in page_obj %}
-                            <div class="col-12 mb-1">
-                                <div class="card p-2 border-start border-1 border-secondary ls-hover-lift rounded-1">
-                                    <!-- Data e Conteúdo -->
-                                    <div class="afirmacao-item-history flex-grow-1 me-3">
-                                        <p class="item-content mb-0 text-break">
-                                            {{ afirmacao.descricaoafirmacao }}
-                                        </p>
-                                    </div>
+                            <div class="col-10 mb-1">
+                                <div class="card px-4 border-start border-1 border-secondary ls-hover-lift rounded-1">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <!-- Data e Conteúdo -->
+                                        <div class="afirmacao-item-history flex-grow-1">
+                                            <p class="item-content mb-0 text-break fs-5">
+                                                {{ afirmacao.descricaoafirmacao }}
+                                            </p>
+                                        </div>
 
-                                    <!-- Botões de Ação -->
-                                    <div class="btn-group btn-group-sm ms-auto flex-shrink-0 d-flex align-items-center gap-1">
-                                        <!-- Botão Alterar-->
-                                        <button 
-                                            class="btn-edit btn btn-sm p-0 btn-warning" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#modalAlteracaoAfirmacao"
-                                            data-afirmacao-id="{{ afirmacao.idafirmacao }}"
-                                            data-afirmacao-data="{{ afirmacao.data|date:'Y-m-d' }}"
-                                            data-afirmacao-desc="{{ afirmacao.descricaoafirmacao }}"
-                                        >
-                                            <i class="bi bi-pencil-square"></i> Alterar
-                                        </button>
-                                        
-                                        <!-- Botão Excluir (Vermelho) -->
-                                        <button 
-                                            class="btn-delete btn btn-danger p-0 btn-sm" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#modalExclusaoAfirmacao"
-                                            data-afirmacao-id="{{ afirmacao.idafirmacao }}"
-                                        >
-                                            <i class="bi bi-trash"></i> Excluir
-                                        </button>
+                                        <!-- Botões de Ação -->
+                                        <div class="d-flex gap-1 ms-auto">
+                                            <!-- Botão Alterar-->
+                                            <button 
+                                                class="btn btn-warning btn-sm" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#modalAlteracaoAfirmacao"
+                                                data-afirmacao-id="{{ afirmacao.idafirmacao }}"
+                                                data-afirmacao-data="{{ afirmacao.data|date:'Y-m-d' }}"
+                                                data-afirmacao-desc="{{ afirmacao.descricaoafirmacao }}"
+                                            >
+                                                <i class="bi bi-pencil-square"></i> Alterar
+                                            </button>
+                                            
+                                            <!-- Botão Excluir (Vermelho) -->
+                                            <button 
+                                                class="btn btn-danger btn-sm" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#modalExclusaoAfirmacao"
+                                                data-afirmacao-id="{{ afirmacao.idafirmacao }}"
+                                            >
+                                                <i class="bi bi-trash"></i> Excluir
+                                            </button>
+                                        </div>   
                                     </div>
                                 </div>
                             </div>
@@ -274,6 +276,11 @@
                 </form>
             </div>
         </div>
+    </div>
+    <div class="d-flex justify-content-between mt-5">
+        <button onclick="window.history.back()" class="btn btn-outline-secondary btn-lg shadow-sm">
+            <i class="bi bi-arrow-left me-2"></i> Voltar à Página Anterior
+        </button>
     </div>
 
 {% endblock %}

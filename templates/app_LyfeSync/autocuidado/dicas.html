@@ -9,7 +9,7 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/responsividade.css' %}">
-    <link rel="stylesheet" href="{% static 'css/autocuidado.css' %}">
+    <link rel="stylesheet" href="{% static 'css/humor.css' %}">
 {% endblock %}
 
 {% block content_logado %}
@@ -80,36 +80,40 @@
                 {# BLOCO DE PAGINAÇÃO #}
                 {# ------------------------------------------------------------------ #}
                 {% if page_obj.paginator.num_pages > 1 %}
-                    <nav aria-label="Paginação de Dicas" class="mt-4 justify-content-between" >
-                        <ul class="d-flex pagination justify-content-center">
-                            {# Botão Anterior #}
-                            <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
-                                <a class="page-link" href="{% if page_obj.has_previous %}?page={{ page_obj.previous_page_number }}{% else %}#{% endif %}" aria-label="Anterior">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
-                            </li>
+                    <div class="d-flex justify-content-center mt-3">
+                        <nav aria-label="Paginação de Dicas">
+                            <ul class="pagination pagination-sm shadow-sm">
+                                {# Botão Primeira #}
+                                <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+                                    <a class="page-link" href="{% if page_obj.has_previous %}?page=1{% else %}#{% endif %}">Primeira</a>
+                                </li>
 
-                            {# Números de Páginas #}
-                            {% for i in page_obj.paginator.page_range %}
-                                {% if page_obj.number == i %}
-                                    <li class="page-item active" aria-current="page">
-                                        <span class="page-link">{{ i }}</span>
-                                    </li>
-                                {% elif i > page_obj.number|add:-3 and i < page_obj.number|add:3 %} 
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ i }}">{{ i }}</a>
-                                    </li>
-                                {% endif %}
-                            {% endfor %}
+                                {# Botão Anterior #}
+                                <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+                                    <a class="page-link" href="{% if page_obj.has_previous %}?page={{ page_obj.previous_page_number }}{% else %}#{% endif %}" aria-label="Anterior">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
 
-                            {# Botão Próxima #}
-                            <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
-                                <a class="page-link" href="{% if page_obj.has_next %}?page={{ page_obj.next_page_number }}{% else %}#{% endif %}" aria-label="Próxima">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
+                                {# Número da Página Atual #}
+                                <li class="page-item active" aria-current="page">
+                                    <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                                </li>
+
+                                {# Botão Próxima #}
+                                <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+                                    <a class="page-link" href="{% if page_obj.has_next %}?page={{ page_obj.next_page_number }}{% else %}#{% endif %}" aria-label="Próxima">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+
+                                {# Botão Última #}
+                                <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+                                    <a class="page-link" href="{% if page_obj.has_next %}?page={{ page_obj.paginator.num_pages }}{% else %}#{% endif %}">Última</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
                 {% endif %}
                 {# FIM DO BLOCO DE PAGINAÇÃO #}
                 
@@ -323,13 +327,13 @@
 
         // 1. Remove o destaque de todos os cartões dentro do mesmo modal
         modalElement.querySelectorAll('[data-humor-container]').forEach(function (el) {
-            el.classList.remove('active', 'selected', 'border', 'border-4', 'border-primary');
+            el.classList.remove('active', 'selected', 'border', 'border-4');
             el.setAttribute('aria-checked', 'false');
         });
 
         // 2. Adiciona o destaque ao elemento clicado (se houver elemento, se não, apenas marca o rádio)
         if (element) {
-            element.classList.add('active', 'selected', 'border', 'border-4', 'border-primary');
+            element.classList.add('active', 'selected', 'border', 'border-4');
             element.setAttribute('aria-checked', 'true');
         }
 
@@ -365,7 +369,7 @@
             // Ativa o cartão visualmente
             const initialElement = document.querySelector(`#adicionarDicaModal [data-humor-value="${String(preSelectedValue)}"]`);
             if (initialElement) {
-                initialElement.classList.add('active', 'selected', 'border', 'border-4', 'border-primary');
+                initialElement.classList.add('active', 'selected', 'border', 'border-4');
             }
 
             // Força a abertura do modal se houver um erro de validação
@@ -418,7 +422,7 @@
                 
                 // 3. Limpar seleções visuais antigas e preencher formulário
                 editarDicaModal.querySelectorAll('[data-humor-container]').forEach(el => 
-                    el.classList.remove('active', 'selected', 'border', 'border-4', 'border-primary')
+                    el.classList.remove('active', 'selected', 'border', 'border-4')
                 );
 
                 modalTituloNome.textContent = dicaNome;
@@ -438,7 +442,7 @@
                     // Garante o destaque visual (pois handleHumorSelection é projetada para o click)
                     const selectedCard = editarDicaModal.querySelector(`[data-humor-value="${dicaHumorId}"]`);
                     if (selectedCard) {
-                        selectedCard.classList.add('active', 'selected', 'border', 'border-4', 'border-primary');
+                        selectedCard.classList.add('active', 'selected', 'border', 'border-4');
                         selectedCard.setAttribute('aria-checked', 'true');
                     }
                 }
