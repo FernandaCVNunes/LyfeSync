@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 import yagmail
+import tempfile
 from decouple import config
 
 # -------------------------------------------------------------------
@@ -43,20 +44,24 @@ def contatos(request):
 
             # 5. Envia e-mail
             if anexo:
-                # Salva o arquivo temporariamente na memória e envia
-                yag.send(
-                    to=destinatario,
-                    subject=f"[CONTATO LYFESYNC] {assunto}",
-                    contents=corpo_email,
-                    attachments=anexo
-                )
-            else:
-                yag.send(
-                    to=destinatario,
-                    subject=f"[CONTATO LYFESYNC] {assunto}",
-                    contents=corpo_email
-                )
+            # cria arquivo temporário no disco
+                with tempfile.NamedTemporaryFile(delete=False, suffix=anexo.name) as temp:
+                    for chunk in anexo.chunks():
+                        temp.write(chunk)
+                        temp_path = temp.name
 
+                        yag.send(
+                            to=destinatario,
+                            subject=f"[CONTATO LYFESYNC] {assunto}",
+                            contents=corpo_email,
+                            attachments=[temp_path]
+                        )
+                    else:
+                        yag.send(
+                            to=destinatario,
+                            subject=f"[CONTATO LYFESYNC] {assunto}",
+                            contents=corpo_email
+                        )
             # 6. Feedback de sucesso
             messages.success(request, 'Mensagem enviada com sucesso! Em 48h entraremos em contato.')
             return HttpResponseRedirect(reverse('contatos'))
