@@ -19,7 +19,7 @@
     --mood-angry: var(--lyfesync-red-salvar);
 
     /* Estilização para as mensagens (Django Messages) - Pop bonito */
-    .message-container {
+    .messages-container {
         position: fixed;
         top: 20px;
         right: 20px;
@@ -27,36 +27,28 @@
         max-width: 300px;
     }
 
-    .message {
+    .messages {
         padding: 1rem;
         margin-bottom: 0.75rem;
         border-radius: 0.5rem;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
         color: white;
-        opacity: 0;
-        transform: translateX(100%);
-        transition: opacity 0.5s ease-out, transform 0.5s ease-out;
     }
 
-    .message.show {
-        opacity: 1;
-        transform: translateX(0);
-    }
-
-    .message.success {
+    .messages.success {
         background-color: #10B981;
     }
 
-    .message.error {
+    .messages.error {
         background-color: #EF4444;
     }
 
     /* Tailwind Red-500 */
-    .message.info {
+    .messages.info {
         background-color: #3B82F6;
     }
 
-    .message button {
+    .messages button {
         margin-left: 0.5rem;
         font-weight: bold;
     }

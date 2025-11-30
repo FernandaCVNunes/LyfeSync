@@ -69,12 +69,12 @@
                     <!-- Preenchimento das colunas do dia 31 para meses menores -->
                     {% with max_dias=31 %}
                         {% for i in max_dias|make_range %}
-                        {% if i > ultimo_dia %}
-                            <th scope="col" class="bg-light text-muted" style="min-width: 30px;"></th>
-                        {% endif %}
+                            {% if i > ultimo_dia %}
+                                <th scope="col" class="bg-light text-muted" style="min-width: 30px;"></th>
+                            {% endif %}
                         {% endfor %}
+                        <th scope="col" class="resultado-celula-habito" style="min-width: 90px;">Resultado (dias)</th>
                     {% endwith %}
-                    <th scope="col" class="resultado-celula-habito" style="min-width: 90px;">Resultado (dias)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -89,7 +89,7 @@
                                     <td class="vazio"></td>
                                 {% endif %}
                             {% endfor %} 
-                                                        
+                            
                             <td class="resultado-celula-habito">{{ dado.total_concluido }}</td> 
                         </tr>
                     {% endfor %}

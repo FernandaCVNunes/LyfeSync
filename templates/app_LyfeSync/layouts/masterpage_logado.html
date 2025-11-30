@@ -131,11 +131,47 @@
               </li>
             {% endif %}
 
+            {# NOVO ITEM: RELATÓRIOS (com submenu) #}
             <li>
-              <a href="{% url 'relatorios' %}" class="sidebar-link">
-                <img src="{% static 'img/icon/relatorio.png' %}" alt="Ícone Relatórios" class="sidebar-icon" />
-                <span>Relatórios</span>
+              <a 
+                  href="{% url 'relatorios' %}" 
+                  aria-expanded="false" 
+                  class="sidebar-link collapsed"
+                  onclick="toggleAndNavigate(event, this, '#submenuRelatorios')"
+              >
+                  <img src="{% static 'img/icon/relatorio.png' %}" alt="Ícone Relatórios" class="sidebar-icon" />
+                  <span>Relatórios</span>
+                  <i class="fas fa-chevron-down ms-auto sidebar-arrow"></i>
               </a>
+              
+              <div class="collapse" id="submenuRelatorios">
+                <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                  <li>
+                      <a href="{% url 'relatorio_habito' %}" class="sidebar-sublink">
+                          <img src="{% static 'img/icon/metas.png' %}" alt="Ícone Relatório de Hábito" class="sidebar-icon-sub" />
+                          Hábito
+                      </a>
+                  </li>
+                  <li>
+                      <a href="{% url 'relatorio_humor' %}" class="sidebar-sublink">
+                          <img src="{% static 'img/icon/humor.png' %}" alt="Ícone Relatório de Humor" class="sidebar-icon-sub" />
+                          Humor
+                      </a>
+                  </li>
+                  <li>
+                      <a href="{% url 'relatorio_gratidao' %}" class="sidebar-sublink">
+                          <img src="{% static 'img/icon/gratidao.png' %}" alt="Ícone Relatório de Gratidão" class="sidebar-icon-sub" />
+                          Gratidão
+                      </a>
+                  </li>
+                  <li>
+                    <a href="{% url 'relatorio_afirmacao' %}" class="sidebar-sublink">
+                        <img src="{% static 'img/icon/afirmacoes.png' %}" alt="Ícone Relatório de Afirmações" class="sidebar-icon-sub" />
+                        Afirmações
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </li>
           </ul>
         </nav>
@@ -189,9 +225,9 @@
 
           {# Bloco 3: Ícones Sociais #}
           <div class="col-lg-4 col-md-12 d-flex justify-content-center align-items-center gap-2">
-            <a href="#" class="social-icon facebook"><i class="fab fa-facebook-f"></i></a>
-            <a href="#" class="social-icon instagram"><i class="fab fa-instagram"></i></a>
-            <a href="#" class="social-icon whatsapp"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://www.facebook.com/fernanda.oliveiradacunha.3/" target="_blank" class="social-icon facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.instagram.com/fernanda.cvnunes/" target="_blank" class="social-icon instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://wa.me/351910576402?text=Ol%C3%A1!%20Gostaria%20de%20saber%20mais" target="_blank" class="social-icon whatsapp"><i class="fab fa-whatsapp"></i></a>
           </div>
         </div>
       </div>

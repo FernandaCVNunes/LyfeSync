@@ -19,7 +19,7 @@ import calendar
 import locale
 import re
 # Importando os Models reais necessários para as views de relatório
-from ..models import Gratidao, Afirmacao, Habito, StatusDiario, Humor, HumorTipo 
+from ..models import Gratidao, Afirmacao, Habito, StatusDiario, Humor, HumorTipo
 from ..forms import HumorForm, DicasForm, RelatorioHumorForm, RelatorioHabitoForm
 from ._aux_logic import _get_report_date_range, get_humor_map, _get_humor_cor_classe, get_humor_icone, get_habitos_e_acompanhamento
 
@@ -174,19 +174,30 @@ def relatorio_habito(request):
 
 
 @login_required(login_url='login')
+@login_required(login_url='login')
 def exportar_habito_csv(request):
     """
     Exporta o relatório de acompanhamento de Hábitos do período selecionado
-    para um arquivo CSV, detalhando o status diário de cada hábito.
-    
-    NOTA: Usa a função mock get_habitos_e_acompanhamento para buscar os dados.
+    para um arquivo CSV, puxando dados diretamente do ORM.
     """
     hoje = timezone.localdate()
-    # Usa a função auxiliar para definir o intervalo de datas
+    # Assume que _get_report_date_range está definida em outro lugar e funciona
     data_inicio, data_fim, data_referencia, periodo, mes_param, ano_param = _get_report_date_range(request, hoje)
 
-    # 1. Busca os Hábitos e o Acompanhamento no período (Usando MOCK)
-    habitos_processados = get_habitos_e_acompanhamento(request.user, data_inicio, data_fim)
+    # 1. ORM: Busca Hábitos e Acompanhamentos
+    habito_qs = Habito.objects.filter(usuario=request.user).order_by('nome')
+    
+    acompanhamento_qs = StatusDiario.objects.filter(
+        habito__in=habito_qs,
+        data__gte=data_inicio,
+        data__lte=data_fim
+    )
+    
+    # Mapeia os acompanhamentos: {(habito_id, data): concluido}
+    acompanhamento_map = {
+        (ac.habito_id, ac.data): ac.concluido 
+        for ac in acompanhamento_qs
+    }
     
     # Lista de todas as datas no período
     delta = data_fim - data_inicio
@@ -196,96 +207,104 @@ def exportar_habito_csv(request):
     filename = f"habitos_{periodo}_{data_inicio.strftime('%Y%m%d')}_{data_fim.strftime('%Y%m%d')}.csv"
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
-    
-    # Adiciona o BOM para garantir que caracteres especiais funcionem no Excel (Português)
     response.write(u'\ufeff'.encode('utf8'))
-
-    # Usa ponto e vírgula como delimitador para melhor compatibilidade com o Excel pt-BR
     writer = csv.writer(response, delimiter=';')
 
-    # 3. Escreve o cabeçalho: 'Hábito' + todas as datas formatadas
-    header_dates = [d.strftime('%d/%m') for d in dias_periodo] # Mês/Dia para ser mais conciso
-    writer.writerow(['ID', 'Hábito'] + header_dates)
+    # 3. Escreve o cabeçalho
+    header_dates = [d.strftime('%d/%m') for d in dias_periodo]
+    writer.writerow(['Hábito'] + header_dates + ['Resultado (dias)']) 
 
     # 4. Escreve os dados
-    for habito in habitos_processados:
-        row = [habito['id'], habito['nome']]
+    for habito in habito_qs:
+        row = [habito.nome]
+        total_concluido = 0
         
         for dia in dias_periodo:
-            status = habito['acompanhamento'].get(dia)
+            # Tenta obter o status do mapa. Retorna None (Sem Registro) se não existir.
+            status = acompanhamento_map.get((habito.id, dia))
             
             if status is True:
-                row.append('Concluído')
-            elif status is False:
-                row.append('Não Concluído')
+                row.append('✔') 
+                total_concluido += 1
+            # False (Não Concluído) e None (Sem Registro) resultam em célula vazia
             else:
-                row.append('Sem Registro') # Dia sem registro de acompanhamento
+                row.append('')
         
+        row.append(str(total_concluido)) 
         writer.writerow(row)
 
     return response
 
-
 @login_required(login_url='login')
 def exportar_habito_pdf(request):
     """
-    Gera um relatório PDF (simulado via HTML formatado para impressão)
-    do acompanhamento de Hábitos do período selecionado.
-    
-    NOTA: Usa a função mock get_habitos_e_acompanhamento para buscar os dados.
+    Gera um relatório PDF (via HTML) do acompanhamento de Hábitos,
+    puxando dados diretamente do ORM.
     """
     hoje = timezone.localdate()
     data_inicio, data_fim, data_referencia, periodo, mes_param, ano_param = _get_report_date_range(request, hoje)
 
-    # Busca os Hábitos e o Acompanhamento no período (Usando MOCK)
-    habitos_processados = get_habitos_e_acompanhamento(request.user, data_inicio, data_fim)
+    # 1. ORM: Busca Hábitos e Acompanhamentos
+    habito_qs = Habito.objects.filter(usuario=request.user).order_by('nome')
+    
+    acompanhamento_qs = StatusDiario.objects.filter(
+        habito__in=habito_qs,
+        data__gte=data_inicio,
+        data__lte=data_fim
+    )
+    
+    # Mapeia os acompanhamentos: {(habito_id, data): concluido}
+    acompanhamento_map = {
+        (ac.habito_id, ac.data): ac.concluido 
+        for ac in acompanhamento_qs
+    }
 
-    # Lista de todas as datas no período (necessário para o cabeçalho da tabela)
+    # 2. Estrutura os dados para o template
     delta = data_fim - data_inicio
     dias_periodo = [data_inicio + timedelta(days=i) for i in range(delta.days + 1)]
     
-    # Converte a lista de dicionários para uma estrutura mais simples para o template
     habitos_para_template = []
-    for h in habitos_processados:
-        acompanhamento_map = h['acompanhamento']
-        
-        # NOVO: Cria uma lista de status ordenados para o template
+    
+    for habito in habito_qs:
         status_ordenado = []
+        total_concluido = 0
+        
         for dia in dias_periodo:
-            status = acompanhamento_map.get(dia)
+            # Tenta obter o status do mapa. Retorna None (Sem Registro) se não existir.
+            status = acompanhamento_map.get((habito.id, dia))
             status_ordenado.append(status)
+            
+            if status is True:
+                total_concluido += 1
 
         habitos_para_template.append({
-            'nome': h['nome'],
-            'status_diario': status_ordenado, # NOVO CAMPO: Lista ordenada
+            'nome': habito.nome,
+            'status_diario': status_ordenado, # Lista ordenada de True/False/None
+            'total_concluido': total_concluido,
         })
         
-    # Determinação da string do período
+    # 3. Determinação da string do período (mantida)
     if periodo == 'mensal':
         mes_extenso = data_referencia.strftime('%B').capitalize() 
         periodo_str = f"Mensal: {mes_extenso} / {data_referencia.year}"
-    elif periodo == 'semanal':
-        periodo_str = f"Semanal: {data_inicio.strftime('%d/%m/%Y')} a {data_fim.strftime('%d/%m/%Y')}"
-    elif periodo == 'quinzenal':
-        periodo_str = f"Quinzenal: {data_inicio.strftime('%d/%m/%Y')} a {data_fim.strftime('%d/%m/%Y')}"
     else:
-        periodo_str = f"Período Personalizado: {data_inicio.strftime('%d/%m/%Y')} a {data_fim.strftime('%d/%m/%Y')}"
+        periodo_str = f"Período: {data_inicio.strftime('%d/%m/%Y')} a {data_fim.strftime('%d/%m/%Y')}"
 
+
+    # 4. Contexto e Geração do PDF
     context = {
         'habitos': habitos_para_template,
         'dias_periodo': dias_periodo,
         'periodo_str': periodo_str,
         'data_geracao': timezone.localtime(timezone.now()).strftime('%d/%m/%Y %H:%M'),
-        'total_habitos': len(habitos_processados),
+        'total_habitos': habito_qs.count(),
         'usuario': request.user.username if request.user.is_authenticated else 'Usuário Não Autenticado',
     }
     
-    # Renderiza o template HTML (otimizado para PDF/impressão)
     html_content = render_to_string('app_LyfeSync/relatorios/pdf_habito.html', context)
-
-    # Retorna o HTML com o Content-Type como PDF
     filename = f"relatorio_habitos_{data_inicio.strftime('%Y%m%d')}_{data_fim.strftime('%Y%m%d')}.pdf"
 
+    # Assume que convert_html_to_pdf está definida e funciona
     return convert_html_to_pdf(html_content, filename, request)
 
 # -------------------------------------------------------------------

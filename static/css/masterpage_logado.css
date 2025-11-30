@@ -151,6 +151,10 @@
     padding-left: 0;
 }
 
+#submenuRelatorios {
+    padding-left: 0;
+}
+
 /* Estilo dos links do sub-menu */
 .sidebar-sublink {
     display: flex;
