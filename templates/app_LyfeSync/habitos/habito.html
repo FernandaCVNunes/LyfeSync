@@ -222,7 +222,6 @@
       const btnAlterar = event.currentTarget; 
       const form = document.getElementById('formAlterarHabito');
       
-      // 🛑 IMPORTANTE: A instância da modal deve ser acessível neste escopo.
       const alterarModalEl = document.getElementById('alterarHabitoModal');
       const alterarModal = bootstrap.Modal.getInstance(alterarModalEl) || new bootstrap.Modal(alterarModalEl);
 
@@ -235,7 +234,7 @@
       fetch(`/habitos/get-data/${habitId}/`)
       .then(response => {
          if (!response.ok) {
-               // ... (tratamento de erro)
+
                throw new Error('Falha ao buscar dados do hábito. (Status: ' + response.status + ')');
          }
          return response.json();
@@ -244,7 +243,6 @@
          // 3. Preenche e exibe se for bem-sucedido
          if (data.id) {
                form.setAttribute('action', `/habitos/alterar/${data.id}/`);
-               // ... (restante do preenchimento dos campos, que parece correto)
                form.querySelector('input[name="nome"]').value = data.nome || '';
                form.querySelector('textarea[name="descricao"]').value = data.descricao || '';
                form.querySelector('input[name="data_inicio"]').value = data.data_inicio || ''; 
@@ -273,11 +271,6 @@
          btnAlterar.innerHTML = originalHtml;
          showToast('Erro ao tentar carregar dados para alteração.', 'error'); 
          
-         // 🚨 Se a modal foi aberta, certifique-se de que ela está escondida em caso de erro.
-         // Isso pode ser necessário se a modal for exibida antes do erro de fetch.
-         // No seu caso, ela só é exibida no .then(), então essa linha é menos crítica aqui,
-         // mas boa prática.
-         // alterarModal.hide(); 
       });
    }
 
@@ -336,11 +329,13 @@
          if (data.success) {
                // SUCESSO: AGORA FECHE O MODAL E ATUALIZE A TELA
                if (confirmModal) {
-                  confirmModal.hide(); // <-- FECHA O MODAL E REMOVE O BACKDROP SOMENTE APÓS O SUCESSO DO SERVIDOR
+                  confirmModal.hide(); 
                }
-               showToast(data.message || 'Hábito excluído com sucesso!', 'success');
-               window.location.reload();
-         } else {
+               showToast(data.message || 'Hábito excluído com sucesso!', 'error');
+               setTimeout(() => {
+                  window.location.reload(); 
+               }, 3000);
+         } else {
                if (confirmModal) {
                   confirmModal.show(); 
                }
