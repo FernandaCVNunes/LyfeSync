@@ -124,18 +124,6 @@
 
 {% block content_logado %}
     <div class="container py-4">
-        
-        {# Bloco de Mensagens do Django (Messages Framework) #}
-        {% if messages %}
-        <div class="messages mb-4">
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags|default_if_none:'info' }} alert-dismissible fade show rounded-3 shadow" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
 
         <div class="row g-4">
             {# Coluna Principal: Humor de Hoje (Largo) #}

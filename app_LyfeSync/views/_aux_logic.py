@@ -327,3 +327,7 @@ def get_habitos_e_acompanhamento(user, data_inicio, data_fim):
         })
         
     return habitos_processados
+
+# -------------------------------------------------------------------
+# MOCKS DE CLASSES E FUNÇÕES (Necessário para Views de Exportação)
+# -------------------------------------------------------------------

@@ -88,10 +88,18 @@
                                 {% else %}
                                     <td class="vazio"></td>
                                 {% endif %}
-                            {% endfor %} 
+                            {% endfor %}
+                            
+                            {% with max_dias=31 %}
+                                {% for i in max_dias|make_range %}
+                                    {% if i > ultimo_dia %}
+                                        <td class="bg-light text-muted"></td>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endwith %}
                             
                             <td class="resultado-celula-habito">{{ dado.total_concluido }}</td> 
-                        </tr>
+                        </tr>                        
                     {% endfor %}
                 </tbody>
                 </table>
