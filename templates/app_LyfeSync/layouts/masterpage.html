@@ -144,6 +144,21 @@
                 });
             }
         });
+
+        $(document).ready(function() {
+            // Seleciona todos os alertas dentro do container de mensagens
+            $(".messages-container .alert").each(function(index) {
+                const $alert = $(this);
+                
+                const delay = 2000; 
+                
+                // Usa o método setTimeout para fechar o alerta
+                setTimeout(function() {
+                    // O método alert('close') do Bootstrap aciona a animação 'fade'
+                    $alert.alert('close'); 
+                }, delay + (index * 100)); // Adiciona um pequeno delay extra se houver várias mensagens
+            });
+        });
     </script>
 
 </body>

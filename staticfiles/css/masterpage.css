@@ -76,6 +76,46 @@ body {
     color: #fff !important;
 }
 
+.messages-fixed-top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1050;
+    /* Garante que fique acima da navbar do Bootstrap */
+    padding-top: 10px;
+    /* Espaçamento do topo */
+    padding-left: 15px;
+    /* Espaçamento lateral */
+    padding-right: 15px;
+    /* Espaçamento lateral */
+}
+
+.alert {
+    padding: 0.5rem 1rem;
+    /* Reduz o padding padrão do Bootstrap (originalmente 1rem 1rem) */
+    margin-bottom: 0.5rem;
+    /* Reduz a margem inferior (originalmente 1rem) */
+    font-size: 0.9rem;
+    /* Diminui um pouco o tamanho da fonte */
+}
+
+/* Ajusta o botão de fechar para ficar menor também */
+.alert .btn-close {
+    padding: 0.3rem 0.5rem;
+    /* Ajusta o padding do botão para corresponder ao novo tamanho do alerta */
+    font-size: 0.75rem;
+    /* Opcional: diminui o ícone do 'x' */
+}
+
+/* Opcional: Se quiser que o container de mensagens também ocupe menos espaço vertical */
+.messages-container {
+    padding-top: 0.5rem;
+    /* Reduz o espaço acima das mensagens, se houver */
+    padding-bottom: 0.5rem;
+    /* Reduz o espaço abaixo das mensagens, se houver */
+}
+
 /* ===================== 2. FOOTER (ESTILOS BASE) ===================== */
 
 .footer {

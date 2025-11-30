@@ -70,6 +70,12 @@ i[data-lucide] {
     color: var(--bs-primary);
 }
 
+.gratidao-item-history p {
+    display: flex;
+    align-items: center;
+    min-height: 60px;
+}
+
 /* ========================================================= */
 /* --- ESTILOS PÁGINA REGISTRAR AFIRMAÇÃO (Customizados) --- */
 /* ========================================================= */
@@ -99,4 +105,11 @@ i[data-lucide] {
     justify-content: center;
     text-align: center;
     transition: transform 0.3s ease;
+}
+
+.afirmacao-item-history p {
+    display: flex;
+    align-items: center;
+    min-height: 60px;
+    color: #24465C;
 }
