@@ -5,6 +5,7 @@ venv/
 # Ignorar arquivos de cache do Python
 __pycache__/
 *.pyc
+.pytest_cache/
 
 # Ignorar arquivos de banco de dados do Django
 db.sqlite3
@@ -12,3 +13,18 @@ db.sqlite3
 # Ignorar arquivos de sistema operacional e de IDE
 .vscode/
 .DS_Store
+
+# Django static coletado (gerado)
+staticfiles/
+
+# Mobile app: manter a pasta mobile-app, ignorar artefatos/segredos
+mobile-app/node_modules/
+mobile-app/android-sdk/
+mobile-app/android/.gradle/
+mobile-app/android/build/
+mobile-app/android/app/build/
+mobile-app/android/local.properties
+mobile-app/android/keystore.properties
+mobile-app/android/keystore/*.jks
+mobile-app/ios/App/Pods/
+mobile-app/ios/App/build/

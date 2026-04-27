@@ -2,10 +2,13 @@ from django.shortcuts import render
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+import os
 import tempfile
 
 import yagmail
 from decouple import config
+
+MAX_UPLOAD_SIZE = 5 * 1024 * 1024  # 5MB
 
 
 # -------------------------------------------------------------------
@@ -29,6 +32,10 @@ def contatos(request):
         mensagem = request.POST.get("mensagem")
         anexo = request.FILES.get("anexo")
 
+        if anexo and anexo.size > MAX_UPLOAD_SIZE:
+            messages.error(request, "O anexo excede o limite de 5MB.")
+            return HttpResponseRedirect(reverse("contatos"))
+
         # 2. Destinatario do e-mail
         destinatario = ["fedcvn@gmail.com"]  # e-mail que recebe os contatos
 
@@ -44,26 +51,36 @@ def contatos(request):
         )
 
         try:
+            email_user = config("EMAIL_HOST_USER", default=None)
+            email_password = config("EMAIL_HOST_PASSWORD", default=None)
+            if not email_user or not email_password:
+                raise ValueError("Credenciais de e-mail não configuradas no ambiente.")
+
             # 4. Cria cliente yagmail
             yag = yagmail.SMTP(
-                user=config("EMAIL_HOST_USER"),
-                password=config("EMAIL_HOST_PASSWORD"),
+                user=email_user,
+                password=email_password,
             )
 
             # 5. Envia e-mail
             if anexo:
                 # Salva o anexo temporariamente para envio
+                temp_path = None
                 with tempfile.NamedTemporaryFile(delete=False, suffix=anexo.name) as temp:
                     for chunk in anexo.chunks():
                         temp.write(chunk)
                     temp_path = temp.name
 
-                yag.send(
-                    to=destinatario,
-                    subject=f"[CONTATO LYFESYNC] {assunto}",
-                    contents=corpo_email,
-                    attachments=[temp_path],
-                )
+                try:
+                    yag.send(
+                        to=destinatario,
+                        subject=f"[CONTATO LYFESYNC] {assunto}",
+                        contents=corpo_email,
+                        attachments=[temp_path],
+                    )
+                finally:
+                    if temp_path and os.path.exists(temp_path):
+                        os.remove(temp_path)
             else:
                 yag.send(
                     to=destinatario,
